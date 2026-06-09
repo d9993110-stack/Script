@@ -1,18 +1,26 @@
--- Music Player GUI Script
--- Вставити в StarterGui як LocalScript
+-- Music Player GUI Script (Адаптований під Delta Executor)
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
+local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+
+-- Захист: для читів краще використовувати CoreGui, щоб UI не видалявся після смерті
+local parentGui
+local success, err = pcall(function()
+    parentGui = game:GetService("CoreGui")
+end)
+if not success then
+    parentGui = player:WaitForChild("PlayerGui")
+end
 
 -- Створення GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MusicPlayer"
+ScreenGui.Name = "DeltaMusicPlayer_BySasha"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = playerGui
+ScreenGui.Parent = parentGui
 
 -- Маленька кнопка (можна перетягувати)
 local ToggleButton = Instance.new("TextButton")
@@ -122,11 +130,11 @@ Status.Parent = MainFrame
 -- Sound об'єкт
 local Sound = Instance.new("Sound")
 Sound.Name = "MusicSound"
-Sound.Volume = 0.5
+Sound.Volume = 2 -- Збільшив гучність, бо 0.5 на телефонах буває тихо через динаміки
 Sound.Looped = true
 Sound.Parent = SoundService
 
--- Перетягування кнопки
+-- Перетягування кнопки (Виправлено для плавності на мобільних в Delta)
 local dragging = false
 local dragStart, startPos
 
@@ -138,17 +146,23 @@ ToggleButton.InputBegan:Connect(function(input)
     end
 end)
 
-ToggleButton.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        
+        -- Використовуємо плавну зміну позиції
+        local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        ToggleButton.Position = newPos
+        
+        -- Розрахунок позиції вікна відносно кнопки
+        MainFrame.Position = UDim2.new(newPos.X.Scale, newPos.X.Offset + 50, newPos.Y.Scale, newPos.Y.Offset - 60)
     end
 end)
 
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        ToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        MainFrame.Position = UDim2.new(0, ToggleButton.Position.X.Offset + 50, ToggleButton.Position.Y.Scale, ToggleButton.Position.Y.Offset - 80)
+-- Обнулення прапорця dragging при завершенні тачу/кліку
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
     end
 end)
 
@@ -157,17 +171,17 @@ ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- Play музику
+-- Play музику (Очищення ID від зайвих пробілів чи букв)
 PlayBtn.MouseButton1Click:Connect(function()
-    local id = IDBox.Text
-    if id ~= "" then
+    local cleanId = IDBox.Text:gsub("%D", "") -- Залишає тільки цифри, якщо скопіювали лінк
+    if cleanId ~= "" then
         Sound:Stop()
-        Sound.SoundId = "rbxassetid://" .. id
+        Sound.SoundId = "rbxassetid://" .. cleanId
         Sound:Play()
-        Status.Text = "🎶 Граю: " .. id
+        Status.Text = "🎶 Граю: " .. cleanId
         Status.TextColor3 = Color3.fromRGB(67, 181, 129)
     else
-        Status.Text = "❌ Введи ID!"
+        Status.Text = "❌ Введи правильний ID!"
         Status.TextColor3 = Color3.fromRGB(240, 71, 71)
     end
 end)
@@ -179,4 +193,4 @@ StopBtn.MouseButton1Click:Connect(function()
     Status.TextColor3 = Color3.fromRGB(150, 150, 150)
 end)
 
-print("🎵 Music Player завантажено!")
+print("🎵 Music Player завантажено успішно!")
