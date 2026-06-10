@@ -1,6 +1,6 @@
 -- ═══════════════════════════════════════════════
--- UNTITLED ROBOT BOXING - ImGui Style Menu
--- Для Delta Executor
+-- UNTITLED ROBOT BOXING - FIXED v2.0
+-- Специально под UPD 1.7
 -- ═══════════════════════════════════════════════
 
 local Players = game:GetService("Players")
@@ -11,47 +11,36 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Player = Players.LocalPlayer
-local Mouse = Player:GetMouse()
 
--- Удаление старого GUI
+-- Удаление старого
 pcall(function()
-    if game.CoreGui:FindFirstChild("URB_ImGui") then
-        game.CoreGui:FindFirstChild("URB_ImGui"):Destroy()
+    if game.CoreGui:FindFirstChild("URB_v2") then
+        game.CoreGui:FindFirstChild("URB_v2"):Destroy()
     end
 end)
 
 -- ═══════════════════════════════════════════════
--- ИНИЦИАЛИЗАЦИЯ GUI
+-- GUI
 -- ═══════════════════════════════════════════════
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "URB_ImGui"
+ScreenGui.Name = "URB_v2"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.IgnoreGuiInset = true
 
-local success = pcall(function()
-    ScreenGui.Parent = game.CoreGui
-end)
-if not success then
-    ScreenGui.Parent = Player:WaitForChild("PlayerGui")
-end
+pcall(function() ScreenGui.Parent = game.CoreGui end)
+if not ScreenGui.Parent then ScreenGui.Parent = Player:WaitForChild("PlayerGui") end
 
--- ═══════════════════════════════════════════════
--- МАЛЕНЬКАЯ КНОПКА (Toggle)
--- ═══════════════════════════════════════════════
-
+-- Кнопка открытия
 local OpenBtn = Instance.new("TextButton")
-OpenBtn.Name = "OpenButton"
 OpenBtn.Size = UDim2.new(0, 45, 0, 45)
-OpenBtn.Position = UDim2.new(0, 10, 0, 200)
+OpenBtn.Position = UDim2.new(0, 10, 0, 350)
 OpenBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 OpenBtn.Text = "URB"
 OpenBtn.TextColor3 = Color3.fromRGB(255, 60, 60)
 OpenBtn.TextSize = 14
 OpenBtn.Font = Enum.Font.Code
 OpenBtn.BorderSizePixel = 0
-OpenBtn.AutoButtonColor = false
 OpenBtn.ZIndex = 100
 OpenBtn.Parent = ScreenGui
 
@@ -64,90 +53,76 @@ OpenStroke.Color = Color3.fromRGB(255, 60, 60)
 OpenStroke.Thickness = 1
 OpenStroke.Parent = OpenBtn
 
--- Перетаскивание кнопки
-local btnDragging, btnDragStart, btnStartPos
-OpenBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        btnDragging = true
-        btnDragStart = input.Position
-        btnStartPos = OpenBtn.Position
+-- Drag кнопки
+local btnDrag, btnStart, btnPos
+OpenBtn.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        btnDrag = true; btnStart = i.Position; btnPos = OpenBtn.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(i)
+    if btnDrag and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+        local d = i.Position - btnStart
+        OpenBtn.Position = UDim2.new(btnPos.X.Scale, btnPos.X.Offset + d.X, btnPos.Y.Scale, btnPos.Y.Offset + d.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        btnDrag = false
     end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if btnDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - btnDragStart
-        OpenBtn.Position = UDim2.new(btnStartPos.X.Scale, btnStartPos.X.Offset + delta.X, btnStartPos.Y.Scale, btnStartPos.Y.Offset + delta.Y)
-    end
-end)
+-- Главное окно
+local Win = Instance.new("Frame")
+Win.Size = UDim2.new(0, 280, 0, 340)
+Win.Position = UDim2.new(0.5, -140, 0.5, -170)
+Win.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+Win.BorderSizePixel = 0
+Win.Visible = false
+Win.ZIndex = 50
+Win.Parent = ScreenGui
 
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        btnDragging = false
-    end
-end)
+local WinC = Instance.new("UICorner")
+WinC.CornerRadius = UDim.new(0, 3)
+WinC.Parent = Win
 
--- ═══════════════════════════════════════════════
--- ГЛАВНОЕ ОКНО (ImGui Style)
--- ═══════════════════════════════════════════════
+local WinS = Instance.new("UIStroke")
+WinS.Color = Color3.fromRGB(60, 60, 70)
+WinS.Thickness = 1
+WinS.Parent = Win
 
-local MainWindow = Instance.new("Frame")
-MainWindow.Name = "MainWindow"
-MainWindow.Size = UDim2.new(0, 280, 0, 320)
-MainWindow.Position = UDim2.new(0.5, -140, 0.5, -160)
-MainWindow.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
-MainWindow.BorderSizePixel = 0
-MainWindow.Visible = false
-MainWindow.ZIndex = 50
-MainWindow.Parent = ScreenGui
+-- Title
+local Title = Instance.new("Frame")
+Title.Size = UDim2.new(1, 0, 0, 24)
+Title.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
+Title.BorderSizePixel = 0
+Title.ZIndex = 51
+Title.Parent = Win
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 3)
-MainCorner.Parent = MainWindow
+local TC = Instance.new("UICorner")
+TC.CornerRadius = UDim.new(0, 3)
+TC.Parent = Title
 
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Color3.fromRGB(60, 60, 70)
-MainStroke.Thickness = 1
-MainStroke.Parent = MainWindow
+local TF = Instance.new("Frame")
+TF.Size = UDim2.new(1, 0, 0, 12)
+TF.Position = UDim2.new(0, 0, 1, -12)
+TF.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
+TF.BorderSizePixel = 0
+TF.ZIndex = 51
+TF.Parent = Title
 
--- ═══════════════════════════════════════════════
--- ЗАГОЛОВОК (Title Bar)
--- ═══════════════════════════════════════════════
+local TT = Instance.new("TextLabel")
+TT.Size = UDim2.new(1, -30, 1, 0)
+TT.Position = UDim2.new(0, 8, 0, 0)
+TT.BackgroundTransparency = 1
+TT.Text = "URB CHEAT v2.0  |  UPD 1.7"
+TT.TextColor3 = Color3.fromRGB(255, 255, 255)
+TT.TextSize = 12
+TT.Font = Enum.Font.Code
+TT.TextXAlignment = Enum.TextXAlignment.Left
+TT.ZIndex = 52
+TT.Parent = Title
 
-local TitleBar = Instance.new("Frame")
-TitleBar.Name = "TitleBar"
-TitleBar.Size = UDim2.new(1, 0, 0, 24)
-TitleBar.Position = UDim2.new(0, 0, 0, 0)
-TitleBar.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
-TitleBar.BorderSizePixel = 0
-TitleBar.ZIndex = 51
-TitleBar.Parent = MainWindow
-
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 3)
-TitleCorner.Parent = TitleBar
-
-local TitleFix = Instance.new("Frame")
-TitleFix.Size = UDim2.new(1, 0, 0, 12)
-TitleFix.Position = UDim2.new(0, 0, 1, -12)
-TitleFix.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
-TitleFix.BorderSizePixel = 0
-TitleFix.ZIndex = 51
-TitleFix.Parent = TitleBar
-
-local TitleText = Instance.new("TextLabel")
-TitleText.Size = UDim2.new(1, -30, 1, 0)
-TitleText.Position = UDim2.new(0, 8, 0, 0)
-TitleText.BackgroundTransparency = 1
-TitleText.Text = "URB CHEAT  |  v1.0"
-TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleText.TextSize = 12
-TitleText.Font = Enum.Font.Code
-TitleText.TextXAlignment = Enum.TextXAlignment.Left
-TitleText.ZIndex = 52
-TitleText.Parent = TitleBar
-
--- Кнопка закрытия (X)
 local CloseX = Instance.new("TextButton")
 CloseX.Size = UDim2.new(0, 20, 0, 20)
 CloseX.Position = UDim2.new(1, -22, 0, 2)
@@ -157,157 +132,68 @@ CloseX.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseX.TextSize = 18
 CloseX.Font = Enum.Font.Code
 CloseX.ZIndex = 53
-CloseX.Parent = TitleBar
+CloseX.Parent = Title
 
--- Перетаскивание окна
-local winDragging, winDragStart, winStartPos
-TitleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        winDragging = true
-        winDragStart = input.Position
-        winStartPos = MainWindow.Position
+-- Drag окна
+local wDrag, wStart, wPos
+Title.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        wDrag = true; wStart = i.Position; wPos = Win.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(i)
+    if wDrag and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+        local d = i.Position - wStart
+        Win.Position = UDim2.new(wPos.X.Scale, wPos.X.Offset + d.X, wPos.Y.Scale, wPos.Y.Offset + d.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        wDrag = false
     end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if winDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - winDragStart
-        MainWindow.Position = UDim2.new(winStartPos.X.Scale, winStartPos.X.Offset + delta.X, winStartPos.Y.Scale, winStartPos.Y.Offset + delta.Y)
-    end
-end)
+-- Контент
+local Content = Instance.new("ScrollingFrame")
+Content.Size = UDim2.new(1, -10, 1, -34)
+Content.Position = UDim2.new(0, 5, 0, 28)
+Content.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Content.BorderSizePixel = 0
+Content.ScrollBarThickness = 3
+Content.ScrollBarImageColor3 = Color3.fromRGB(180, 30, 30)
+Content.CanvasSize = UDim2.new(0, 0, 0, 0)
+Content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Content.ZIndex = 51
+Content.Parent = Win
 
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        winDragging = false
-    end
-end)
+local CC = Instance.new("UICorner")
+CC.CornerRadius = UDim.new(0, 2)
+CC.Parent = Content
 
--- ═══════════════════════════════════════════════
--- ТАБЫ (Tabs)
--- ═══════════════════════════════════════════════
+local Layout = Instance.new("UIListLayout")
+Layout.Padding = UDim.new(0, 4)
+Layout.SortOrder = Enum.SortOrder.LayoutOrder
+Layout.Parent = Content
 
-local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(1, -10, 0, 22)
-TabBar.Position = UDim2.new(0, 5, 0, 28)
-TabBar.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-TabBar.BorderSizePixel = 0
-TabBar.ZIndex = 51
-TabBar.Parent = MainWindow
-
-local TabBarCorner = Instance.new("UICorner")
-TabBarCorner.CornerRadius = UDim.new(0, 2)
-TabBarCorner.Parent = TabBar
-
-local TabLayout = Instance.new("UIListLayout")
-TabLayout.FillDirection = Enum.FillDirection.Horizontal
-TabLayout.Padding = UDim.new(0, 2)
-TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabLayout.Parent = TabBar
-
-local TabPadding = Instance.new("UIPadding")
-TabPadding.PaddingLeft = UDim.new(0, 2)
-TabPadding.PaddingTop = UDim.new(0, 2)
-TabPadding.Parent = TabBar
+local Pad = Instance.new("UIPadding")
+Pad.PaddingLeft = UDim.new(0, 4)
+Pad.PaddingTop = UDim.new(0, 4)
+Pad.PaddingRight = UDim.new(0, 4)
+Pad.Parent = Content
 
 -- ═══════════════════════════════════════════════
--- КОНТЕЙНЕР ДЛЯ КОНТЕНТА
+-- ЭЛЕМЕНТЫ
 -- ═══════════════════════════════════════════════
 
-local ContentArea = Instance.new("Frame")
-ContentArea.Size = UDim2.new(1, -10, 1, -58)
-ContentArea.Position = UDim2.new(0, 5, 0, 54)
-ContentArea.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-ContentArea.BorderSizePixel = 0
-ContentArea.ZIndex = 51
-ContentArea.Parent = MainWindow
-
-local ContentCorner = Instance.new("UICorner")
-ContentCorner.CornerRadius = UDim.new(0, 2)
-ContentCorner.Parent = ContentArea
-
--- ═══════════════════════════════════════════════
--- СИСТЕМА ТАБОВ
--- ═══════════════════════════════════════════════
-
-local Tabs = {}
-local CurrentTab = nil
-
-local function CreateTab(name)
-    local TabBtn = Instance.new("TextButton")
-    TabBtn.Size = UDim2.new(0, 70, 1, -4)
-    TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-    TabBtn.Text = name
-    TabBtn.TextColor3 = Color3.fromRGB(180, 180, 190)
-    TabBtn.TextSize = 11
-    TabBtn.Font = Enum.Font.Code
-    TabBtn.BorderSizePixel = 0
-    TabBtn.AutoButtonColor = false
-    TabBtn.ZIndex = 52
-    TabBtn.Parent = TabBar
+local function Checkbox(name, callback)
+    local C = Instance.new("Frame")
+    C.Size = UDim2.new(1, -8, 0, 22)
+    C.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    C.BorderSizePixel = 0
+    C.ZIndex = 53
+    C.Parent = Content
     
-    local TabBtnCorner = Instance.new("UICorner")
-    TabBtnCorner.CornerRadius = UDim.new(0, 2)
-    TabBtnCorner.Parent = TabBtn
-    
-    local TabContent = Instance.new("ScrollingFrame")
-    TabContent.Size = UDim2.new(1, -8, 1, -8)
-    TabContent.Position = UDim2.new(0, 4, 0, 4)
-    TabContent.BackgroundTransparency = 1
-    TabContent.BorderSizePixel = 0
-    TabContent.ScrollBarThickness = 3
-    TabContent.ScrollBarImageColor3 = Color3.fromRGB(180, 30, 30)
-    TabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
-    TabContent.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    TabContent.Visible = false
-    TabContent.ZIndex = 52
-    TabContent.Parent = ContentArea
-    
-    local ContentLayout = Instance.new("UIListLayout")
-    ContentLayout.Padding = UDim.new(0, 4)
-    ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ContentLayout.Parent = TabContent
-    
-    local tabData = {Button = TabBtn, Content = TabContent}
-    table.insert(Tabs, tabData)
-    
-    TabBtn.MouseButton1Click:Connect(function()
-        for _, t in pairs(Tabs) do
-            t.Content.Visible = false
-            t.Button.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-            t.Button.TextColor3 = Color3.fromRGB(180, 180, 190)
-        end
-        TabContent.Visible = true
-        TabBtn.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
-        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        CurrentTab = tabData
-    end)
-    
-    -- Активируем первый таб
-    if #Tabs == 1 then
-        TabContent.Visible = true
-        TabBtn.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
-        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        CurrentTab = tabData
-    end
-    
-    return TabContent
-end
-
--- ═══════════════════════════════════════════════
--- ФУНКЦИИ СОЗДАНИЯ ЭЛЕМЕНТОВ
--- ═══════════════════════════════════════════════
-
-local function CreateCheckbox(parent, name, callback)
-    local Container = Instance.new("Frame")
-    Container.Size = UDim2.new(1, -4, 0, 22)
-    Container.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-    Container.BorderSizePixel = 0
-    Container.ZIndex = 53
-    Container.Parent = parent
-    
-    local CCorner = Instance.new("UICorner")
-    CCorner.CornerRadius = UDim.new(0, 2)
-    CCorner.Parent = Container
+    local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(0, 2); cc.Parent = C
     
     local Box = Instance.new("Frame")
     Box.Size = UDim2.new(0, 14, 0, 14)
@@ -315,16 +201,10 @@ local function CreateCheckbox(parent, name, callback)
     Box.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
     Box.BorderSizePixel = 0
     Box.ZIndex = 54
-    Box.Parent = Container
+    Box.Parent = C
     
-    local BoxCorner = Instance.new("UICorner")
-    BoxCorner.CornerRadius = UDim.new(0, 2)
-    BoxCorner.Parent = Box
-    
-    local BoxStroke = Instance.new("UIStroke")
-    BoxStroke.Color = Color3.fromRGB(80, 80, 90)
-    BoxStroke.Thickness = 1
-    BoxStroke.Parent = Box
+    local bc = Instance.new("UICorner"); bc.CornerRadius = UDim.new(0, 2); bc.Parent = Box
+    local bs = Instance.new("UIStroke"); bs.Color = Color3.fromRGB(80, 80, 90); bs.Thickness = 1; bs.Parent = Box
     
     local Check = Instance.new("TextLabel")
     Check.Size = UDim2.new(1, 0, 1, 0)
@@ -336,220 +216,228 @@ local function CreateCheckbox(parent, name, callback)
     Check.ZIndex = 55
     Check.Parent = Box
     
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -28, 1, 0)
-    Label.Position = UDim2.new(0, 26, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = name
-    Label.TextColor3 = Color3.fromRGB(220, 220, 230)
-    Label.TextSize = 11
-    Label.Font = Enum.Font.Code
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.ZIndex = 54
-    Label.Parent = Container
+    local L = Instance.new("TextLabel")
+    L.Size = UDim2.new(1, -28, 1, 0)
+    L.Position = UDim2.new(0, 26, 0, 0)
+    L.BackgroundTransparency = 1
+    L.Text = name
+    L.TextColor3 = Color3.fromRGB(220, 220, 230)
+    L.TextSize = 11
+    L.Font = Enum.Font.Code
+    L.TextXAlignment = Enum.TextXAlignment.Left
+    L.ZIndex = 54
+    L.Parent = C
     
-    local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(1, 0, 1, 0)
-    Btn.BackgroundTransparency = 1
-    Btn.Text = ""
-    Btn.ZIndex = 56
-    Btn.Parent = Container
+    local B = Instance.new("TextButton")
+    B.Size = UDim2.new(1, 0, 1, 0)
+    B.BackgroundTransparency = 1
+    B.Text = ""
+    B.ZIndex = 56
+    B.Parent = C
     
-    local state = false
-    Btn.MouseButton1Click:Connect(function()
-        state = not state
-        if state then
+    local s = false
+    B.MouseButton1Click:Connect(function()
+        s = not s
+        if s then
             Check.Text = "✓"
-            BoxStroke.Color = Color3.fromRGB(255, 60, 60)
+            bs.Color = Color3.fromRGB(255, 60, 60)
             Box.BackgroundColor3 = Color3.fromRGB(50, 15, 15)
         else
             Check.Text = ""
-            BoxStroke.Color = Color3.fromRGB(80, 80, 90)
+            bs.Color = Color3.fromRGB(80, 80, 90)
             Box.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
         end
-        callback(state)
+        callback(s)
     end)
-    
-    Btn.MouseEnter:Connect(function()
-        Container.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-    end)
-    Btn.MouseLeave:Connect(function()
-        Container.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-    end)
-    
-    return Container
 end
 
-local function CreateButton(parent, name, callback)
-    local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(1, -4, 0, 22)
-    Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-    Btn.Text = name
-    Btn.TextColor3 = Color3.fromRGB(220, 220, 230)
-    Btn.TextSize = 11
-    Btn.Font = Enum.Font.Code
-    Btn.BorderSizePixel = 0
-    Btn.AutoButtonColor = false
-    Btn.ZIndex = 53
-    Btn.Parent = parent
+local function Button(name, callback)
+    local B = Instance.new("TextButton")
+    B.Size = UDim2.new(1, -8, 0, 24)
+    B.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    B.Text = name
+    B.TextColor3 = Color3.fromRGB(220, 220, 230)
+    B.TextSize = 11
+    B.Font = Enum.Font.Code
+    B.BorderSizePixel = 0
+    B.AutoButtonColor = false
+    B.ZIndex = 53
+    B.Parent = Content
     
-    local BCorner = Instance.new("UICorner")
-    BCorner.CornerRadius = UDim.new(0, 2)
-    BCorner.Parent = Btn
+    local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, 2); c.Parent = B
+    local s = Instance.new("UIStroke"); s.Color = Color3.fromRGB(60, 60, 70); s.Thickness = 1; s.Parent = B
     
-    local BStroke = Instance.new("UIStroke")
-    BStroke.Color = Color3.fromRGB(60, 60, 70)
-    BStroke.Thickness = 1
-    BStroke.Parent = Btn
-    
-    Btn.MouseEnter:Connect(function()
-        Btn.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
-        BStroke.Color = Color3.fromRGB(255, 60, 60)
+    B.MouseEnter:Connect(function()
+        B.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
+        s.Color = Color3.fromRGB(255, 60, 60)
     end)
-    Btn.MouseLeave:Connect(function()
-        Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-        BStroke.Color = Color3.fromRGB(60, 60, 70)
+    B.MouseLeave:Connect(function()
+        B.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+        s.Color = Color3.fromRGB(60, 60, 70)
     end)
-    
-    Btn.MouseButton1Click:Connect(callback)
-    
-    return Btn
+    B.MouseButton1Click:Connect(callback)
 end
 
-local function CreateLabel(parent, text, color)
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -4, 0, 18)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = color or Color3.fromRGB(150, 150, 160)
-    Label.TextSize = 10
-    Label.Font = Enum.Font.Code
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.ZIndex = 53
-    Label.Parent = parent
-    return Label
+local function Label(text, color)
+    local L = Instance.new("TextLabel")
+    L.Size = UDim2.new(1, -8, 0, 18)
+    L.BackgroundTransparency = 1
+    L.Text = text
+    L.TextColor3 = color or Color3.fromRGB(150, 150, 160)
+    L.TextSize = 10
+    L.Font = Enum.Font.Code
+    L.TextXAlignment = Enum.TextXAlignment.Left
+    L.ZIndex = 53
+    L.Parent = Content
+    return L
 end
 
-local function CreateSeparator(parent)
-    local Sep = Instance.new("Frame")
-    Sep.Size = UDim2.new(1, -4, 0, 1)
-    Sep.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-    Sep.BorderSizePixel = 0
-    Sep.ZIndex = 53
-    Sep.Parent = parent
-    return Sep
+local function Sep()
+    local S = Instance.new("Frame")
+    S.Size = UDim2.new(1, -8, 0, 1)
+    S.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    S.BorderSizePixel = 0
+    S.ZIndex = 53
+    S.Parent = Content
 end
 
 -- ═══════════════════════════════════════════════
--- СОЗДАНИЕ ТАБОВ И ФУНКЦИЙ
+-- ЛОГИКА - АНАЛИЗ ИГРЫ URB
 -- ═══════════════════════════════════════════════
 
-local MainTab = CreateTab("MAIN")
-local CombatTab = CreateTab("COMBAT")
-local InfoTab = CreateTab("INFO")
+-- Найти робота игрока (НЕ персонажа humanoid а робота)
+local function FindMyRobot()
+    -- Поиск робота через различные методы
+    local char = Player.Character
+    if not char then return nil end
+    
+    -- Метод 1: По имени игрока в Workspace
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if obj:IsA("Model") then
+            -- Проверка имени или владельца
+            if obj.Name == Player.Name .. "_Robot" or obj.Name == Player.Name .. "Robot" then
+                return obj
+            end
+            -- Проверка через атрибут владельца
+            if obj:GetAttribute("Owner") == Player.Name or obj:GetAttribute("Player") == Player.Name then
+                return obj
+            end
+        end
+    end
+    
+    -- Метод 2: Через папку Robots
+    local robotsFolder = Workspace:FindFirstChild("Robots") or Workspace:FindFirstChild("Bots") or Workspace:FindFirstChild("Fighters")
+    if robotsFolder then
+        for _, r in pairs(robotsFolder:GetChildren()) do
+            if r:GetAttribute("Owner") == Player.Name or r:GetAttribute("Player") == Player.Name or r.Name:find(Player.Name) then
+                return r
+            end
+        end
+    end
+    
+    return nil
+end
 
--- ═══════════════════════════════════════════════
--- ПЕРЕМЕННЫЕ СОСТОЯНИЯ
--- ═══════════════════════════════════════════════
-
-local Flags = {
-    InfiniteStamina = false,
-    OneHitKO = false,
-    AutoFarm = false,
-    NoCooldown = false,
-}
-
--- ═══════════════════════════════════════════════
--- MAIN TAB
--- ═══════════════════════════════════════════════
-
-CreateLabel(MainTab, "» Main Features", Color3.fromRGB(255, 60, 60))
-CreateSeparator(MainTab)
-
--- ✔ Неограниченная выносливость
-CreateCheckbox(MainTab, "Infinite Stamina", function(state)
-    Flags.InfiniteStamina = state
-end)
-
--- ✔ Нокаут одним ударом
-CreateCheckbox(MainTab, "One Hit KO", function(state)
-    Flags.OneHitKO = state
-end)
-
-CreateCheckbox(MainTab, "No Attack Cooldown", function(state)
-    Flags.NoCooldown = state
-end)
-
-CreateSeparator(MainTab)
-CreateLabel(MainTab, "» Quick Actions", Color3.fromRGB(255, 60, 60))
-
-CreateButton(MainTab, "Reset Character", function()
-    pcall(function()
-        Player.Character:BreakJoints()
-    end)
-end)
-
-CreateButton(MainTab, "Rejoin Server", function()
-    game:GetService("TeleportService"):Teleport(game.PlaceId, Player)
-end)
-
--- ═══════════════════════════════════════════════
--- COMBAT TAB
--- ═══════════════════════════════════════════════
-
-CreateLabel(CombatTab, "» Combat Settings", Color3.fromRGB(255, 60, 60))
-CreateSeparator(CombatTab)
-
-CreateCheckbox(CombatTab, "Auto Punch (Nearest)", function(state)
-    Flags.AutoFarm = state
-end)
-
-CreateButton(CombatTab, "Kill All Nearby (15 studs)", function()
-    pcall(function()
-        local char = Player.Character
-        if not char then return end
-        local myRoot = char:FindFirstChild("HumanoidRootPart")
-        if not myRoot then return end
-        
-        for _, model in pairs(Workspace:GetDescendants()) do
-            if model:IsA("Humanoid") and model.Parent ~= char then
-                local root = model.Parent:FindFirstChild("HumanoidRootPart") or model.Parent:FindFirstChild("Torso")
-                if root and (root.Position - myRoot.Position).Magnitude < 15 then
-                    model.Health = 0
-                    -- Поиск HP значений
-                    for _, v in pairs(model.Parent:GetDescendants()) do
-                        if (v:IsA("NumberValue") or v:IsA("IntValue")) then
-                            local n = v.Name:lower()
-                            if n:find("health") or n:find("hp") then
-                                pcall(function() v.Value = 0 end)
-                            end
-                        end
+-- Найти робота врага
+local function FindEnemyRobot()
+    local myRobot = FindMyRobot()
+    
+    -- Поиск всех роботов кроме своего
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj ~= myRobot then
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+            if hum and hum.Health > 0 then
+                -- Это робот если у него есть характеристики бойца
+                local isRobot = false
+                for _, v in pairs(obj:GetDescendants()) do
+                    if v.Name:lower():find("charge") or v.Name:lower():find("зарядка") or v.Name:lower():find("battery") then
+                        isRobot = true
+                        break
+                    end
+                end
+                if isRobot or obj.Name:lower():find("robot") or obj.Name:lower():find("bot") then
+                    -- Проверка что это НЕ твой
+                    local owner = obj:GetAttribute("Owner") or obj:GetAttribute("Player")
+                    if owner ~= Player.Name then
+                        return obj
                     end
                 end
             end
         end
-    end)
-end)
+    end
+    return nil
+end
 
-CreateButton(CombatTab, "Refill Stamina Now", function()
-    pcall(function()
-        local char = Player.Character
-        if not char then return end
-        for _, v in pairs(char:GetDescendants()) do
-            if v:IsA("NumberValue") or v:IsA("IntValue") then
-                local n = v.Name:lower()
-                if n:find("stam") or n:find("energy") or n:find("endur") then
-                    v.Value = 999999
+-- Найти ВСЕ Charge/Stamina value в робота
+local function FindRobotValues(robot, keywords)
+    local found = {}
+    if not robot then return found end
+    
+    for _, v in pairs(robot:GetDescendants()) do
+        if v:IsA("NumberValue") or v:IsA("IntValue") then
+            local n = v.Name:lower()
+            for _, kw in pairs(keywords) do
+                if n:find(kw) then
+                    table.insert(found, v)
+                    break
                 end
             end
         end
+    end
+    return found
+end
+
+-- Флаги
+local Flags = {
+    InfStamina = false,
+    InfCharge = false,
+    NoCooldown = false,
+    AutoCharge = false,
+}
+
+-- ═══════════════════════════════════════════════
+-- СОДЕРЖИМОЕ МЕНЮ
+-- ═══════════════════════════════════════════════
+
+Label("» URB FEATURES", Color3.fromRGB(255, 60, 60))
+Sep()
+
+Checkbox("Infinite Charge (ЗАРЯДКА)", function(s)
+    Flags.InfCharge = s
+end)
+
+Checkbox("Infinite Stamina", function(s)
+    Flags.InfStamina = s
+end)
+
+Checkbox("No Cooldown (Удары без задержки)", function(s)
+    Flags.NoCooldown = s
+end)
+
+Checkbox("Auto Charge Refill", function(s)
+    Flags.AutoCharge = s
+end)
+
+Sep()
+Label("» ACTIONS", Color3.fromRGB(255, 60, 60))
+
+Button("Refill My Charge NOW", function()
+    pcall(function()
+        local robot = FindMyRobot()
+        if robot then
+            local vals = FindRobotValues(robot, {"charge", "зарядка", "stamina", "energy", "battery", "fuel"})
+            for _, v in pairs(vals) do
+                pcall(function() v.Value = 800 end)
+            end
+        end
+        -- Также в Player
         for _, folder in pairs(Player:GetChildren()) do
             if folder:IsA("Folder") or folder:IsA("Configuration") then
                 for _, v in pairs(folder:GetDescendants()) do
                     if v:IsA("NumberValue") or v:IsA("IntValue") then
                         local n = v.Name:lower()
-                        if n:find("stam") or n:find("energy") then
-                            v.Value = 999999
+                        if n:find("charge") or n:find("stam") or n:find("energy") then
+                            pcall(function() v.Value = 800 end)
                         end
                     end
                 end
@@ -558,262 +446,199 @@ CreateButton(CombatTab, "Refill Stamina Now", function()
     end)
 end)
 
--- ═══════════════════════════════════════════════
--- INFO TAB
--- ═══════════════════════════════════════════════
-
-CreateLabel(InfoTab, "» URB Cheat Information", Color3.fromRGB(255, 60, 60))
-CreateSeparator(InfoTab)
-CreateLabel(InfoTab, "Game: Untitled Robot Boxing")
-CreateLabel(InfoTab, "Version: 1.0")
-CreateLabel(InfoTab, "Executor: Delta")
-CreateLabel(InfoTab, "Status: Active", Color3.fromRGB(60, 255, 60))
-CreateSeparator(InfoTab)
-CreateLabel(InfoTab, "» Controls", Color3.fromRGB(255, 60, 60))
-CreateLabel(InfoTab, "Drag title to move window")
-CreateLabel(InfoTab, "Click URB button to toggle")
-CreateLabel(InfoTab, "Press RightShift to hide/show")
-CreateSeparator(InfoTab)
-local PingLabel = CreateLabel(InfoTab, "Ping: 0ms")
-local FPSLabel = CreateLabel(InfoTab, "FPS: 0")
-
--- Обновление пинга и FPS
-spawn(function()
-    local lastTick = tick()
-    local frames = 0
-    while ScreenGui.Parent do
-        frames = frames + 1
-        if tick() - lastTick >= 1 then
-            FPSLabel.Text = "FPS: " .. frames
-            PingLabel.Text = "Ping: " .. math.floor(Player:GetNetworkPing() * 1000) .. "ms"
-            frames = 0
-            lastTick = tick()
+Button("Damage Enemy (-100 HP)", function()
+    pcall(function()
+        local enemy = FindEnemyRobot()
+        if enemy then
+            local hum = enemy:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Health = hum.Health - 100
+            end
         end
-        task.wait()
+    end)
+end)
+
+Button("Print Robot Info (Console)", function()
+    local robot = FindMyRobot()
+    print("=== MY ROBOT ===")
+    if robot then
+        print("Robot found:", robot.Name)
+        for _, v in pairs(robot:GetDescendants()) do
+            if v:IsA("NumberValue") or v:IsA("IntValue") then
+                print("  Value:", v.Name, "=", v.Value)
+            end
+        end
+    else
+        print("Robot NOT found!")
+    end
+    print("=== ENEMY ===")
+    local enemy = FindEnemyRobot()
+    if enemy then
+        print("Enemy found:", enemy.Name)
+    end
+    print("=== REMOTES ===")
+    for _, r in pairs(ReplicatedStorage:GetDescendants()) do
+        if r:IsA("RemoteEvent") or r:IsA("RemoteFunction") then
+            print("  Remote:", r:GetFullName())
+        end
     end
 end)
 
+Button("Reset Character", function()
+    pcall(function() Player.Character:BreakJoints() end)
+end)
+
+Sep()
+Label("» INFO", Color3.fromRGB(255, 60, 60))
+Label("Game: Untitled Robot Boxing")
+Label("Charge = ЗАРЯДКА = твоё HP")
+Label("Press RightShift to toggle")
+local FPSL = Label("FPS: 0", Color3.fromRGB(100, 255, 100))
+
 -- ═══════════════════════════════════════════════
--- ОТКРЫТИЕ/ЗАКРЫТИЕ МЕНЮ
+-- ОТКРЫТИЕ
 -- ═══════════════════════════════════════════════
 
-local menuOpen = false
-
-local function ToggleMenu()
-    menuOpen = not menuOpen
-    if menuOpen then
-        MainWindow.Visible = true
-        MainWindow.Size = UDim2.new(0, 0, 0, 0)
-        TweenService:Create(MainWindow, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(0, 280, 0, 320)
-        }):Play()
+local open = false
+local function Toggle()
+    open = not open
+    if open then
+        Win.Visible = true
+        Win.Size = UDim2.new(0, 0, 0, 0)
+        TweenService:Create(Win, TweenInfo.new(0.2), {Size = UDim2.new(0, 280, 0, 340)}):Play()
         OpenBtn.TextColor3 = Color3.fromRGB(60, 255, 60)
         OpenStroke.Color = Color3.fromRGB(60, 255, 60)
     else
-        local t = TweenService:Create(MainWindow, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(0, 0, 0, 0)
-        })
+        local t = TweenService:Create(Win, TweenInfo.new(0.2), {Size = UDim2.new(0, 0, 0, 0)})
         t:Play()
         t.Completed:Wait()
-        MainWindow.Visible = false
+        Win.Visible = false
         OpenBtn.TextColor3 = Color3.fromRGB(255, 60, 60)
         OpenStroke.Color = Color3.fromRGB(255, 60, 60)
     end
 end
 
-OpenBtn.MouseButton1Click:Connect(ToggleMenu)
-CloseX.MouseButton1Click:Connect(ToggleMenu)
+OpenBtn.MouseButton1Click:Connect(Toggle)
+CloseX.MouseButton1Click:Connect(Toggle)
 
--- Hotkey RightShift
-UserInputService.InputBegan:Connect(function(input, processed)
-    if processed then return end
-    if input.KeyCode == Enum.KeyCode.RightShift then
-        ToggleMenu()
-    end
+UserInputService.InputBegan:Connect(function(i, p)
+    if not p and i.KeyCode == Enum.KeyCode.RightShift then Toggle() end
 end)
 
 -- ═══════════════════════════════════════════════
--- ХУК REMOTE EVENTS (Delta поддерживает)
+-- ЛУПЫ ФУНКЦИЙ (БЕЗОПАСНЫЕ - не ломают игру)
 -- ═══════════════════════════════════════════════
 
-local oldNamecall
-local ok = pcall(function()
-    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        local args = {...}
-        
-        if (method == "FireServer" or method == "InvokeServer") and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
-            local rName = self.Name:lower()
-            
-            -- Блок траты стамины
-            if Flags.InfiniteStamina then
-                if rName:find("stam") or rName:find("energy") or rName:find("fatigue") or rName:find("tired") or rName:find("exhaust") then
-                    return nil
-                end
-            end
-            
-            -- Блок кулдаунов
-            if Flags.NoCooldown then
-                if rName:find("cooldown") or rName:find("delay") then
-                    return nil
-                end
-            end
-            
-            -- Усиление урона
-            if Flags.OneHitKO then
-                if rName:find("damage") or rName:find("hit") or rName:find("punch") or rName:find("attack") or rName:find("strike") or rName:find("dmg") then
-                    local newArgs = {}
-                    for i, v in pairs(args) do
-                        if type(v) == "number" and v > 0 and v < 999999 then
-                            newArgs[i] = 999999
-                        else
-                            newArgs[i] = v
-                        end
-                    end
-                    return oldNamecall(self, table.unpack(newArgs))
-                end
-            end
-        end
-        
-        return oldNamecall(self, ...)
-    end)
-end)
-
--- ═══════════════════════════════════════════════
--- ОСНОВНЫЕ ЛУПЫ ФУНКЦИЙ
--- ═══════════════════════════════════════════════
-
--- Бесконечная стамина (постоянное обновление)
-spawn(function()
-    while task.wait(0.1) do
-        if Flags.InfiniteStamina then
-            pcall(function()
-                local char = Player.Character
-                if not char then return end
-                
-                -- В персонаже
-                for _, v in pairs(char:GetDescendants()) do
-                    if v:IsA("NumberValue") or v:IsA("IntValue") then
-                        local n = v.Name:lower()
-                        if n:find("stam") or n:find("energy") or n:find("endur") or n:find("fuel") or n:find("charge") then
-                            v.Value = 999999
-                        end
-                        if n:find("fatigue") or n:find("tired") or n:find("exhaust") then
-                            v.Value = 0
-                        end
-                    end
-                    if v:IsA("NumberValue") and (v.Name == "Stamina" or v.Name == "Energy") then
-                        v.Value = 100
-                    end
-                end
-                
-                -- В Player folder
-                for _, folder in pairs(Player:GetChildren()) do
-                    if folder:IsA("Folder") or folder:IsA("Configuration") then
-                        for _, v in pairs(folder:GetDescendants()) do
-                            if v:IsA("NumberValue") or v:IsA("IntValue") then
-                                local n = v.Name:lower()
-                                if n:find("stam") or n:find("energy") or n:find("endur") then
-                                    v.Value = 999999
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                -- attributes
-                for _, attr in pairs({"Stamina", "Energy", "Endurance", "Power"}) do
-                    if char:GetAttribute(attr) ~= nil then
-                        char:SetAttribute(attr, 999999)
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- Нокаут одним ударом (буст урона)
-spawn(function()
-    while task.wait(0.2) do
-        if Flags.OneHitKO then
-            pcall(function()
-                local char = Player.Character
-                if not char then return end
-                
-                for _, v in pairs(char:GetDescendants()) do
-                    if v:IsA("NumberValue") or v:IsA("IntValue") then
-                        local n = v.Name:lower()
-                        if n:find("damage") or n:find("dmg") or n:find("power") or n:find("strength") or n:find("attack") or n:find("punch") or n:find("force") then
-                            v.Value = 999999
-                        end
-                    end
-                end
-                
-                local backpack = Player:FindFirstChild("Backpack")
-                if backpack then
-                    for _, v in pairs(backpack:GetDescendants()) do
-                        if v:IsA("NumberValue") or v:IsA("IntValue") then
-                            local n = v.Name:lower()
-                            if n:find("damage") or n:find("dmg") or n:find("power") then
-                                v.Value = 999999
-                            end
-                        end
-                    end
-                end
-                
-                for _, folder in pairs(Player:GetChildren()) do
-                    if folder:IsA("Folder") or folder:IsA("Configuration") then
-                        for _, v in pairs(folder:GetDescendants()) do
-                            if v:IsA("NumberValue") or v:IsA("IntValue") then
-                                local n = v.Name:lower()
-                                if n:find("damage") or n:find("dmg") or n:find("power") or n:find("strength") then
-                                    v.Value = 999999
-                                end
-                            end
-                        end
-                    end
-                end
-                
-                -- Атрибуты
-                for _, attr in pairs({"Damage", "Power", "Strength", "AttackPower"}) do
-                    if char:GetAttribute(attr) ~= nil then
-                        char:SetAttribute(attr, 999999)
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- Auto Punch
+-- Бесконечная ЗАРЯДКА (только для своего робота)
 spawn(function()
     while task.wait(0.3) do
-        if Flags.AutoFarm then
+        if Flags.InfCharge or Flags.AutoCharge then
             pcall(function()
-                local char = Player.Character
-                if not char then return end
-                local myRoot = char:FindFirstChild("HumanoidRootPart")
-                if not myRoot then return end
-                
-                local nearest, dist = nil, 20
-                for _, model in pairs(Workspace:GetDescendants()) do
-                    if model:IsA("Humanoid") and model.Parent ~= char and model.Health > 0 then
-                        local root = model.Parent:FindFirstChild("HumanoidRootPart") or model.Parent:FindFirstChild("Torso")
-                        if root then
-                            local d = (root.Position - myRoot.Position).Magnitude
-                            if d < dist then
-                                dist = d
-                                nearest = model
-                            end
+                local robot = FindMyRobot()
+                if robot then
+                    local vals = FindRobotValues(robot, {"charge", "зарядка", "battery"})
+                    for _, v in pairs(vals) do
+                        -- Восстанавливаем только если значение упало
+                        if v.Value < 800 then
+                            pcall(function() v.Value = 800 end)
                         end
                     end
                 end
                 
-                if nearest then
-                    nearest.Health = 0
+                -- Player folders
+                for _, folder in pairs(Player:GetChildren()) do
+                    if folder:IsA("Folder") or folder:IsA("Configuration") then
+                        for _, v in pairs(folder:GetDescendants()) do
+                            if v:IsA("NumberValue") or v:IsA("IntValue") then
+                                local n = v.Name:lower()
+                                if n:find("charge") and v.Value < 800 then
+                                    pcall(function() v.Value = 800 end)
+                                end
+                            end
+                        end
+                    end
                 end
             end)
         end
+    end
+end)
+
+-- Бесконечная стамина
+spawn(function()
+    while task.wait(0.3) do
+        if Flags.InfStamina then
+            pcall(function()
+                local robot = FindMyRobot()
+                if robot then
+                    local vals = FindRobotValues(robot, {"stamina", "energy", "endur", "fuel"})
+                    for _, v in pairs(vals) do
+                        if v.Value < 100 then
+                            pcall(function() v.Value = 100 end)
+                        end
+                    end
+                end
+                
+                for _, folder in pairs(Player:GetChildren()) do
+                    if folder:IsA("Folder") or folder:IsA("Configuration") then
+                        for _, v in pairs(folder:GetDescendants()) do
+                            if v:IsA("NumberValue") or v:IsA("IntValue") then
+                                local n = v.Name:lower()
+                                if (n:find("stam") or n:find("energy")) and v.Value < 100 then
+                                    pcall(function() v.Value = 100 end)
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- No Cooldown - только блокируем cooldown ремоты
+spawn(function()
+    while task.wait(0.1) do
+        if Flags.NoCooldown then
+            pcall(function()
+                local char = Player.Character
+                if not char then return end
+                
+                for _, v in pairs(char:GetDescendants()) do
+                    if v:IsA("NumberValue") or v:IsA("IntValue") then
+                        local n = v.Name:lower()
+                        if n:find("cooldown") or n:find("delay") or n:find("recharge") then
+                            pcall(function() v.Value = 0 end)
+                        end
+                    end
+                end
+                
+                for _, folder in pairs(Player:GetChildren()) do
+                    if folder:IsA("Folder") or folder:IsA("Configuration") then
+                        for _, v in pairs(folder:GetDescendants()) do
+                            if v:IsA("NumberValue") or v:IsA("IntValue") then
+                                local n = v.Name:lower()
+                                if n:find("cooldown") or n:find("delay") then
+                                    pcall(function() v.Value = 0 end)
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- FPS
+spawn(function()
+    local f, lt = 0, tick()
+    while ScreenGui.Parent do
+        f = f + 1
+        if tick() - lt >= 1 then
+            FPSL.Text = "FPS: " .. f .. "  |  Ping: " .. math.floor(Player:GetNetworkPing() * 1000) .. "ms"
+            f = 0; lt = tick()
+        end
+        task.wait()
     end
 end)
 
@@ -823,14 +648,15 @@ end)
 
 pcall(function()
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "URB Cheat Loaded",
-        Text = "Click URB button or press RightShift",
-        Duration = 5
+        Title = "URB v2.0 LOADED",
+        Text = "Жми URB или RightShift. Сначала жми 'Print Robot Info'",
+        Duration = 7
     })
 end)
 
 print("════════════════════════════")
-print("  URB CHEAT v1.0 LOADED")
-print("  Press URB button to open")
-print("  Or press RightShift")
+print("  URB CHEAT v2.0 LOADED")
+print("  Press URB button or RightShift")
+print("  IMPORTANT: Press 'Print Robot Info'")
+print("  to send game info to developer")
 print("════════════════════════════")
