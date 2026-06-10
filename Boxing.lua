@@ -1,10 +1,11 @@
 -- ====================================
 -- 🤖 UNTITLED ROBOT BOXING SCRIPT
--- 💥 Версия для UPD 1.7
+-- 🎨 KAVO UI LIBRARY
+-- 💥 UPD 1.7
 -- ====================================
 
--- UI Library (Orion)
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+-- Kavo UI Library
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 
 -- Сервисы
 local Players = game:GetService("Players")
@@ -17,146 +18,139 @@ local Settings = {
     InfiniteStamina = false,
     OneHitKO = false,
     AutoParry = false,
-    SpeedBoost = false
+    SpeedBoost = false,
+    InfiniteJump = false
 }
 
 -- ====================================
 -- 🎨 СОЗДАНИЕ КРАСИВОГО МЕНЮ
 -- ====================================
 
-local Window = OrionLib:MakeWindow({
-    Name = "🥊 Robot Boxing Hub | UPD 1.7",
-    HidePremium = false,
-    SaveConfig = true,
-    ConfigFolder = "URBHub",
-    IntroText = "Untitled Robot Boxing",
-    IntroIcon = "rbxassetid://4483345998"
-})
+local Window = Library.CreateLib("🥊 Robot Boxing Hub | UPD 1.7", "Ocean")
 
 -- 🔥 Главная вкладка
-local MainTab = Window:MakeTab({
-    Name = "⚡ Главное",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local Main = Window:NewTab("⚡ Главное")
+local MainSection = Main:NewSection("🥊 Боевые функции")
 
-MainTab:AddSection({
-    Name = "🥊 Боевые функции"
-})
-
-MainTab:AddToggle({
-    Name = "♾️ Бесконечная выносливость",
-    Default = false,
-    Callback = function(Value)
-        Settings.InfiniteStamina = Value
-        OrionLib:MakeNotification({
-            Name = "Выносливость",
-            Content = Value and "✅ Включено!" or "❌ Выключено",
-            Image = "rbxassetid://4483345998",
-            Time = 2
-        })
+MainSection:NewToggle("♾️ Бесконечная выносливость", "Стамина не заканчивается", function(state)
+    Settings.InfiniteStamina = state
+    if state then
+        print("✅ Бесконечная выносливость ВКЛ")
+    else
+        print("❌ Бесконечная выносливость ВЫКЛ")
     end
-})
+end)
 
-MainTab:AddToggle({
-    Name = "💥 Нокаут одним ударом",
-    Default = false,
-    Callback = function(Value)
-        Settings.OneHitKO = Value
-        OrionLib:MakeNotification({
-            Name = "One Hit KO",
-            Content = Value and "✅ Включено!" or "❌ Выключено",
-            Image = "rbxassetid://4483345998",
-            Time = 2
-        })
+MainSection:NewToggle("💥 Нокаут одним ударом", "Уничтожает врага за 1 удар", function(state)
+    Settings.OneHitKO = state
+    if state then
+        print("✅ One Hit KO ВКЛ")
+    else
+        print("❌ One Hit KO ВЫКЛ")
     end
-})
+end)
 
-MainTab:AddSection({
-    Name = "🛡️ Дополнительно"
-})
+local ExtraSection = Main:NewSection("🛡️ Дополнительно")
 
-MainTab:AddToggle({
-    Name = "🛡️ Авто-парирование",
-    Default = false,
-    Callback = function(Value)
-        Settings.AutoParry = Value
+ExtraSection:NewToggle("🛡️ Авто-парирование", "Автоматическое парирование ударов", function(state)
+    Settings.AutoParry = state
+end)
+
+ExtraSection:NewToggle("💨 Ускорение", "Быстрое передвижение", function(state)
+    Settings.SpeedBoost = state
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = state and 35 or 16
     end
-})
+end)
 
-MainTab:AddToggle({
-    Name = "💨 Ускорение",
-    Default = false,
-    Callback = function(Value)
-        Settings.SpeedBoost = Value
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("Humanoid") then
-            char.Humanoid.WalkSpeed = Value and 35 or 16
+ExtraSection:NewToggle("🦘 Бесконечный прыжок", "Прыгать сколько угодно", function(state)
+    Settings.InfiniteJump = state
+end)
+
+-- 👤 Вкладка игрока
+local Player = Window:NewTab("👤 Игрок")
+local PlayerSection = Player:NewSection("⚙️ Настройки персонажа")
+
+PlayerSection:NewSlider("🏃 Скорость ходьбы", "Скорость персонажа", 200, 16, function(s)
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = s
+    end
+end)
+
+PlayerSection:NewSlider("🦘 Сила прыжка", "Высота прыжка", 300, 50, function(s)
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.JumpPower = s
+    end
+end)
+
+PlayerSection:NewButton("🔄 Сбросить персонажа", "Респавн", function()
+    LocalPlayer.Character:BreakJoints()
+end)
+
+PlayerSection:NewButton("🪂 Безопасное приземление", "Отменить урон от падения", function()
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
+    end
+end)
+
+-- 🎯 Вкладка телепортов
+local Teleport = Window:NewTab("🎯 Телепорт")
+local TPSection = Teleport:NewSection("📍 Игроки")
+
+TPSection:NewButton("👥 Список игроков (в консоль)", "Показать всех игроков", function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            print("👤 " .. p.Name)
         end
     end
-})
+end)
 
--- 🎮 Вкладка игрока
-local PlayerTab = Window:MakeTab({
-    Name = "👤 Игрок",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local PlayerDropdown
+local playerList = {}
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= LocalPlayer then
+        table.insert(playerList, p.Name)
+    end
+end
 
-PlayerTab:AddSlider({
-    Name = "🏃 Скорость ходьбы",
-    Min = 16,
-    Max = 100,
-    Default = 16,
-    Color = Color3.fromRGB(255, 0, 0),
-    Increment = 1,
-    ValueName = "speed",
-    Callback = function(Value)
+TPSection:NewDropdown("🎯 Выбрать игрока", "Телепорт к игроку", playerList, function(currentOption)
+    local target = Players:FindFirstChild(currentOption)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
         local char = LocalPlayer.Character
-        if char and char:FindFirstChild("Humanoid") then
-            char.Humanoid.WalkSpeed = Value
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
         end
     end
-})
+end)
 
-PlayerTab:AddSlider({
-    Name = "🦘 Сила прыжка",
-    Min = 50,
-    Max = 300,
-    Default = 50,
-    Color = Color3.fromRGB(0, 255, 0),
-    Increment = 5,
-    ValueName = "jump",
-    Callback = function(Value)
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("Humanoid") then
-            char.Humanoid.JumpPower = Value
-        end
-    end
-})
-
-PlayerTab:AddButton({
-    Name = "🔄 Сбросить персонажа",
-    Callback = function()
-        LocalPlayer.Character:BreakJoints()
-    end
-})
+TPSection:NewButton("🔄 Обновить список", "Обновить игроков", function()
+    Window:Destroy()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+    print("🔄 Перезагрузи скрипт для обновления")
+end)
 
 -- ⚙️ Вкладка настроек
-local SettingsTab = Window:MakeTab({
-    Name = "⚙️ Настройки",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local SettingsTab = Window:NewTab("⚙️ Настройки")
+local InfoSection = SettingsTab:NewSection("ℹ️ Информация")
 
-SettingsTab:AddParagraph("ℹ️ Информация", "Скрипт для Untitled Robot Boxing UPD 1.7\nРазработано для лучшего игрового опыта")
+InfoSection:NewLabel("🎮 Игра: untitled robot boxing")
+InfoSection:NewLabel("📦 Версия: UPD 1.7")
+InfoSection:NewLabel("👨‍💻 Создатель: cocoa and games")
+InfoSection:NewLabel("🎨 UI: Kavo Library")
 
-SettingsTab:AddButton({
-    Name = "🗑️ Уничтожить интерфейс",
-    Callback = function()
-        OrionLib:Destroy()
-    end
-})
+local ControlSection = SettingsTab:NewSection("🎛️ Управление")
+
+ControlSection:NewButton("🗑️ Закрыть меню", "Уничтожить интерфейс", function()
+    Window:ToggleUI()
+end)
+
+ControlSection:NewKeybind("🎹 Открыть/Закрыть меню", "Горячая клавиша", Enum.KeyCode.RightShift, function()
+    Window:ToggleUI()
+end)
 
 -- ====================================
 -- 🔧 ОСНОВНЫЕ ФУНКЦИИ
@@ -170,7 +164,6 @@ spawn(function()
                 local char = LocalPlayer.Character
                 if not char then return end
                 
-                -- Поиск стамины во всех возможных местах
                 local locations = {
                     char,
                     LocalPlayer,
@@ -196,10 +189,9 @@ spawn(function()
                     end
                 end
                 
-                -- Через атрибуты
                 if char then
-                    for _, attr in pairs(char:GetAttributes()) do
-                        local name = tostring(attr):lower()
+                    for attr, _ in pairs(char:GetAttributes()) do
+                        local name = attr:lower()
                         if name:find("stamina") or name:find("energy") then
                             pcall(function()
                                 char:SetAttribute(attr, 999999)
@@ -245,7 +237,6 @@ spawn(function()
                     end
                 end
                 
-                -- Атрибуты урона
                 if char then
                     for attr, _ in pairs(char:GetAttributes()) do
                         local name = attr:lower()
@@ -266,7 +257,6 @@ spawn(function()
     while task.wait(0.05) do
         if Settings.AutoParry then
             pcall(function()
-                -- Поиск ремотов для парирования
                 for _, v in pairs(ReplicatedStorage:GetDescendants()) do
                     if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
                         local name = v.Name:lower()
@@ -282,6 +272,16 @@ spawn(function()
     end
 end)
 
+-- 🦘 Бесконечный прыжок
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if Settings.InfiniteJump then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("Humanoid") then
+            char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
 -- 💨 Поддержка ускорения при респавне
 LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(1)
@@ -292,18 +292,12 @@ LocalPlayer.CharacterAdded:Connect(function(char)
 end)
 
 -- ====================================
--- 🚀 ИНИЦИАЛИЗАЦИЯ
+-- 🚀 ЗАПУСК
 -- ====================================
 
-OrionLib:MakeNotification({
-    Name = "🥊 Robot Boxing Hub",
-    Content = "Скрипт успешно загружен! UPD 1.7",
-    Image = "rbxassetid://4483345998",
-    Time = 5
-})
-
-OrionLib:Init()
-
-print("✅ Untitled Robot Boxing Script загружен!")
-print("🎮 Игра: [💥🔺 UPD 1.7] untitled robot boxing")
-print("👨‍💻 by cocoa and games")
+print("====================================")
+print("✅ Robot Boxing Hub загружен!")
+print("🎮 Игра: untitled robot boxing UPD 1.7")
+print("🎨 UI: Kavo Library")
+print("🎹 RightShift - открыть/закрыть меню")
+print("====================================")
