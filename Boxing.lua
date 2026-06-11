@@ -40,113 +40,27 @@ RefreshCharacter(LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait())
 LocalPlayer.CharacterAdded:Connect(RefreshCharacter)
 
 --// ═══════════════════════════════════════════
---//  TOGGLE BUTTON — "Eplisma"
+--//  TOGGLE HOTKEY — Клавіша "E"
 --// ═══════════════════════════════════════════
 
-local ToggleGui = Instance.new("ScreenGui")
-ToggleGui.Name = "EplismaToggle"
-ToggleGui.ResetOnSpawn = false
-ToggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ToggleGui.DisplayOrder = 9999
-pcall(function() ToggleGui.Parent = CoreGui end)
-if not ToggleGui.Parent then ToggleGui.Parent = LocalPlayer.PlayerGui end
+local MenuOpen = true
+local TOGGLE_KEY = Enum.KeyCode.E
 
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "OpenBtn"
-ToggleButton.Size = UDim2.fromOffset(130, 36)
-ToggleButton.Position = UDim2.new(0, 20, 0.5, -18)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-ToggleButton.BorderSizePixel = 0
-ToggleButton.Text = ""
-ToggleButton.AutoButtonColor = false
-ToggleButton.Parent = ToggleGui
-
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 8)
-ToggleCorner.Parent = ToggleButton
-
-local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(130, 80, 220)
-ToggleStroke.Thickness = 1.5
-ToggleStroke.Transparency = 0.3
-ToggleStroke.Parent = ToggleButton
-
-local ToggleGrad = Instance.new("UIGradient")
-ToggleGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(130, 80, 220)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 120, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(130, 80, 220)),
-})
-ToggleGrad.Parent = ToggleStroke
-
-local ToggleLabel = Instance.new("TextLabel")
-ToggleLabel.Size = UDim2.fromScale(1, 1)
-ToggleLabel.BackgroundTransparency = 1
-ToggleLabel.Text = "Eplisma"
-ToggleLabel.TextColor3 = Color3.fromRGB(180, 140, 255)
-ToggleLabel.TextSize = 18
-ToggleLabel.Font = Enum.Font.GothamBold
-ToggleLabel.Parent = ToggleButton
-
-local ToggleLabelGrad = Instance.new("UIGradient")
-ToggleLabelGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(140, 90, 230)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 160, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 90, 230)),
-})
-ToggleLabelGrad.Parent = ToggleLabel
-
--- Animate gradient shift
-task.spawn(function()
-    local offset = 0
-    while ToggleGui.Parent do
-        offset = (offset + 0.005) % 1
-        ToggleGrad.Offset = Vector2.new(offset, 0)
-        ToggleLabelGrad.Offset = Vector2.new(offset, 0)
-        task.wait(0.03)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == TOGGLE_KEY then
+        MenuOpen = not MenuOpen
+        pcall(function()
+            local screens = {CoreGui, LocalPlayer.PlayerGui}
+            for _, parent in ipairs(screens) do
+                for _, gui in ipairs(parent:GetChildren()) do
+                    if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
+                        gui.Main.Visible = MenuOpen
+                    end
+                end
+            end
+        end)
     end
-end)
-
--- Drag toggle button
-do
-    local dragging, dragStart, startPos = false, nil, nil
-    ToggleButton.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = inp.Position
-            startPos = ToggleButton.Position
-        end
-    end)
-    ToggleButton.InputChanged:Connect(function(inp)
-        if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-            local delta = inp.Position - dragStart
-            ToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-end
-
--- Hover effect
-ToggleButton.MouseEnter:Connect(function()
-    TweenService:Create(ToggleButton, TweenInfo.new(0.25), {
-        BackgroundColor3 = Color3.fromRGB(28, 24, 38)
-    }):Play()
-    TweenService:Create(ToggleStroke, TweenInfo.new(0.25), {
-        Transparency = 0
-    }):Play()
-end)
-
-ToggleButton.MouseLeave:Connect(function()
-    TweenService:Create(ToggleButton, TweenInfo.new(0.25), {
-        BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-    }):Play()
-    TweenService:Create(ToggleStroke, TweenInfo.new(0.25), {
-        Transparency = 0.3
-    }):Play()
 end)
 
 --// ═══════════════════════════════════════════
@@ -230,29 +144,6 @@ local Themes = {
 }
 
 Window:SetTheme(Themes.Dark)
-
--- Toggle visibility with Eplisma button
-local MenuOpen = true
-
-ToggleButton.MouseButton1Click:Connect(function()
-    MenuOpen = not MenuOpen
-    pcall(function()
-        local screens = {CoreGui, LocalPlayer.PlayerGui}
-        for _, parent in ipairs(screens) do
-            for _, gui in ipairs(parent:GetChildren()) do
-                if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") and gui ~= ToggleGui then
-                    gui.Main.Visible = MenuOpen
-                end
-            end
-        end
-    end)
-    
-    if MenuOpen then
-        TweenService:Create(ToggleLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    else
-        TweenService:Create(ToggleLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    end
-end)
 
 --// ═══════════════════════════════════════════
 --//  TAB SECTIONS
@@ -1014,7 +905,7 @@ Window:AddSection({ Name = "About", Tab = TabConfig })
 
 Window:AddParagraph({
     Title = "Eplisma v1.0",
-    Description = "Developer: Frost\nTelegram: @Jokerfros\n\nProfessional cheat suite.\nTap the [Eplisma] button to toggle menu.",
+    Description = "Developer: Frost\nTelegram: @Jokerfros\n\nProfessional cheat suite.\nPress [E] to toggle menu.",
     Tab = TabConfig,
 })
 
@@ -1033,10 +924,9 @@ Window:AddButton({
         CFG.Noclip = false
         CFG.ESP = false
         CFG.Aimbot = false
-        pcall(function() ToggleGui:Destroy() end)
         pcall(function()
             for _, g in ipairs(CoreGui:GetChildren()) do
-                if g:FindFirstChild("Main") and g.Name ~= "EplismaToggle" then
+                if g:FindFirstChild("Main") then
                     g:Destroy()
                 end
             end
@@ -1355,7 +1245,7 @@ end)
 
 Window:Notify({
     Title = "Eplisma Loaded",
-    Description = "Welcome, " .. LocalPlayer.DisplayName .. "\nTap [Eplisma] to toggle menu\nby Frost | @Jokerfros",
+    Description = "Welcome, " .. LocalPlayer.DisplayName .. "\nPress [E] to toggle menu\nby Frost | @Jokerfros",
     Duration = 6,
 })
 
@@ -1366,6 +1256,8 @@ print([[
 ║     Telegram: @Jokerfros            ║
 ╠══════════════════════════════════════╣
 ║  Player: ]] .. LocalPlayer.Name .. [[
+
 ║  Place: ]] .. game.PlaceId .. [[
+
 ╚══════════════════════════════════════╝
 ]])
