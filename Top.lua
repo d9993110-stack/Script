@@ -1,196 +1,496 @@
--- Music Player GUI Script (Адаптований під Delta Executor)
+-- ============================================
+-- 💣 AUTO BOMB PASS CHEAT
+-- Натисни T щоб включити/виключити
+-- Автоматично передає бомбу найближчому гравцю
+-- ============================================
 
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
-local player = Players.LocalPlayer
+-- Налаштування
+local enabled = false
+local TOGGLE_KEY = Enum.KeyCode.T
+local CHECK_INTERVAL = 0.05 -- як часто перевіряти (секунди)
 
--- Захист: для читів краще використовувати CoreGui, щоб UI не видалявся після смерті
-local parentGui
-local success, err = pcall(function()
-    parentGui = game:GetService("CoreGui")
-end)
-if not success then
-    parentGui = player:WaitForChild("PlayerGui")
+-- ============================================
+-- GUI - Кнопка на екрані
+-- ============================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "BombPassGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Знищити старий GUI якщо є
+if LocalPlayer.PlayerGui:FindFirstChild("BombPassGUI") then
+    LocalPlayer.PlayerGui:FindFirstChild("BombPassGUI"):Destroy()
 end
 
--- Створення GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DeltaMusicPlayer_BySasha"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = parentGui
+ScreenGui.Parent = LocalPlayer.PlayerGui
 
--- Маленька кнопка (можна перетягувати)
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "ToggleBtn"
-ToggleButton.Size = UDim2.new(0, 40, 0, 40)
-ToggleButton.Position = UDim2.new(0, 10, 0.5, 0)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
-ToggleButton.Text = "🎵"
-ToggleButton.TextSize = 20
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.TextColor3 = Color3.new(1, 1, 1)
-ToggleButton.Parent = ScreenGui
-
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(1, 0)
-ToggleCorner.Parent = ToggleButton
-
--- Головне вікно
+-- Основний фрейм
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 220, 0, 160)
-MainFrame.Position = UDim2.new(0, 60, 0.5, -80)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-MainFrame.Visible = false
+MainFrame.Size = UDim2.new(0, 220, 0, 80)
+MainFrame.Position = UDim2.new(0, 10, 0.5, -40)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12)
-MainCorner.Parent = MainFrame
+-- Закруглення
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
 
--- Заголовок
+-- Обводка
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(255, 50, 50)
+UIStroke.Thickness = 2
+UIStroke.Parent = MainFrame
+
+-- Іконка бомби + Заголовок
 local Title = Instance.new("TextLabel")
+Title.Name = "Title"
 Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
-Title.Text = "🎵 Music Player"
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.TextSize = 14
+Title.Position = UDim2.new(0, 0, 0, 5)
+Title.BackgroundTransparency = 1
+Title.Text = "💣 BOMB PASS"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 18
 Title.Font = Enum.Font.GothamBold
 Title.Parent = MainFrame
 
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 12)
-TitleCorner.Parent = Title
-
--- Поле для ID
-local IDBox = Instance.new("TextBox")
-IDBox.Name = "IDBox"
-IDBox.Size = UDim2.new(0, 190, 0, 30)
-IDBox.Position = UDim2.new(0, 15, 0, 45)
-IDBox.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-IDBox.Text = ""
-IDBox.PlaceholderText = "Введи Music ID..."
-IDBox.TextColor3 = Color3.new(1, 1, 1)
-IDBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
-IDBox.TextSize = 12
-IDBox.Font = Enum.Font.Gotham
-IDBox.ClearTextOnFocus = false
-IDBox.Parent = MainFrame
-
-local IDCorner = Instance.new("UICorner")
-IDCorner.CornerRadius = UDim.new(0, 8)
-IDCorner.Parent = IDBox
-
--- Кнопка Play
-local PlayBtn = Instance.new("TextButton")
-PlayBtn.Name = "PlayBtn"
-PlayBtn.Size = UDim2.new(0, 90, 0, 32)
-PlayBtn.Position = UDim2.new(0, 15, 0, 85)
-PlayBtn.BackgroundColor3 = Color3.fromRGB(67, 181, 129)
-PlayBtn.Text = "▶ Play"
-PlayBtn.TextColor3 = Color3.new(1, 1, 1)
-PlayBtn.TextSize = 13
-PlayBtn.Font = Enum.Font.GothamBold
-PlayBtn.Parent = MainFrame
-
-local PlayCorner = Instance.new("UICorner")
-PlayCorner.CornerRadius = UDim.new(0, 8)
-PlayCorner.Parent = PlayBtn
-
--- Кнопка Stop
-local StopBtn = Instance.new("TextButton")
-StopBtn.Name = "StopBtn"
-StopBtn.Size = UDim2.new(0, 90, 0, 32)
-StopBtn.Position = UDim2.new(0, 115, 0, 85)
-StopBtn.BackgroundColor3 = Color3.fromRGB(240, 71, 71)
-StopBtn.Text = "⏹ Stop"
-StopBtn.TextColor3 = Color3.new(1, 1, 1)
-StopBtn.TextSize = 13
-StopBtn.Font = Enum.Font.GothamBold
-StopBtn.Parent = MainFrame
-
-local StopCorner = Instance.new("UICorner")
-StopCorner.CornerRadius = UDim.new(0, 8)
-StopCorner.Parent = StopBtn
-
 -- Статус
-local Status = Instance.new("TextLabel")
-Status.Size = UDim2.new(1, -30, 0, 20)
-Status.Position = UDim2.new(0, 15, 0, 125)
-Status.BackgroundTransparency = 1
-Status.Text = "Готово до роботи"
-Status.TextColor3 = Color3.fromRGB(150, 150, 150)
-Status.TextSize = 11
-Status.Font = Enum.Font.Gotham
-Status.Parent = MainFrame
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Name = "Status"
+StatusLabel.Size = UDim2.new(1, 0, 0, 25)
+StatusLabel.Position = UDim2.new(0, 0, 0, 30)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "❌ ВИМКНЕНО"
+StatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+StatusLabel.TextSize = 16
+StatusLabel.Font = Enum.Font.GothamSemibold
+StatusLabel.Parent = MainFrame
 
--- Sound об'єкт
-local Sound = Instance.new("Sound")
-Sound.Name = "MusicSound"
-Sound.Volume = 2 -- Збільшив гучність, бо 0.5 на телефонах буває тихо через динаміки
-Sound.Looped = true
-Sound.Parent = SoundService
+-- Підказка
+local HintLabel = Instance.new("TextLabel")
+HintLabel.Name = "Hint"
+HintLabel.Size = UDim2.new(1, 0, 0, 20)
+HintLabel.Position = UDim2.new(0, 0, 0, 55)
+HintLabel.BackgroundTransparency = 1
+HintLabel.Text = "[T] - Toggle"
+HintLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+HintLabel.TextSize = 12
+HintLabel.Font = Enum.Font.Gotham
+HintLabel.Parent = MainFrame
 
--- Перетягування кнопки (Виправлено для плавності на мобільних в Delta)
+-- Можна перетягувати GUI
 local dragging = false
-local dragStart, startPos
+local dragInput, dragStart, startPos
 
-ToggleButton.InputBegan:Connect(function(input)
+MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
-        startPos = ToggleButton.Position
+        startPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    if input == dragInput and dragging then
         local delta = input.Position - dragStart
-        
-        -- Використовуємо плавну зміну позиції
-        local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        ToggleButton.Position = newPos
-        
-        -- Розрахунок позиції вікна відносно кнопки
-        MainFrame.Position = UDim2.new(newPos.X.Scale, newPos.X.Offset + 50, newPos.Y.Scale, newPos.Y.Offset - 60)
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
 
--- Обнулення прапорця dragging при завершенні тачу/кліку
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-    end
-end)
-
--- Відкрити/Закрити меню
-ToggleButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
-
--- Play музику (Очищення ID від зайвих пробілів чи букв)
-PlayBtn.MouseButton1Click:Connect(function()
-    local cleanId = IDBox.Text:gsub("%D", "") -- Залишає тільки цифри, якщо скопіювали лінк
-    if cleanId ~= "" then
-        Sound:Stop()
-        Sound.SoundId = "rbxassetid://" .. cleanId
-        Sound:Play()
-        Status.Text = "🎶 Граю: " .. cleanId
-        Status.TextColor3 = Color3.fromRGB(67, 181, 129)
+-- ============================================
+-- Оновити GUI статус
+-- ============================================
+local function updateGUI()
+    if enabled then
+        StatusLabel.Text = "✅ УВІМКНЕНО"
+        StatusLabel.TextColor3 = Color3.fromRGB(80, 255, 80)
+        UIStroke.Color = Color3.fromRGB(80, 255, 80)
+        MainFrame.BackgroundColor3 = Color3.fromRGB(20, 40, 20)
     else
-        Status.Text = "❌ Введи правильний ID!"
-        Status.TextColor3 = Color3.fromRGB(240, 71, 71)
+        StatusLabel.Text = "❌ ВИМКНЕНО"
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+        UIStroke.Color = Color3.fromRGB(255, 50, 50)
+        MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    end
+end
+
+-- ============================================
+-- Знайти найближчого гравця
+-- ============================================
+local function getClosestPlayer()
+    local character = LocalPlayer.Character
+    if not character then return nil end
+    local myRoot = character:FindFirstChild("HumanoidRootPart")
+    if not myRoot then return nil end
+
+    local closestPlayer = nil
+    local closestDistance = math.huge
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local char = player.Character
+            if char then
+                local root = char:FindFirstChild("HumanoidRootPart")
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if root and humanoid and humanoid.Health > 0 then
+                    local distance = (myRoot.Position - root.Position).Magnitude
+                    if distance < closestDistance then
+                        closestDistance = distance
+                        closestPlayer = player
+                    end
+                end
+            end
+        end
+    end
+
+    return closestPlayer, closestDistance
+end
+
+-- ============================================
+-- Перевірити чи є бомба в руках/інвентарі
+-- ============================================
+local function findBomb()
+    local character = LocalPlayer.Character
+    if not character then return nil end
+    local backpack = LocalPlayer:FindFirstChild("Backpack")
+
+    -- Список можливих назв бомби (додай свої якщо потрібно)
+    local bombNames = {
+        "bomb", "бомба", "tnt", "explosive", "grenade",
+        "граната", "dynamite", "динаміт", "bomba"
+    }
+
+    local function isBomb(item)
+        if not item then return false end
+        local name = string.lower(item.Name)
+
+        -- Перевірка по назві
+        for _, bombName in pairs(bombNames) do
+            if string.find(name, bombName) then
+                return true
+            end
+        end
+
+        -- Перевірка по тегам/атрибутам
+        if item:GetAttribute("IsBomb") or item:GetAttribute("Bomb") then
+            return true
+        end
+
+        -- Перевірка чи має тег
+        if game:GetService("CollectionService"):HasTag(item, "Bomb") then
+            return true
+        end
+
+        -- Перевірка по класу та властивостям (іноді бомба - це просто Tool)
+        if item:IsA("Tool") then
+            local handle = item:FindFirstChild("Handle")
+            if handle then
+                -- Перевірити ефекти вогню/диму як ознака бомби
+                if handle:FindFirstChildOfClass("Fire") or handle:FindFirstChildOfClass("Smoke") or handle:FindFirstChildOfClass("ParticleEmitter") then
+                    -- Може бути бомба
+                end
+            end
+        end
+
+        return false
+    end
+
+    -- Перевірити що в руках (Character)
+    for _, child in pairs(character:GetChildren()) do
+        if child:IsA("Tool") and isBomb(child) then
+            return child
+        end
+    end
+
+    -- Перевірити Backpack
+    if backpack then
+        for _, child in pairs(backpack:GetChildren()) do
+            if child:IsA("Tool") and isBomb(child) then
+                return child
+            end
+        end
+    end
+
+    -- Якщо нічого не знайдено по назві, перевірити ВСІ тули
+    -- (деякі ігри мають нестандартні назви)
+    -- Розкоментуй якщо потрібно передавати БУДЬ-ЯКИЙ інструмент:
+    --[[
+    for _, child in pairs(character:GetChildren()) do
+        if child:IsA("Tool") then
+            return child
+        end
+    end
+    if backpack then
+        for _, child in pairs(backpack:GetChildren()) do
+            if child:IsA("Tool") then
+                return child
+            end
+        end
+    end
+    ]]
+
+    return nil
+end
+
+-- ============================================
+-- Передати бомбу гравцю
+-- ============================================
+local function passBombToPlayer(bomb, targetPlayer)
+    if not bomb or not targetPlayer then return false end
+
+    local targetChar = targetPlayer.Character
+    if not targetChar then return false end
+    local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+    if not targetRoot then return false end
+
+    local myChar = LocalPlayer.Character
+    if not myChar then return false end
+    local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+    local humanoid = myChar:FindFirstChildOfClass("Humanoid")
+    if not myRoot or not humanoid then return false end
+
+    -- Спочатку екіпувати бомбу якщо вона в Backpack
+    if bomb.Parent == LocalPlayer:FindFirstChild("Backpack") then
+        humanoid:EquipTool(bomb)
+        task.wait(0.1)
+    end
+
+    -- === Метод 1: Телепортуватись до гравця і кинути ===
+    local originalCFrame = myRoot.CFrame
+    local targetPosition = targetRoot.Position + (targetRoot.CFrame.LookVector * -3) -- трохи позаду
+
+    -- Телепорт до цілі
+    myRoot.CFrame = CFrame.new(targetPosition) * CFrame.new(0, 0, 0)
+    task.wait(0.05)
+
+    -- Кинути/відпустити бомбу
+    -- Спроба 1: Активувати тул (клік)
+    if bomb:FindFirstChild("RemoteEvent") then
+        for _, remote in pairs(bomb:GetDescendants()) do
+            if remote:IsA("RemoteEvent") then
+                pcall(function()
+                    remote:FireServer()
+                end)
+            end
+        end
+    end
+
+    -- Спроба 2: Через ClickDetector
+    if bomb:FindFirstChild("Handle") then
+        local handle = bomb:FindFirstChild("Handle")
+        local clickDetector = handle:FindFirstChildOfClass("ClickDetector")
+        if clickDetector then
+            pcall(function()
+                fireclickdetector(clickDetector)
+            end)
+        end
+    end
+
+    -- Спроба 3: Активувати тул
+    pcall(function()
+        bomb:Activate()
+    end)
+
+    task.wait(0.05)
+
+    -- Спроба 4: Просто кинути тул (drop)
+    pcall(function()
+        humanoid:UnequipTools()
+    end)
+
+    task.wait(0.1)
+
+    -- Повернутись назад
+    if myRoot and originalCFrame then
+        myRoot.CFrame = originalCFrame
+    end
+
+    -- === Метод 2: Через ProximityPrompt (деякі ігри) ===
+    pcall(function()
+        if targetChar then
+            for _, desc in pairs(targetChar:GetDescendants()) do
+                if desc:IsA("ProximityPrompt") then
+                    fireproximityprompt(desc)
+                end
+            end
+        end
+    end)
+
+    -- === Метод 3: Через RemoteEvent (специфічно для гри) ===
+    -- Шукаємо remote events пов'язані з передачею бомби
+    pcall(function()
+        local replicatedStorage = game:GetService("ReplicatedStorage")
+        for _, remote in pairs(replicatedStorage:GetDescendants()) do
+            if remote:IsA("RemoteEvent") then
+                local name = string.lower(remote.Name)
+                if string.find(name, "pass") or string.find(name, "give") or
+                   string.find(name, "throw") or string.find(name, "transfer") or
+                   string.find(name, "bomb") then
+                    pcall(function()
+                        remote:FireServer(targetPlayer)
+                        remote:FireServer(targetPlayer.Character)
+                        remote:FireServer(targetPlayer.Name)
+                        remote:FireServer(targetPlayer, bomb)
+                    end)
+                end
+            end
+        end
+    end)
+
+    return true
+end
+
+-- ============================================
+-- Головний цикл
+-- ============================================
+local mainLoop = nil
+
+local function startLoop()
+    if mainLoop then return end
+
+    mainLoop = RunService.Heartbeat:Connect(function()
+        if not enabled then return end
+
+        local bomb = findBomb()
+        if bomb then
+            local closestPlayer, distance = getClosestPlayer()
+            if closestPlayer and distance then
+                -- Показати кому передаємо
+                HintLabel.Text = "🎯 → " .. closestPlayer.Name .. " (" .. math.floor(distance) .. "m)"
+
+                -- Передати бомбу
+                passBombToPlayer(bomb, closestPlayer)
+
+                task.wait(0.2) -- Невелика затримка після передачі
+            else
+                HintLabel.Text = "⚠️ Немає гравців поруч"
+            end
+        else
+            HintLabel.Text = "[T] - Toggle | Бомби немає"
+        end
+    end)
+end
+
+local function stopLoop()
+    if mainLoop then
+        mainLoop:Disconnect()
+        mainLoop = nil
+    end
+    HintLabel.Text = "[T] - Toggle"
+end
+
+-- ============================================
+-- Toggle по натисканню T
+-- ============================================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+
+    if input.KeyCode == TOGGLE_KEY then
+        enabled = not enabled
+        updateGUI()
+
+        if enabled then
+            startLoop()
+
+            -- Повідомлення
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "💣 Bomb Pass",
+                Text = "✅ УВІМКНЕНО! Автопередача бомби активна.",
+                Duration = 3
+            })
+        else
+            stopLoop()
+
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "💣 Bomb Pass",
+                Text = "❌ ВИМКНЕНО",
+                Duration = 2
+            })
+        end
     end
 end)
 
--- Stop музику
-StopBtn.MouseButton1Click:Connect(function()
-    Sound:Stop()
-    Status.Text = "⏹ Зупинено"
-    Status.TextColor3 = Color3.fromRGB(150, 150, 150)
+-- ============================================
+-- Додатковий моніторинг - стежити коли бомба
+-- з'являється в інвентарі (ChildAdded)
+-- ============================================
+local function monitorInventory()
+    -- Моніторинг Backpack
+    local backpack = LocalPlayer:WaitForChild("Backpack")
+    backpack.ChildAdded:Connect(function(child)
+        if not enabled then return end
+        if child:IsA("Tool") then
+            task.wait(0.05) -- мінімальна затримка
+            local bomb = findBomb()
+            if bomb then
+                local closestPlayer = getClosestPlayer()
+                if closestPlayer then
+                    passBombToPlayer(bomb, closestPlayer)
+                end
+            end
+        end
+    end)
+
+    -- Моніторинг Character (коли бомба екіпується)
+    local function watchCharacter(character)
+        if not character then return end
+        character.ChildAdded:Connect(function(child)
+            if not enabled then return end
+            if child:IsA("Tool") then
+                task.wait(0.05)
+                local bomb = findBomb()
+                if bomb then
+                    local closestPlayer = getClosestPlayer()
+                    if closestPlayer then
+                        passBombToPlayer(bomb, closestPlayer)
+                    end
+                end
+            end
+        end)
+    end
+
+    if LocalPlayer.Character then
+        watchCharacter(LocalPlayer.Character)
+    end
+    LocalPlayer.CharacterAdded:Connect(watchCharacter)
+end
+
+monitorInventory()
+
+-- Початковий стан GUI
+updateGUI()
+
+-- ============================================
+-- Повідомлення про завантаження
+-- ============================================
+pcall(function()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "💣 Bomb Pass Loaded!",
+        Text = "Натисни [T] щоб увімкнути/вимкнути",
+        Duration = 5
+    })
 end)
 
-print("🎵 Music Player завантажено успішно!")
+print("============================================")
+print("💣 BOMB PASS SCRIPT LOADED!")
+print("Натисни [T] щоб увімкнути/вимкнути")
+print("Автоматично передає бомбу найближчому гравцю")
+print("============================================")
