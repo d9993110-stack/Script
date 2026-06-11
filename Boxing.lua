@@ -5,7 +5,7 @@
     ║                                          ║
     ║   Developer: Frost                       ║
     ║   Telegram: @Jokerfros                   ║
-    ║   Version: 3.0 (Void UI)                 ║
+    ║   Version: 3.0 (Obsidian UI)             ║
     ╚══════════════════════════════════════════╝
 ]]
 
@@ -50,7 +50,7 @@ local L = {
     EN = {
         character = "Character", combat = "Combat", teleport = "Teleport",
         esp = "ESP", environment = "Environment", utilities = "Utilities",
-        settings = "Settings",
+        settings = "UI Settings",
         walkspeed = "WalkSpeed", jumppower = "JumpPower",
         gravity = "Gravity", infJump = "Infinite Jump",
         autoJump = "Auto Jump", bunnyHop = "Bunny Hop",
@@ -98,7 +98,7 @@ local L = {
     RU = {
         character = "Персонаж", combat = "Бой", teleport = "Телепорт",
         esp = "ESP", environment = "Окружение", utilities = "Утилиты",
-        settings = "Настройки",
+        settings = "Настройки UI",
         walkspeed = "Скорость", jumppower = "Прыжок",
         gravity = "Гравитация", infJump = "Бесконечный прыжок",
         autoJump = "Авто-прыжок", bunnyHop = "Банни-хоп",
@@ -113,12 +113,12 @@ local L = {
         killAura = "Аура убийства", auraRange = "Радиус ауры",
         nearestPlayer = "Ближайший игрок", noPlayersNear = "Нет игроков рядом",
         targetName = "Имя цели", tpToTarget = "ТП к цели",
-        randomPlayer = "Случайный игрок", tpSpawn = "ТП на спавн",
+        randomPlayer = "Случайный", tpSpawn = "ТП на спавн",
         tpForward = "ТП вперёд 100", savePos = "Сохранить позицию",
         loadPos = "Загрузить позицию", clickTp = "ТП по клику",
         saved = "Сохранено", loaded = "Загружено", posStored = "Позиция сохранена",
         posRestored = "Позиция восстановлена", nothingSaved = "Ничего не сохранено",
-        notFound = "Игрок не найден", noPlayers = "Нет игроков",
+        notFound = "Не найден", noPlayers = "Нет игроков",
         movedTo = "Перемещён к",
         enableEsp = "Включить ESP", boundBox = "Рамки",
         nameTags = "Имена", healthBars = "Полоски HP",
@@ -150,17 +150,25 @@ local function T(key)
 end
 
 --// ═══════════════════════════════════════════
---//  VOID UI LIBRARY
+--//  OBSIDIAN (LINORIA) UI LIBRARY
 --// ═══════════════════════════════════════════
 
-local VoidUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/raphaelmaboi/ui-libraries/refs/heads/main/VoidUi/source.lua"))()
+local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
+local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 
-local Window = VoidUI:CreateWindow({
+local Options = Library.Options
+local Toggles = Library.Toggles
+
+Library.ShowToggleFrameInKeybinds = true
+
+local Window = Library:CreateWindow({
     Title = "Eplisma v3.0",
-    SubTitle = "by Frost | @Jokerfros",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(500, 400),
-    Theme = "Dark",
+    Footer = "by Frost | @Jokerfros",
+    NotifySide = "Right",
+    ShowCustomCursor = true,
+    AutoShow = true,
 })
 
 --// ═══════════════════════════════════════════
@@ -196,571 +204,913 @@ local CFG = {
 }
 
 --// ═══════════════════════════════════════════
+--//  TABS
+--// ═══════════════════════════════════════════
+
+local Tabs = {
+    Character = Window:AddTab(T("character"), "user"),
+    Combat = Window:AddTab(T("combat"), "swords"),
+    Teleport = Window:AddTab(T("teleport"), "map-pin"),
+    ESP = Window:AddTab(T("esp"), "eye"),
+    Environment = Window:AddTab(T("environment"), "sun"),
+    Utilities = Window:AddTab(T("utilities"), "wrench"),
+    Settings = Window:AddTab(T("settings"), "settings"),
+}
+
+--// ═══════════════════════════════════════════
 --//  TAB: CHARACTER
 --// ═══════════════════════════════════════════
 
-local TabChar = Window:AddTab(T("character"))
+do
+    local MovementBox = Tabs.Character:AddLeftGroupbox("Movement")
 
-local SectMovement = TabChar:AddSection(T("character") .. " - Movement")
+    MovementBox:AddSlider("WalkSpeed", {
+        Text = T("walkspeed"),
+        Default = 16,
+        Min = 0,
+        Max = 500,
+        Rounding = 0,
+        Compact = false,
+        Callback = function(v)
+            CFG.Speed = v
+            pcall(function() Humanoid.WalkSpeed = v end)
+        end,
+    })
 
-SectMovement:AddSlider(T("walkspeed"), 0, 500, 16, function(v)
-    CFG.Speed = v
-    pcall(function() Humanoid.WalkSpeed = v end)
-end)
+    MovementBox:AddSlider("JumpPower", {
+        Text = T("jumppower"),
+        Default = 50,
+        Min = 0,
+        Max = 500,
+        Rounding = 0,
+        Callback = function(v)
+            CFG.JumpPower = v
+            pcall(function()
+                Humanoid.UseJumpPower = true
+                Humanoid.JumpPower = v
+            end)
+        end,
+    })
 
-SectMovement:AddSlider(T("jumppower"), 0, 500, 50, function(v)
-    CFG.JumpPower = v
-    pcall(function()
-        Humanoid.UseJumpPower = true
-        Humanoid.JumpPower = v
-    end)
-end)
+    MovementBox:AddSlider("Gravity", {
+        Text = T("gravity"),
+        Default = 196,
+        Min = 0,
+        Max = 500,
+        Rounding = 0,
+        Callback = function(v)
+            CFG.Gravity = v
+            Workspace.Gravity = v
+        end,
+    })
 
-SectMovement:AddSlider(T("gravity"), 0, 500, 196, function(v)
-    CFG.Gravity = v
-    Workspace.Gravity = v
-end)
+    MovementBox:AddDivider()
 
-SectMovement:AddToggle(T("infJump"), false, function(v)
-    CFG.InfJump = v
-end)
+    MovementBox:AddToggle("InfJump", {
+        Text = T("infJump"),
+        Default = false,
+        Callback = function(v) CFG.InfJump = v end,
+    })
 
-SectMovement:AddToggle(T("autoJump"), false, function(v)
-    CFG.AutoJump = v
-    pcall(function() Humanoid.AutoJumpEnabled = v end)
-end)
+    MovementBox:AddToggle("AutoJump", {
+        Text = T("autoJump"),
+        Default = false,
+        Callback = function(v)
+            CFG.AutoJump = v
+            pcall(function() Humanoid.AutoJumpEnabled = v end)
+        end,
+    })
 
-SectMovement:AddToggle(T("bunnyHop"), false, function(v)
-    CFG.BunnyHop = v
-end)
+    MovementBox:AddToggle("BunnyHop", {
+        Text = T("bunnyHop"),
+        Default = false,
+        Callback = function(v) CFG.BunnyHop = v end,
+    })
 
-SectMovement:AddToggle(T("noclip"), false, function(v)
-    CFG.Noclip = v
-end)
+    MovementBox:AddToggle("Noclip", {
+        Text = T("noclip"),
+        Default = false,
+        Callback = function(v) CFG.Noclip = v end,
+    })
 
-local SectFlight = TabChar:AddSection("Flight")
+    -- Flight
+    local FlightBox = Tabs.Character:AddRightGroupbox("Flight")
 
-SectFlight:AddToggle(T("fly"), false, function(v)
-    CFG.Fly = v
-    if not v then
-        pcall(function()
-            if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
-            if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
-        end)
-    end
-end)
+    FlightBox:AddToggle("Fly", {
+        Text = T("fly"),
+        Default = false,
+        Callback = function(v)
+            CFG.Fly = v
+            if not v then
+                pcall(function()
+                    if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
+                    if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
+                end)
+            end
+        end,
+    })
 
-SectFlight:AddSlider(T("flySpeed"), 0, 300, 60, function(v)
-    CFG.FlySpeed = v
-end)
+    FlightBox:AddSlider("FlySpeed", {
+        Text = T("flySpeed"),
+        Default = 60,
+        Min = 0,
+        Max = 300,
+        Rounding = 0,
+        Callback = function(v) CFG.FlySpeed = v end,
+    })
 
-local SectCamera = TabChar:AddSection("Camera")
+    -- Camera
+    local CameraBox = Tabs.Character:AddRightGroupbox("Camera")
 
-SectCamera:AddSlider(T("fov"), 10, 120, 70, function(v)
-    CFG.FOV = v
-    Camera.FieldOfView = v
-end)
+    CameraBox:AddSlider("FOV", {
+        Text = T("fov"),
+        Default = 70,
+        Min = 10,
+        Max = 120,
+        Rounding = 0,
+        Callback = function(v)
+            CFG.FOV = v
+            Camera.FieldOfView = v
+        end,
+    })
 
-local SectSurvival = TabChar:AddSection("Survivability")
+    -- Survivability
+    local SurvivalBox = Tabs.Character:AddRightGroupbox("Survivability")
 
-SectSurvival:AddToggle(T("godMode"), false, function(v)
-    CFG.GodMode = v
-end)
+    SurvivalBox:AddToggle("GodMode", {
+        Text = T("godMode"),
+        Default = false,
+        Callback = function(v) CFG.GodMode = v end,
+    })
 
-SectSurvival:AddToggle(T("noReset"), false, function(v)
-    CFG.NoReset = v
-    pcall(function() StarterGui:SetCore("ResetButtonCallback", not v) end)
-end)
+    SurvivalBox:AddToggle("NoReset", {
+        Text = T("noReset"),
+        Default = false,
+        Callback = function(v)
+            CFG.NoReset = v
+            pcall(function() StarterGui:SetCore("ResetButtonCallback", not v) end)
+        end,
+    })
 
-SectSurvival:AddButton(T("forceReset"), function()
-    pcall(function() Humanoid.Health = 0 end)
-end)
+    SurvivalBox:AddDivider()
 
-SectSurvival:AddButton(T("respawn"), function()
-    pcall(function() LocalPlayer:LoadCharacter() end)
-end)
+    SurvivalBox:AddButton({
+        Text = T("forceReset"),
+        Func = function()
+            pcall(function() Humanoid.Health = 0 end)
+        end,
+    })
 
-SectSurvival:AddButton(T("freeze"), function()
-    pcall(function()
-        HRP.Anchored = not HRP.Anchored
-    end)
-end)
+    SurvivalBox:AddButton({
+        Text = T("respawn"),
+        Func = function()
+            pcall(function() LocalPlayer:LoadCharacter() end)
+        end,
+    })
+
+    SurvivalBox:AddButton({
+        Text = T("freeze"),
+        Func = function()
+            pcall(function()
+                HRP.Anchored = not HRP.Anchored
+                Library:Notify({
+                    Title = T("freeze"),
+                    Description = HRP.Anchored and T("frozen") or T("unfrozen"),
+                    Time = 2,
+                })
+            end)
+        end,
+    })
+end
 
 --// ═══════════════════════════════════════════
 --//  TAB: COMBAT
 --// ═══════════════════════════════════════════
 
-local TabCombat = Window:AddTab(T("combat"))
+do
+    local AimBox = Tabs.Combat:AddLeftGroupbox("Aim Assist")
 
-local SectAim = TabCombat:AddSection("Aim Assist")
+    AimBox:AddToggle("Aimbot", {
+        Text = T("aimbot"),
+        Default = false,
+        Tooltip = "Hold RMB to aim",
+        Callback = function(v) CFG.Aimbot = v end,
+    })
 
-SectAim:AddToggle(T("aimbot"), false, function(v)
-    CFG.Aimbot = v
-end)
+    AimBox:AddSlider("AimFOV", {
+        Text = T("fovRadius"),
+        Default = 250,
+        Min = 10,
+        Max = 900,
+        Rounding = 0,
+        Callback = function(v) CFG.AimFOV = v end,
+    })
 
-SectAim:AddSlider(T("fovRadius"), 10, 900, 250, function(v)
-    CFG.AimFOV = v
-end)
+    AimBox:AddSlider("AimSmooth", {
+        Text = T("smoothing"),
+        Default = 5,
+        Min = 1,
+        Max = 50,
+        Rounding = 1,
+        Callback = function(v) CFG.AimSmooth = v end,
+    })
 
-SectAim:AddSlider(T("smoothing"), 1, 50, 5, function(v)
-    CFG.AimSmooth = v
-end)
+    AimBox:AddToggle("ShowFOV", {
+        Text = T("showFov"),
+        Default = false,
+        Callback = function(v) CFG.ShowFOV = v end,
+    })
 
-SectAim:AddToggle(T("showFov"), false, function(v)
-    CFG.ShowFOV = v
-end)
+    -- Melee
+    local MeleeBox = Tabs.Combat:AddLeftGroupbox("Melee")
 
-local SectMelee = TabCombat:AddSection("Melee")
-
-SectMelee:AddToggle(T("hitbox"), false, function(v)
-    CFG.HitboxExp = v
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character then
-            local h = p.Character:FindFirstChild("HumanoidRootPart")
-            if h then
-                h.Size = v and Vector3.new(CFG.HitboxSize, CFG.HitboxSize, CFG.HitboxSize) or Vector3.new(2, 2, 1)
-                h.Transparency = v and 0.5 or 1
+    MeleeBox:AddToggle("HitboxExp", {
+        Text = T("hitbox"),
+        Default = false,
+        Callback = function(v)
+            CFG.HitboxExp = v
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character then
+                    local h = p.Character:FindFirstChild("HumanoidRootPart")
+                    if h then
+                        h.Size = v and Vector3.new(CFG.HitboxSize, CFG.HitboxSize, CFG.HitboxSize) or Vector3.new(2, 2, 1)
+                        h.Transparency = v and 0.5 or 1
+                    end
+                end
             end
-        end
-    end
-end)
+        end,
+    })
 
-SectMelee:AddSlider(T("hitboxScale"), 1, 30, 5, function(v)
-    CFG.HitboxSize = v
-end)
+    MeleeBox:AddSlider("HitboxSize", {
+        Text = T("hitboxScale"),
+        Default = 5,
+        Min = 1,
+        Max = 30,
+        Rounding = 0,
+        Callback = function(v) CFG.HitboxSize = v end,
+    })
 
-SectMelee:AddToggle(T("killAura"), false, function(v)
-    CFG.KillAura = v
-end)
+    MeleeBox:AddToggle("KillAura", {
+        Text = T("killAura"),
+        Default = false,
+        Risky = true,
+        Callback = function(v) CFG.KillAura = v end,
+    })
 
-SectMelee:AddSlider(T("auraRange"), 1, 60, 15, function(v)
-    CFG.AuraRange = v
-end)
+    MeleeBox:AddSlider("AuraRange", {
+        Text = T("auraRange"),
+        Default = 15,
+        Min = 1,
+        Max = 60,
+        Rounding = 0,
+        Callback = function(v) CFG.AuraRange = v end,
+    })
 
-local SectBomb = TabCombat:AddSection("Bomb Pass")
+    -- Bomb Pass
+    local BombBox = Tabs.Combat:AddRightGroupbox("Bomb Pass")
 
-SectBomb:AddToggle(T("autoBomb"), false, function(v)
-    CFG.AutoBomb = v
-end)
+    BombBox:AddToggle("AutoBomb", {
+        Text = T("autoBomb"),
+        Default = false,
+        Risky = true,
+        Callback = function(v) CFG.AutoBomb = v end,
+    })
 
-SectBomb:AddTextbox(T("bombKeywords"), "bomb,бомба,tnt,dynamite,explosive", function(v)
-    CFG.BombKeywords = v
-end)
+    BombBox:AddInput("BombKeywords", {
+        Default = "bomb,бомба,tnt,dynamite,explosive",
+        Text = T("bombKeywords"),
+        Finished = false,
+        Callback = function(v) CFG.BombKeywords = v end,
+    })
 
-local SectInfo = TabCombat:AddSection("Info")
+    -- Info
+    local InfoBox = Tabs.Combat:AddRightGroupbox("Info")
 
-SectInfo:AddButton(T("nearestPlayer"), function()
-    local closest, dist = nil, math.huge
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local d = (HRP.Position - p.Character.HumanoidRootPart.Position).Magnitude
-            if d < dist then dist = d; closest = p end
-        end
-    end
-    if closest then
-        VoidUI:Notification(T("nearestPlayer"), closest.DisplayName .. " — " .. math.floor(dist) .. " studs", 4)
-    else
-        VoidUI:Notification("Error", T("noPlayersNear"), 3)
-    end
-end)
+    InfoBox:AddButton({
+        Text = T("nearestPlayer"),
+        Func = function()
+            local closest, dist = nil, math.huge
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    local d = (HRP.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                    if d < dist then dist = d; closest = p end
+                end
+            end
+            if closest then
+                Library:Notify({
+                    Title = T("nearestPlayer"),
+                    Description = closest.DisplayName .. " — " .. math.floor(dist) .. " studs",
+                    Time = 4,
+                })
+            else
+                Library:Notify({
+                    Title = "Error",
+                    Description = T("noPlayersNear"),
+                    Time = 3,
+                })
+            end
+        end,
+    })
+end
 
 --// ═══════════════════════════════════════════
 --//  TAB: TELEPORT
 --// ═══════════════════════════════════════════
 
-local TabTP = Window:AddTab(T("teleport"))
+do
+    local PlayerTPBox = Tabs.Teleport:AddLeftGroupbox("Player Transport")
 
-local SectPlayerTP = TabTP:AddSection("Player Transport")
+    PlayerTPBox:AddInput("TpTarget", {
+        Default = "",
+        Text = T("targetName"),
+        Placeholder = "Player name...",
+        Finished = false,
+        Callback = function(v) CFG.TpTarget = v end,
+    })
 
-SectPlayerTP:AddTextbox(T("targetName"), "", function(v)
-    CFG.TpTarget = v
-end)
+    PlayerTPBox:AddButton({
+        Text = T("tpToTarget"),
+        Func = function()
+            local query = CFG.TpTarget:lower()
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and (p.Name:lower():find(query) or p.DisplayName:lower():find(query)) and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    HRP.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
+                    Library:Notify({ Title = T("teleport"), Description = T("movedTo") .. " " .. p.DisplayName, Time = 3 })
+                    return
+                end
+            end
+            Library:Notify({ Title = "Error", Description = T("notFound"), Time = 3 })
+        end,
+    })
 
-SectPlayerTP:AddButton(T("tpToTarget"), function()
-    local query = CFG.TpTarget:lower()
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and (p.Name:lower():find(query) or p.DisplayName:lower():find(query)) and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            HRP.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
-            VoidUI:Notification(T("teleport"), T("movedTo") .. " " .. p.DisplayName, 3)
-            return
-        end
-    end
-    VoidUI:Notification("Error", T("notFound"), 3)
-end)
+    PlayerTPBox:AddButton({
+        Text = T("randomPlayer"),
+        Func = function()
+            local pool = {}
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    table.insert(pool, p)
+                end
+            end
+            if #pool == 0 then
+                Library:Notify({ Title = "Error", Description = T("noPlayers"), Time = 3 })
+                return
+            end
+            local t = pool[math.random(#pool)]
+            HRP.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
+            Library:Notify({ Title = T("randomPlayer"), Description = T("movedTo") .. " " .. t.DisplayName, Time = 3 })
+        end,
+    })
 
-SectPlayerTP:AddButton(T("randomPlayer"), function()
-    local pool = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            table.insert(pool, p)
-        end
-    end
-    if #pool == 0 then
-        VoidUI:Notification("Error", T("noPlayers"), 3)
-        return
-    end
-    local t = pool[math.random(#pool)]
-    HRP.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
-    VoidUI:Notification(T("randomPlayer"), T("movedTo") .. " " .. t.DisplayName, 3)
-end)
+    PlayerTPBox:AddButton({
+        Text = T("tpSpawn"),
+        Func = function()
+            pcall(function()
+                local sp = Workspace:FindFirstChildOfClass("SpawnLocation")
+                if sp then HRP.CFrame = sp.CFrame + Vector3.new(0, 5, 0)
+                else HRP.CFrame = CFrame.new(0, 50, 0) end
+            end)
+        end,
+    })
 
-SectPlayerTP:AddButton(T("tpSpawn"), function()
-    pcall(function()
-        local sp = Workspace:FindFirstChildOfClass("SpawnLocation")
-        if sp then
-            HRP.CFrame = sp.CFrame + Vector3.new(0, 5, 0)
-        else
-            HRP.CFrame = CFrame.new(0, 50, 0)
-        end
-    end)
-end)
+    PlayerTPBox:AddButton({
+        Text = T("tpForward"),
+        Func = function()
+            pcall(function() HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * 100 end)
+        end,
+    })
 
-SectPlayerTP:AddButton(T("tpForward"), function()
-    pcall(function() HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * 100 end)
-end)
+    -- Waypoints
+    local WaypointBox = Tabs.Teleport:AddRightGroupbox("Waypoints")
 
-local SectWaypoints = TabTP:AddSection("Waypoints")
+    WaypointBox:AddButton({
+        Text = T("savePos"),
+        Func = function()
+            CFG.SavedCF = HRP.CFrame
+            Library:Notify({ Title = T("saved"), Description = T("posStored"), Time = 2 })
+        end,
+    })
 
-SectWaypoints:AddButton(T("savePos"), function()
-    CFG.SavedCF = HRP.CFrame
-    VoidUI:Notification(T("saved"), T("posStored"), 2)
-end)
+    WaypointBox:AddButton({
+        Text = T("loadPos"),
+        Func = function()
+            if CFG.SavedCF then
+                HRP.CFrame = CFG.SavedCF
+                Library:Notify({ Title = T("loaded"), Description = T("posRestored"), Time = 2 })
+            else
+                Library:Notify({ Title = "Error", Description = T("nothingSaved"), Time = 2 })
+            end
+        end,
+    })
 
-SectWaypoints:AddButton(T("loadPos"), function()
-    if CFG.SavedCF then
-        HRP.CFrame = CFG.SavedCF
-        VoidUI:Notification(T("loaded"), T("posRestored"), 2)
-    else
-        VoidUI:Notification("Error", T("nothingSaved"), 2)
-    end
-end)
-
-SectWaypoints:AddToggle(T("clickTp"), false, function(v)
-    CFG.ClickTP = v
-end)
+    WaypointBox:AddToggle("ClickTP", {
+        Text = T("clickTp"),
+        Default = false,
+        Callback = function(v) CFG.ClickTP = v end,
+    })
+end
 
 --// ═══════════════════════════════════════════
 --//  TAB: ESP
 --// ═══════════════════════════════════════════
 
-local TabESP = Window:AddTab(T("esp"))
+do
+    local RenderBox = Tabs.ESP:AddLeftGroupbox("Rendering")
 
-local SectRendering = TabESP:AddSection("Rendering")
+    RenderBox:AddToggle("ESP", {
+        Text = T("enableEsp"),
+        Default = false,
+        Callback = function(v) CFG.ESP = v end,
+    })
 
-SectRendering:AddToggle(T("enableEsp"), false, function(v)
-    CFG.ESP = v
-end)
+    RenderBox:AddToggle("BoxESP", {
+        Text = T("boundBox"),
+        Default = false,
+        Callback = function(v) CFG.BoxESP = v end,
+    })
 
-SectRendering:AddToggle(T("boundBox"), false, function(v)
-    CFG.BoxESP = v
-end)
+    RenderBox:AddToggle("NameESP", {
+        Text = T("nameTags"),
+        Default = false,
+        Callback = function(v) CFG.NameESP = v end,
+    })
 
-SectRendering:AddToggle(T("nameTags"), false, function(v)
-    CFG.NameESP = v
-end)
+    RenderBox:AddToggle("HealthESP", {
+        Text = T("healthBars"),
+        Default = false,
+        Callback = function(v) CFG.HealthESP = v end,
+    })
 
-SectRendering:AddToggle(T("healthBars"), false, function(v)
-    CFG.HealthESP = v
-end)
+    RenderBox:AddToggle("DistESP", {
+        Text = T("distTags"),
+        Default = false,
+        Callback = function(v) CFG.DistESP = v end,
+    })
 
-SectRendering:AddToggle(T("distTags"), false, function(v)
-    CFG.DistESP = v
-end)
+    RenderBox:AddToggle("TracerESP", {
+        Text = T("tracers"),
+        Default = false,
+        Callback = function(v) CFG.TracerESP = v end,
+    })
 
-SectRendering:AddToggle(T("tracers"), false, function(v)
-    CFG.TracerESP = v
-end)
-
-SectRendering:AddToggle(T("chams"), false, function(v)
-    CFG.ChamsESP = v
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character then
-            local ex = p.Character:FindFirstChild("_Highlight")
-            if v and not ex then
-                local h = Instance.new("Highlight")
-                h.Name = "_Highlight"
-                h.FillColor = Color3.fromRGB(130, 80, 220)
-                h.FillTransparency = 0.4
-                h.OutlineColor = Color3.fromRGB(255, 255, 255)
-                h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                h.Parent = p.Character
-            elseif not v and ex then
-                ex:Destroy()
+    RenderBox:AddToggle("ChamsESP", {
+        Text = T("chams"),
+        Default = false,
+        Callback = function(v)
+            CFG.ChamsESP = v
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character then
+                    local ex = p.Character:FindFirstChild("_Highlight")
+                    if v and not ex then
+                        local h = Instance.new("Highlight")
+                        h.Name = "_Highlight"
+                        h.FillColor = Color3.fromRGB(130, 80, 220)
+                        h.FillTransparency = 0.4
+                        h.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                        h.Parent = p.Character
+                    elseif not v and ex then
+                        ex:Destroy()
+                    end
+                end
             end
-        end
-    end
-end)
+        end,
+    })
 
-local SectFilters = TabESP:AddSection("Filters")
+    -- Filters
+    local FilterBox = Tabs.ESP:AddRightGroupbox("Filters")
 
-SectFilters:AddToggle(T("teamFilter"), false, function(v)
-    CFG.TeamCheck = v
-end)
+    FilterBox:AddToggle("TeamCheck", {
+        Text = T("teamFilter"),
+        Default = false,
+        Callback = function(v) CFG.TeamCheck = v end,
+    })
+end
 
 --// ═══════════════════════════════════════════
 --//  TAB: ENVIRONMENT
 --// ═══════════════════════════════════════════
 
-local TabEnv = Window:AddTab(T("environment"))
+do
+    local LightBox = Tabs.Environment:AddLeftGroupbox("Lighting")
 
-local SectLighting = TabEnv:AddSection("Lighting")
+    LightBox:AddToggle("Fullbright", {
+        Text = T("fullbright"),
+        Default = false,
+        Callback = function(v)
+            CFG.Fullbright = v
+            if v then
+                Lighting.Brightness = 2; Lighting.GlobalShadows = false
+                Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
+                Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+            else
+                Lighting.Brightness = 1; Lighting.GlobalShadows = true
+                Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+                Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+            end
+        end,
+    })
 
-SectLighting:AddToggle(T("fullbright"), false, function(v)
-    CFG.Fullbright = v
-    if v then
-        Lighting.Brightness = 2
-        Lighting.GlobalShadows = false
-        Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
-        Lighting.Ambient = Color3.fromRGB(200, 200, 200)
-    else
-        Lighting.Brightness = 1
-        Lighting.GlobalShadows = true
-        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-        Lighting.Ambient = Color3.fromRGB(0, 0, 0)
-    end
-end)
+    LightBox:AddToggle("NoFog", {
+        Text = T("noFog"),
+        Default = false,
+        Callback = function(v)
+            CFG.NoFog = v
+            Lighting.FogEnd = v and 9999999 or 100000
+        end,
+    })
 
-SectLighting:AddToggle(T("noFog"), false, function(v)
-    CFG.NoFog = v
-    Lighting.FogEnd = v and 9999999 or 100000
-end)
+    LightBox:AddToggle("TimeLock", {
+        Text = T("timeLock"),
+        Default = false,
+        Callback = function(v) CFG.CustomTime = v end,
+    })
 
-SectLighting:AddToggle(T("timeLock"), false, function(v)
-    CFG.CustomTime = v
-end)
+    LightBox:AddSlider("ClockTime", {
+        Text = T("clockTime"),
+        Default = 14,
+        Min = 0,
+        Max = 24,
+        Rounding = 1,
+        Callback = function(v)
+            CFG.TimeVal = v
+            if CFG.CustomTime then Lighting.ClockTime = v end
+        end,
+    })
 
-SectLighting:AddSlider(T("clockTime"), 0, 24, 14, function(v)
-    CFG.TimeVal = v
-    if CFG.CustomTime then Lighting.ClockTime = v end
-end)
+    -- Cleanup
+    local CleanBox = Tabs.Environment:AddRightGroupbox("Cleanup")
 
-local SectCleanup = TabEnv:AddSection("Cleanup")
+    CleanBox:AddButton({
+        Text = T("removeEffects"),
+        Func = function()
+            local n = 0
+            for _, e in ipairs(Lighting:GetChildren()) do
+                if e:IsA("Atmosphere") or e:IsA("BloomEffect") or e:IsA("BlurEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("DepthOfFieldEffect") or e:IsA("SunRaysEffect") then
+                    e:Destroy(); n += 1
+                end
+            end
+            Library:Notify({ Title = "Cleanup", Description = n .. " " .. T("effectsRemoved"), Time = 2 })
+        end,
+    })
 
-SectCleanup:AddButton(T("removeEffects"), function()
-    local n = 0
-    for _, e in ipairs(Lighting:GetChildren()) do
-        if e:IsA("Atmosphere") or e:IsA("BloomEffect") or e:IsA("BlurEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("DepthOfFieldEffect") or e:IsA("SunRaysEffect") then
-            e:Destroy(); n += 1
-        end
-    end
-    VoidUI:Notification("Cleanup", n .. " " .. T("effectsRemoved"), 2)
-end)
+    CleanBox:AddButton({
+        Text = T("removeParticles"),
+        Func = function()
+            local n = 0
+            for _, o in ipairs(Workspace:GetDescendants()) do
+                if o:IsA("ParticleEmitter") or o:IsA("Fire") or o:IsA("Smoke") or o:IsA("Sparkles") then
+                    o:Destroy(); n += 1
+                end
+            end
+            Library:Notify({ Title = "Cleanup", Description = n .. " " .. T("particlesRemoved"), Time = 2 })
+        end,
+    })
 
-SectCleanup:AddButton(T("removeParticles"), function()
-    local n = 0
-    for _, o in ipairs(Workspace:GetDescendants()) do
-        if o:IsA("ParticleEmitter") or o:IsA("Fire") or o:IsA("Smoke") or o:IsA("Sparkles") then
-            o:Destroy(); n += 1
-        end
-    end
-    VoidUI:Notification("Cleanup", n .. " " .. T("particlesRemoved"), 2)
-end)
+    CleanBox:AddButton({
+        Text = T("removeDecals"),
+        Func = function()
+            local n = 0
+            for _, o in ipairs(Workspace:GetDescendants()) do
+                if o:IsA("Decal") or o:IsA("Texture") then o:Destroy(); n += 1 end
+            end
+            Library:Notify({ Title = "Cleanup", Description = n .. " removed", Time = 2 })
+        end,
+    })
 
-SectCleanup:AddButton(T("removeDecals"), function()
-    local n = 0
-    for _, o in ipairs(Workspace:GetDescendants()) do
-        if o:IsA("Decal") or o:IsA("Texture") then o:Destroy(); n += 1 end
-    end
-    VoidUI:Notification("Cleanup", n .. " removed", 2)
-end)
+    CleanBox:AddButton({
+        Text = T("removeSounds"),
+        Func = function()
+            local n = 0
+            for _, o in ipairs(Workspace:GetDescendants()) do
+                if o:IsA("Sound") then o:Stop(); o:Destroy(); n += 1 end
+            end
+            Library:Notify({ Title = "Cleanup", Description = n .. " removed", Time = 2 })
+        end,
+    })
 
-SectCleanup:AddButton(T("removeSounds"), function()
-    local n = 0
-    for _, o in ipairs(Workspace:GetDescendants()) do
-        if o:IsA("Sound") then o:Stop(); o:Destroy(); n += 1 end
-    end
-    VoidUI:Notification("Cleanup", n .. " removed", 2)
-end)
+    CleanBox:AddButton({
+        Text = T("removeBlur"),
+        Func = function()
+            local n = 0
+            for _, obj in ipairs(Lighting:GetChildren()) do
+                if obj:IsA("BlurEffect") then obj:Destroy(); n += 1 end
+            end
+            Library:Notify({ Title = "Blur", Description = n .. " removed", Time = 2 })
+        end,
+    })
+end
 
 --// ═══════════════════════════════════════════
 --//  TAB: UTILITIES
 --// ═══════════════════════════════════════════
 
-local TabUtil = Window:AddTab(T("utilities"))
+do
+    local ProtectBox = Tabs.Utilities:AddLeftGroupbox("Protection")
 
-local SectProtect = TabUtil:AddSection("Protection")
+    ProtectBox:AddToggle("AntiAFK", {
+        Text = T("antiAfk"),
+        Default = false,
+        Callback = function(v) CFG.AntiAFK = v end,
+    })
 
-SectProtect:AddToggle(T("antiAfk"), false, function(v)
-    CFG.AntiAFK = v
-end)
+    ProtectBox:AddToggle("AntiKick", {
+        Text = T("antiKick"),
+        Default = false,
+        Callback = function(v) CFG.AntiKick = v end,
+    })
 
-SectProtect:AddToggle(T("antiKick"), false, function(v)
-    CFG.AntiKick = v
-end)
-
-local SectActions = TabUtil:AddSection("Actions")
-
-SectActions:AddToggle(T("spin"), false, function(v)
-    CFG.Spin = v
-end)
-
-SectActions:AddSlider(T("spinSpeed"), 1, 50, 10, function(v)
-    CFG.SpinSpeed = v
-end)
-
-SectActions:AddButton(T("spawnPlatform"), function()
-    local p = Instance.new("Part")
-    p.Size = Vector3.new(20, 1, 20)
-    p.CFrame = HRP.CFrame * CFrame.new(0, -4, 0)
-    p.Anchored = true
-    p.BrickColor = BrickColor.new("Bright violet")
-    p.Material = Enum.Material.Neon
-    p.Transparency = 0.3
-    p.Parent = Workspace
-end)
-
-SectActions:AddButton(T("forceSit"), function()
-    pcall(function() Humanoid.Sit = true end)
-end)
-
-SectActions:AddButton(T("forceJump"), function()
-    pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
-end)
-
-SectActions:AddButton(T("copyPos"), function()
-    local pos = HRP.Position
-    local txt = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
-    pcall(function() setclipboard(txt) end)
-    VoidUI:Notification(T("copied"), txt, 3)
-end)
-
-SectActions:AddButton(T("copyLink"), function()
-    local link = "https://www.roblox.com/games/" .. game.PlaceId
-    pcall(function() setclipboard(link) end)
-    VoidUI:Notification(T("copied"), link, 3)
-end)
-
-local SectChat = TabUtil:AddSection("Chat")
-
-SectChat:AddTextbox(T("spamMsg"), "", function(v)
-    CFG.SpamMsg = v
-end)
-
-SectChat:AddSlider(T("spamInterval"), 1, 10, 2, function(v)
-    CFG.SpamDelay = v
-end)
-
-SectChat:AddToggle(T("chatSpam"), false, function(v)
-    CFG.ChatSpam = v
-end)
-
-local SectServer = TabUtil:AddSection("Server")
-
-SectServer:AddButton(T("rejoin"), function()
-    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-end)
-
-SectServer:AddButton(T("serverHop"), function()
-    task.spawn(function()
-        local ok, data = pcall(function()
-            return HttpService:JSONDecode(game:HttpGet(("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"):format(game.PlaceId)))
-        end)
-        if not ok then
-            VoidUI:Notification("Error", "Failed", 3)
-            return
-        end
-        for _, sv in ipairs(data.data) do
-            if sv.id ~= game.JobId and sv.playing < sv.maxPlayers then
-                TeleportService:TeleportToPlaceInstance(game.PlaceId, sv.id, LocalPlayer)
-                return
+    ProtectBox:AddToggle("AntiBlur", {
+        Text = T("blurEnabled"),
+        Default = false,
+        Callback = function(v)
+            CFG.AntiBlur = v
+            if v then
+                for _, obj in ipairs(Lighting:GetChildren()) do
+                    if obj:IsA("BlurEffect") then obj:Destroy() end
+                end
             end
-        end
-        VoidUI:Notification("Error", "No servers", 3)
-    end)
-end)
+        end,
+    })
 
-SectServer:AddButton(T("serverInfo"), function()
-    VoidUI:Notification(T("serverInfo"), string.format("Players: %d/%d | Place: %d | Ping: ~%dms",
-        #Players:GetPlayers(), Players.MaxPlayers, game.PlaceId,
-        math.floor(LocalPlayer:GetNetworkPing() * 1000)), 6)
-end)
+    -- Actions
+    local ActionBox = Tabs.Utilities:AddLeftGroupbox("Actions")
+
+    ActionBox:AddToggle("Spin", {
+        Text = T("spin"),
+        Default = false,
+        Callback = function(v) CFG.Spin = v end,
+    })
+
+    ActionBox:AddSlider("SpinSpeed", {
+        Text = T("spinSpeed"),
+        Default = 10,
+        Min = 1,
+        Max = 50,
+        Rounding = 0,
+        Callback = function(v) CFG.SpinSpeed = v end,
+    })
+
+    ActionBox:AddDivider()
+
+    ActionBox:AddButton({
+        Text = T("spawnPlatform"),
+        Func = function()
+            local p = Instance.new("Part")
+            p.Size = Vector3.new(20, 1, 20)
+            p.CFrame = HRP.CFrame * CFrame.new(0, -4, 0)
+            p.Anchored = true
+            p.BrickColor = BrickColor.new("Bright violet")
+            p.Material = Enum.Material.Neon
+            p.Transparency = 0.3
+            p.Parent = Workspace
+        end,
+    })
+
+    ActionBox:AddButton({
+        Text = T("forceSit"),
+        Func = function() pcall(function() Humanoid.Sit = true end) end,
+    })
+
+    ActionBox:AddButton({
+        Text = T("forceJump"),
+        Func = function() pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end) end,
+    })
+
+    ActionBox:AddButton({
+        Text = T("copyPos"),
+        Func = function()
+            local pos = HRP.Position
+            local txt = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
+            pcall(function() setclipboard(txt) end)
+            Library:Notify({ Title = T("copied"), Description = txt, Time = 3 })
+        end,
+    })
+
+    ActionBox:AddButton({
+        Text = T("copyLink"),
+        Func = function()
+            local link = "https://www.roblox.com/games/" .. game.PlaceId
+            pcall(function() setclipboard(link) end)
+            Library:Notify({ Title = T("copied"), Description = link, Time = 3 })
+        end,
+    })
+
+    -- Chat
+    local ChatBox = Tabs.Utilities:AddRightGroupbox("Chat")
+
+    ChatBox:AddInput("SpamMsg", {
+        Default = "",
+        Text = T("spamMsg"),
+        Placeholder = "Message...",
+        Finished = false,
+        Callback = function(v) CFG.SpamMsg = v end,
+    })
+
+    ChatBox:AddSlider("SpamDelay", {
+        Text = T("spamInterval"),
+        Default = 2,
+        Min = 1,
+        Max = 10,
+        Rounding = 1,
+        Suffix = "s",
+        Callback = function(v) CFG.SpamDelay = v end,
+    })
+
+    ChatBox:AddToggle("ChatSpam", {
+        Text = T("chatSpam"),
+        Default = false,
+        Risky = true,
+        Callback = function(v) CFG.ChatSpam = v end,
+    })
+
+    -- Server
+    local ServerBox = Tabs.Utilities:AddRightGroupbox("Server")
+
+    ServerBox:AddButton({
+        Text = T("rejoin"),
+        Func = function()
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+        end,
+    })
+
+    ServerBox:AddButton({
+        Text = T("serverHop"),
+        Func = function()
+            task.spawn(function()
+                local ok, data = pcall(function()
+                    return HttpService:JSONDecode(game:HttpGet(("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"):format(game.PlaceId)))
+                end)
+                if not ok then Library:Notify({ Title = "Error", Description = "Failed", Time = 3 }); return end
+                for _, sv in ipairs(data.data) do
+                    if sv.id ~= game.JobId and sv.playing < sv.maxPlayers then
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, sv.id, LocalPlayer)
+                        return
+                    end
+                end
+                Library:Notify({ Title = "Error", Description = "No servers", Time = 3 })
+            end)
+        end,
+    })
+
+    ServerBox:AddButton({
+        Text = T("serverInfo"),
+        Func = function()
+            Library:Notify({
+                Title = T("serverInfo"),
+                Description = string.format("Players: %d/%d\nPlace: %d\nPing: ~%dms",
+                    #Players:GetPlayers(), Players.MaxPlayers, game.PlaceId,
+                    math.floor(LocalPlayer:GetNetworkPing() * 1000)),
+                Time = 6,
+            })
+        end,
+    })
+
+    ServerBox:AddButton({
+        Text = T("copyId") .. " (" .. LocalPlayer.UserId .. ")",
+        Func = function()
+            pcall(function() setclipboard(tostring(LocalPlayer.UserId)) end)
+            Library:Notify({ Title = T("copied"), Description = tostring(LocalPlayer.UserId), Time = 2 })
+        end,
+    })
+
+    -- Graphics
+    local GfxBox = Tabs.Utilities:AddRightGroupbox("Graphics")
+
+    GfxBox:AddButton({
+        Text = T("removeAllPost"),
+        Func = function()
+            local n = 0
+            for _, e in ipairs(Lighting:GetChildren()) do
+                if e:IsA("PostEffect") or e:IsA("Atmosphere") then e:Destroy(); n += 1 end
+            end
+            Library:Notify({ Title = "Cleanup", Description = n .. " removed", Time = 2 })
+        end,
+    })
+
+    GfxBox:AddButton({
+        Text = T("lowGraphics"),
+        Func = function()
+            pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
+            Lighting.GlobalShadows = false
+            for _, e in ipairs(Lighting:GetChildren()) do
+                if e:IsA("PostEffect") or e:IsA("Atmosphere") then e.Enabled = false end
+            end
+            for _, o in ipairs(Workspace:GetDescendants()) do
+                if o:IsA("ParticleEmitter") or o:IsA("Trail") then o.Enabled = false end
+            end
+            Library:Notify({ Title = "Graphics", Description = "Low mode ON", Time = 2 })
+        end,
+    })
+end
 
 --// ═══════════════════════════════════════════
 --//  TAB: SETTINGS
 --// ═══════════════════════════════════════════
 
-local TabSettings = Window:AddTab(T("settings"))
+do
+    local MenuBox = Tabs.Settings:AddLeftGroupbox("Menu")
 
-local SectLang = TabSettings:AddSection("Language")
+    MenuBox:AddToggle("KeybindMenuOpen", {
+        Default = false,
+        Text = "Open Keybind Menu",
+        Callback = function(v)
+            Library.KeybindFrame.Visible = v
+        end,
+    })
 
-SectLang:AddButton("🇬🇧 English", function()
-    Lang = "EN"
-    VoidUI:Notification("Language", "English selected. Rejoin to apply.", 4)
-end)
+    MenuBox:AddToggle("ShowCustomCursor", {
+        Text = "Custom Cursor",
+        Default = true,
+        Callback = function(v)
+            Library.ShowCustomCursor = v
+        end,
+    })
 
-SectLang:AddButton("🇷🇺 Русский", function()
-    Lang = "RU"
-    VoidUI:Notification("Язык", "Русский выбран. Перезайдите.", 4)
-end)
+    MenuBox:AddDropdown("NotificationSide", {
+        Values = { "Left", "Right" },
+        Default = "Right",
+        Text = "Notification Side",
+        Callback = function(v)
+            Library:SetNotifySide(v)
+        end,
+    })
 
-local SectGfx = TabSettings:AddSection("Graphics")
+    MenuBox:AddDivider()
 
-SectGfx:AddToggle(T("blurEnabled"), false, function(v)
-    CFG.AntiBlur = v
-    if v then
-        for _, obj in ipairs(Lighting:GetChildren()) do
-            if obj:IsA("BlurEffect") then obj:Destroy() end
-        end
-    end
-end)
+    MenuBox:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", {
+        Default = "RightControl",
+        NoUI = true,
+        Text = "Menu keybind",
+    })
 
-SectGfx:AddButton(T("removeBlur"), function()
-    local n = 0
-    for _, obj in ipairs(Lighting:GetChildren()) do
-        if obj:IsA("BlurEffect") then obj:Destroy(); n += 1 end
-    end
-    VoidUI:Notification("Blur", n .. " removed", 2)
-end)
+    -- Language
+    local LangBox = Tabs.Settings:AddLeftGroupbox("Language")
 
-SectGfx:AddButton(T("removeAllPost"), function()
-    local n = 0
-    for _, e in ipairs(Lighting:GetChildren()) do
-        if e:IsA("PostEffect") or e:IsA("Atmosphere") then e:Destroy(); n += 1 end
-    end
-    VoidUI:Notification("Cleanup", n .. " removed", 2)
-end)
+    LangBox:AddButton({
+        Text = "🇬🇧 English",
+        Func = function()
+            Lang = "EN"
+            Library:Notify({ Title = "Language", Description = "English selected. Rejoin to apply.", Time = 4 })
+        end,
+    })
 
-SectGfx:AddButton(T("lowGraphics"), function()
-    pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
-    Lighting.GlobalShadows = false
-    for _, e in ipairs(Lighting:GetChildren()) do
-        if e:IsA("PostEffect") or e:IsA("Atmosphere") then e.Enabled = false end
-    end
-    for _, o in ipairs(Workspace:GetDescendants()) do
-        if o:IsA("ParticleEmitter") or o:IsA("Trail") then o.Enabled = false end
-    end
-    VoidUI:Notification("Graphics", "Low mode ON", 2)
-end)
+    LangBox:AddButton({
+        Text = "🇷🇺 Русский",
+        Func = function()
+            Lang = "RU"
+            Library:Notify({ Title = "Язык", Description = "Русский выбран. Перезайдите.", Time = 4 })
+        end,
+    })
 
-local SectPlayerInfo = TabSettings:AddSection("Player Info")
+    -- Info
+    local InfoBox = Tabs.Settings:AddLeftGroupbox("Player Info")
 
-SectPlayerInfo:AddButton(T("copyId") .. " (" .. LocalPlayer.UserId .. ")", function()
-    pcall(function() setclipboard(tostring(LocalPlayer.UserId)) end)
-    VoidUI:Notification(T("copied"), tostring(LocalPlayer.UserId), 2)
-end)
+    InfoBox:AddLabel("Name: " .. LocalPlayer.Name)
+    InfoBox:AddLabel("Display: " .. LocalPlayer.DisplayName)
+    InfoBox:AddLabel("ID: " .. LocalPlayer.UserId)
 
-local SectAbout = TabSettings:AddSection("About")
+    -- About
+    local AboutBox = Tabs.Settings:AddLeftGroupbox("About")
 
-SectAbout:AddButton("Eplisma v3.0 | Frost | @Jokerfros", function()
-    VoidUI:Notification("Eplisma v3.0", "Developer: Frost\nTelegram: @Jokerfros\nVoid UI Edition", 5)
-end)
+    AboutBox:AddLabel("Eplisma v3.0")
+    AboutBox:AddLabel("Developer: Frost")
+    AboutBox:AddLabel("Telegram: @Jokerfros")
+    AboutBox:AddLabel("Obsidian UI Edition")
 
-local SectDanger = TabSettings:AddSection("Danger Zone")
+    -- Danger
+    local DangerBox = Tabs.Settings:AddLeftGroupbox("Danger Zone")
 
-SectDanger:AddButton(T("destroy"), function()
-    pcall(function() _G._CleanESP() end)
-    pcall(function() _G._FOV:Remove() end)
-    pcall(function()
-        if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
-        if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
-    end)
-    CFG.Fly = false
-    CFG.Noclip = false
-    CFG.ESP = false
-    CFG.Aimbot = false
-    CFG.AutoBomb = false
-    pcall(function() VoidUI:Destroy() end)
-end)
+    DangerBox:AddButton({
+        Text = T("destroy"),
+        DoubleClick = true,
+        Func = function()
+            pcall(function() _G._CleanESP() end)
+            pcall(function() _G._FOV:Remove() end)
+            pcall(function()
+                if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
+                if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
+            end)
+            CFG.Fly = false; CFG.Noclip = false; CFG.ESP = false
+            CFG.Aimbot = false; CFG.AutoBomb = false
+            Library:Unload()
+        end,
+    })
+
+    -- Addons
+    Library.ToggleKeybind = Options.MenuKeybind
+
+    ThemeManager:SetLibrary(Library)
+    SaveManager:SetLibrary(Library)
+    SaveManager:IgnoreThemeSettings()
+    SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
+    ThemeManager:SetFolder("Eplisma")
+    SaveManager:SetFolder("Eplisma/config")
+
+    SaveManager:BuildConfigSection(Tabs.Settings)
+    ThemeManager:ApplyToTab(Tabs.Settings)
+    SaveManager:LoadAutoloadConfig()
+end
 
 --// ═══════════════════════════════════════════
 --//  DRAWING: FOV CIRCLE
@@ -808,13 +1158,9 @@ local function DelESP(plr)
     end
 end
 
-local function HideAll(esp)
-    for _, d in pairs(esp) do d.Visible = false end
-end
+local function HideAll(esp) for _, d in pairs(esp) do d.Visible = false end end
 
-_G._CleanESP = function()
-    for p in pairs(ESPCache) do DelESP(p) end
-end
+_G._CleanESP = function() for p in pairs(ESPCache) do DelESP(p) end end
 
 for _, p in ipairs(Players:GetPlayers()) do AddESP(p) end
 Players.PlayerAdded:Connect(AddESP)
@@ -835,8 +1181,7 @@ local function FindTarget()
     local mp = UserInputService:GetMouseLocation()
     for _, p in ipairs(Players:GetPlayers()) do
         if p == LocalPlayer or IsAlly(p) then continue end
-        local c = p.Character
-        if not c then continue end
+        local c = p.Character; if not c then continue end
         local hum = c:FindFirstChildOfClass("Humanoid")
         local part = c:FindFirstChild(CFG.AimBone) or c:FindFirstChild("HumanoidRootPart")
         if not (hum and hum.Health > 0 and part) then continue end
@@ -875,7 +1220,6 @@ end
 
 RunService.RenderStepped:Connect(function()
     local mp = UserInputService:GetMouseLocation()
-
     FOVCircle.Visible = CFG.ShowFOV
     FOVCircle.Radius = CFG.AimFOV
     FOVCircle.Position = mp
@@ -898,64 +1242,32 @@ RunService.RenderStepped:Connect(function()
         local hrp = c and c:FindFirstChild("HumanoidRootPart")
         local head = c and c:FindFirstChild("Head")
         if not (c and hum and hum.Health > 0 and hrp and head and CFG.ESP) or IsAlly(plr) then
-            HideAll(esp)
-            continue
+            HideAll(esp); continue
         end
         local wp, vis = Camera:WorldToViewportPoint(hrp.Position)
         local hp = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, .5, 0))
         local fp = Camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
         if not vis then HideAll(esp); continue end
-        local bH = math.abs(hp.Y - fp.Y)
-        local bW = bH * 0.55
-        local cx = wp.X
+        local bH = math.abs(hp.Y - fp.Y); local bW = bH * 0.55; local cx = wp.X
 
-        esp.Box.Visible = CFG.BoxESP
-        esp.Box.Size = Vector2.new(bW, bH)
-        esp.Box.Position = Vector2.new(cx - bW * .5, hp.Y)
-
-        esp.Name.Visible = CFG.NameESP
-        esp.Name.Text = plr.DisplayName
-        esp.Name.Position = Vector2.new(cx, hp.Y - 16)
+        esp.Box.Visible = CFG.BoxESP; esp.Box.Size = Vector2.new(bW, bH); esp.Box.Position = Vector2.new(cx - bW * .5, hp.Y)
+        esp.Name.Visible = CFG.NameESP; esp.Name.Text = plr.DisplayName; esp.Name.Position = Vector2.new(cx, hp.Y - 16)
 
         local pct = hum.Health / hum.MaxHealth
-        esp.HpBG.Visible = CFG.HealthESP
-        esp.HpBG.From = Vector2.new(cx - bW * .5 - 5, fp.Y)
-        esp.HpBG.To = Vector2.new(cx - bW * .5 - 5, hp.Y)
-        esp.Hp.Visible = CFG.HealthESP
-        esp.Hp.From = Vector2.new(cx - bW * .5 - 5, fp.Y)
-        esp.Hp.To = Vector2.new(cx - bW * .5 - 5, fp.Y - bH * pct)
-        esp.Hp.Color = Color3.new(1 - pct, pct, 0)
+        esp.HpBG.Visible = CFG.HealthESP; esp.HpBG.From = Vector2.new(cx - bW * .5 - 5, fp.Y); esp.HpBG.To = Vector2.new(cx - bW * .5 - 5, hp.Y)
+        esp.Hp.Visible = CFG.HealthESP; esp.Hp.From = Vector2.new(cx - bW * .5 - 5, fp.Y); esp.Hp.To = Vector2.new(cx - bW * .5 - 5, fp.Y - bH * pct); esp.Hp.Color = Color3.new(1 - pct, pct, 0)
 
         local dist = (HRP.Position - hrp.Position).Magnitude
-        esp.Dist.Visible = CFG.DistESP
-        esp.Dist.Text = math.floor(dist) .. "m"
-        esp.Dist.Position = Vector2.new(cx, fp.Y + 3)
-
-        esp.Tracer.Visible = CFG.TracerESP
-        esp.Tracer.From = Vector2.new(vp.X * .5, vp.Y)
-        esp.Tracer.To = Vector2.new(cx, fp.Y)
+        esp.Dist.Visible = CFG.DistESP; esp.Dist.Text = math.floor(dist) .. "m"; esp.Dist.Position = Vector2.new(cx, fp.Y + 3)
+        esp.Tracer.Visible = CFG.TracerESP; esp.Tracer.From = Vector2.new(vp.X * .5, vp.Y); esp.Tracer.To = Vector2.new(cx, fp.Y)
     end
 
     if CFG.Fly and HRP then
-        local bv = HRP:FindFirstChild("_BV")
-        local bg = HRP:FindFirstChild("_BG")
-        if not bv then
-            bv = Instance.new("BodyVelocity")
-            bv.Name = "_BV"
-            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            bv.Parent = HRP
-        end
-        if not bg then
-            bg = Instance.new("BodyGyro")
-            bg.Name = "_BG"
-            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-            bg.D = 200
-            bg.P = 10000
-            bg.Parent = HRP
-        end
+        local bv = HRP:FindFirstChild("_BV"); local bg = HRP:FindFirstChild("_BG")
+        if not bv then bv = Instance.new("BodyVelocity"); bv.Name = "_BV"; bv.MaxForce = Vector3.new(9e9, 9e9, 9e9); bv.Parent = HRP end
+        if not bg then bg = Instance.new("BodyGyro"); bg.Name = "_BG"; bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9); bg.D = 200; bg.P = 10000; bg.Parent = HRP end
         bg.CFrame = Camera.CFrame
-        local dir = Vector3.zero
-        local u = UserInputService
+        local dir = Vector3.zero; local u = UserInputService
         if u:IsKeyDown(Enum.KeyCode.W) then dir += Camera.CFrame.LookVector end
         if u:IsKeyDown(Enum.KeyCode.S) then dir -= Camera.CFrame.LookVector end
         if u:IsKeyDown(Enum.KeyCode.A) then dir -= Camera.CFrame.RightVector end
@@ -977,9 +1289,7 @@ end)
 --// ═══════════════════════════════════════════
 
 RunService.Heartbeat:Connect(function()
-    if CFG.GodMode and Humanoid then
-        pcall(function() Humanoid.Health = Humanoid.MaxHealth end)
-    end
+    if CFG.GodMode and Humanoid then pcall(function() Humanoid.Health = Humanoid.MaxHealth end) end
     if CFG.Noclip and Character then
         for _, p in ipairs(Character:GetDescendants()) do
             if p:IsA("BasePart") then p.CanCollide = false end
@@ -1044,19 +1354,13 @@ task.spawn(function()
         if not CFG.KillAura or not HRP then continue end
         for _, p in ipairs(Players:GetPlayers()) do
             if p == LocalPlayer or IsAlly(p) then continue end
-            local c = p.Character
-            local hrp2 = c and c:FindFirstChild("HumanoidRootPart")
-            local hum2 = c and c:FindFirstChildOfClass("Humanoid")
+            local c = p.Character; local hrp2 = c and c:FindFirstChild("HumanoidRootPart"); local hum2 = c and c:FindFirstChildOfClass("Humanoid")
             if hrp2 and hum2 and hum2.Health > 0 and (HRP.Position - hrp2.Position).Magnitude <= CFG.AuraRange then
                 pcall(function()
                     local tool = Character:FindFirstChildOfClass("Tool")
                     if tool then
                         local h = tool:FindFirstChild("Handle")
-                        if h then
-                            firetouchinterest(h, hrp2, 0)
-                            task.wait()
-                            firetouchinterest(h, hrp2, 1)
-                        end
+                        if h then firetouchinterest(h, hrp2, 0); task.wait(); firetouchinterest(h, hrp2, 1) end
                     end
                 end)
             end
@@ -1071,38 +1375,22 @@ end)
 task.spawn(function()
     while task.wait(0.1) do
         if not CFG.AutoBomb or not Character then continue end
-
         for _, tool in ipairs(Character:GetChildren()) do
             if IsBombTool(tool) then
                 local nearest = FindNearestPlayer()
                 if nearest and nearest.Character and nearest.Character:FindFirstChild("HumanoidRootPart") then
                     local targetHRP = nearest.Character.HumanoidRootPart
-
-                    pcall(function()
-                        HRP.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 2)
-                    end)
-
+                    pcall(function() HRP.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 2) end)
                     task.wait(0.05)
-
                     pcall(function()
                         local handle = tool:FindFirstChild("Handle")
-                        if handle then
-                            firetouchinterest(handle, targetHRP, 0)
-                            task.wait(0.05)
-                            firetouchinterest(handle, targetHRP, 1)
-                        end
+                        if handle then firetouchinterest(handle, targetHRP, 0); task.wait(0.05); firetouchinterest(handle, targetHRP, 1) end
                     end)
-
                     task.wait(0.1)
-
                     if tool.Parent == Character then
                         pcall(function()
                             local handle = tool:FindFirstChild("Handle")
-                            if handle then
-                                firetouchinterest(handle, targetHRP, 0)
-                                task.wait(0.1)
-                                firetouchinterest(handle, targetHRP, 1)
-                            end
+                            if handle then firetouchinterest(handle, targetHRP, 0); task.wait(0.1); firetouchinterest(handle, targetHRP, 1) end
                         end)
                     end
                 end
@@ -1117,21 +1405,13 @@ Players.PlayerAdded:Connect(function(plr)
         if CFG.HitboxExp then
             task.wait(1)
             local h = char:FindFirstChild("HumanoidRootPart")
-            if h then
-                h.Size = Vector3.new(CFG.HitboxSize, CFG.HitboxSize, CFG.HitboxSize)
-                h.Transparency = 0.5
-            end
+            if h then h.Size = Vector3.new(CFG.HitboxSize, CFG.HitboxSize, CFG.HitboxSize); h.Transparency = 0.5 end
         end
         if CFG.ChamsESP then
             task.wait(1)
             if not char:FindFirstChild("_Highlight") then
-                local hl = Instance.new("Highlight")
-                hl.Name = "_Highlight"
-                hl.FillColor = Color3.fromRGB(130, 80, 220)
-                hl.FillTransparency = 0.4
-                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                hl.Parent = char
+                local hl = Instance.new("Highlight"); hl.Name = "_Highlight"; hl.FillColor = Color3.fromRGB(130, 80, 220)
+                hl.FillTransparency = 0.4; hl.OutlineColor = Color3.fromRGB(255, 255, 255); hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop; hl.Parent = char
             end
         end
     end)
@@ -1146,17 +1426,37 @@ task.delay(2, function()
 end)
 
 --// ═══════════════════════════════════════════
+--//  UNLOAD HANDLER
+--// ═══════════════════════════════════════════
+
+Library:OnUnload(function()
+    pcall(function() _G._CleanESP() end)
+    pcall(function() _G._FOV:Remove() end)
+    pcall(function()
+        if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
+        if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
+    end)
+    CFG.Fly = false; CFG.Noclip = false; CFG.ESP = false
+    CFG.Aimbot = false; CFG.AutoBomb = false
+    print("Eplisma unloaded!")
+end)
+
+--// ═══════════════════════════════════════════
 --//  STARTUP
 --// ═══════════════════════════════════════════
 
-VoidUI:Notification("Eplisma v3.0", T("welcome") .. ", " .. LocalPlayer.DisplayName .. "!\nby Frost | @Jokerfros", 6)
+Library:Notify({
+    Title = "Eplisma v3.0",
+    Description = T("welcome") .. ", " .. LocalPlayer.DisplayName .. "!\nby Frost | @Jokerfros\nObsidian UI Edition",
+    Time = 6,
+})
 
 print([[
 ╔══════════════════════════════════════╗
 ║         E P L I S M A  v3.0         ║
 ║     Developer: Frost                ║
 ║     Telegram: @Jokerfros            ║
-║     UI: Void UI Library             ║
+║     UI: Obsidian (Linoria)          ║
 ╠══════════════════════════════════════╣
 ║  Player: ]] .. LocalPlayer.Name .. [[
 
