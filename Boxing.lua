@@ -40,31 +40,129 @@ RefreshCharacter(LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait())
 LocalPlayer.CharacterAdded:Connect(RefreshCharacter)
 
 --// ═══════════════════════════════════════════
---//  TOGGLE HOTKEY — Клавіша "E"
+--//  ЧИСТКА ГРАФІКИ — прибираємо блюр/ефекти
 --// ═══════════════════════════════════════════
 
-local MenuOpen = true
-local TOGGLE_KEY = Enum.KeyCode.E
+pcall(function()
+    for _, e in ipairs(Lighting:GetChildren()) do
+        if e:IsA("BlurEffect") or e:IsA("DepthOfFieldEffect") or e:IsA("SunRaysEffect")
+        or e:IsA("BloomEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("Atmosphere") then
+            e.Enabled = false
+        end
+    end
+end)
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == TOGGLE_KEY then
+--// ═══════════════════════════════════════════
+--//  КНОПКА "E" — маленька, кругла
+--// ═══════════════════════════════════════════
+
+local ToggleGui = Instance.new("ScreenGui")
+ToggleGui.Name = "EplismaToggleBtn"
+ToggleGui.ResetOnSpawn = false
+ToggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ToggleGui.DisplayOrder = 99999
+pcall(function() ToggleGui.Parent = CoreGui end)
+if not ToggleGui.Parent then ToggleGui.Parent = LocalPlayer.PlayerGui end
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "EBtn"
+ToggleButton.Size = UDim2.fromOffset(34, 34)
+ToggleButton.Position = UDim2.new(0, 10, 0.5, -17)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+ToggleButton.BackgroundTransparency = 0.15
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Text = "E"
+ToggleButton.TextColor3 = Color3.fromRGB(160, 120, 240)
+ToggleButton.TextSize = 15
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.AutoButtonColor = false
+ToggleButton.ZIndex = 99999
+ToggleButton.Parent = ToggleGui
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(1, 0)
+ToggleCorner.Parent = ToggleButton
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(100, 60, 180)
+ToggleStroke.Thickness = 1.4
+ToggleStroke.Transparency = 0.3
+ToggleStroke.Parent = ToggleButton
+
+-- Drag
+do
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    local hasMoved = false
+    local MenuOpen = true
+
+    ToggleButton.InputBegan:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            hasMoved = false
+            dragStart = inp.Position
+            startPos = ToggleButton.Position
+        end
+    end)
+
+    ToggleButton.InputChanged:Connect(function(inp)
+        if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+            local delta = inp.Position - dragStart
+            if delta.Magnitude > 4 then
+                hasMoved = true
+            end
+            ToggleButton.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    ToggleButton.MouseButton1Click:Connect(function()
+        if hasMoved then
+            hasMoved = false
+            return
+        end
+
         MenuOpen = not MenuOpen
         pcall(function()
             local screens = {CoreGui, LocalPlayer.PlayerGui}
             for _, parent in ipairs(screens) do
                 for _, gui in ipairs(parent:GetChildren()) do
-                    if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
+                    if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") and gui ~= ToggleGui then
                         gui.Main.Visible = MenuOpen
                     end
                 end
             end
         end)
+
+        if MenuOpen then
+            TweenService:Create(ToggleStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(140, 100, 240), Transparency = 0}):Play()
+            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 24, 42)}):Play()
+        else
+            TweenService:Create(ToggleStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(100, 60, 180), Transparency = 0.3}):Play()
+            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(20, 20, 26)}):Play()
+        end
+    end)
+end
+
+-- Клавіша E на ПК
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.E then
+        ToggleButton.MouseButton1Click:Fire()
     end
 end)
 
 --// ═══════════════════════════════════════════
---//  LIBRARY SETUP
+--//  LIBRARY SETUP — без блюру
 --// ═══════════════════════════════════════════
 
 local Library = loadstring(game:HttpGet(
@@ -75,8 +173,8 @@ local Window = Library:CreateWindow({
     Title = "Eplisma",
     Theme = "Dark",
     Size = UDim2.fromOffset(560, 360),
-    Transparency = 0.15,
-    Blurring = true,
+    Transparency = 0,
+    Blurring = false,
     MinimizeKeybind = Enum.KeyCode.RightControl,
 })
 
@@ -145,6 +243,15 @@ local Themes = {
 
 Window:SetTheme(Themes.Dark)
 
+-- Прибираємо блюр після створення вікна
+pcall(function()
+    for _, obj in ipairs(Lighting:GetChildren()) do
+        if obj:IsA("BlurEffect") and obj.Name == "Blur" then
+            obj:Destroy()
+        end
+    end
+end)
+
 --// ═══════════════════════════════════════════
 --//  TAB SECTIONS
 --// ═══════════════════════════════════════════
@@ -162,21 +269,22 @@ local CFG = {
     InfJump = false, Noclip = false,
     Fly = false, FlySpeed = 60,
     GodMode = false,
-    
+
     Aimbot = false, AimFOV = 250, AimSmooth = 5,
     AimBone = "Head", ShowFOV = false,
     HitboxExp = false, HitboxSize = 5,
     KillAura = false, AuraRange = 15,
-    
+
     ESP = false, BoxESP = false, NameESP = false,
     HealthESP = false, DistESP = false,
     TracerESP = false, ChamsESP = false, TeamCheck = false,
-    
+
     Fullbright = false, NoFog = false,
     AntiAFK = false, CustomTime = false, TimeVal = 14,
     ClickTP = false, Spin = false,
     ChatSpam = false, SpamMsg = "", SpamDelay = 2,
     SavedCF = nil, TpTarget = "",
+    CurrentTheme = "Dark",
 }
 
 --// ═══════════════════════════════════════════
@@ -333,7 +441,7 @@ Window:AddSlider({
 
 Window:AddSlider({
     Title = "Smoothing",
-    Description = "Aim interpolation factor (1 = instant)",
+    Description = "Aim interpolation (1 = instant)",
     Tab = TabCombat,
     MaxValue = 50,
     AllowDecimals = true,
@@ -438,13 +546,11 @@ Window:AddButton({
             and (p.Name:lower():find(query) or p.DisplayName:lower():find(query))
             and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                 HRP.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
-                Window:Notify({ Title = "Teleport",
-                    Description = "Moved to " .. p.DisplayName, Duration = 3 })
+                Window:Notify({ Title = "Teleport", Description = "Moved to " .. p.DisplayName, Duration = 3 })
                 return
             end
         end
-        Window:Notify({ Title = "Error",
-            Description = "Player not found", Duration = 3 })
+        Window:Notify({ Title = "Error", Description = "Player not found", Duration = 3 })
     end,
 })
 
@@ -465,8 +571,7 @@ Window:AddButton({
         end
         local t = pool[math.random(#pool)]
         HRP.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
-        Window:Notify({ Title = "Random TP",
-            Description = "Moved to " .. t.DisplayName, Duration = 3 })
+        Window:Notify({ Title = "Random TP", Description = "Moved to " .. t.DisplayName, Duration = 3 })
     end,
 })
 
@@ -820,7 +925,7 @@ Window:AddButton({
 })
 
 --// ═══════════════════════════════════════════
---//  TAB: CONFIG
+--//  TAB: CONFIG — кнопки замість дропдауну
 --// ═══════════════════════════════════════════
 
 local TabConfig = Window:AddTab({
@@ -829,75 +934,92 @@ local TabConfig = Window:AddTab({
     Icon = "rbxassetid://11293977610",
 })
 
-Window:AddSection({ Name = "Interface", Tab = TabConfig })
+Window:AddSection({ Name = "Theme Selection", Tab = TabConfig })
 
-Window:AddDropdown({
-    Title = "Theme",
-    Description = "Visual style preset",
+Window:AddButton({
+    Title = "Theme: Dark",
+    Description = "Standard dark theme",
     Tab = TabConfig,
-    Options = {
-        ["Dark"] = "Dark",
-        ["Void"] = "Void",
-        ["Amethyst"] = "Amethyst",
-        ["Midnight"] = "Midnight",
-        ["Crimson"] = "Crimson",
-    },
-    Callback = function(v)
-        Window:SetTheme(Themes[v])
+    Callback = function()
+        CFG.CurrentTheme = "Dark"
+        Window:SetTheme(Themes.Dark)
+        Window:Notify({ Title = "Theme", Description = "Switched to Dark", Duration = 2 })
     end,
 })
 
-Window:AddSlider({
-    Title = "Transparency",
-    Description = "Window background opacity",
+Window:AddButton({
+    Title = "Theme: Void",
+    Description = "Ultra-dark minimal theme",
     Tab = TabConfig,
-    MaxValue = 1,
-    AllowDecimals = true,
-    DecimalAmount = 2,
-    Callback = function(v)
-        Window:SetSetting("Transparency", v)
+    Callback = function()
+        CFG.CurrentTheme = "Void"
+        Window:SetTheme(Themes.Void)
+        Window:Notify({ Title = "Theme", Description = "Switched to Void", Duration = 2 })
     end,
 })
 
-Window:AddToggle({
-    Title = "Background Blur",
-    Description = "Blur behind window (requires Graphics 8+)",
-    Default = true,
+Window:AddButton({
+    Title = "Theme: Amethyst",
+    Description = "Purple crystal tones",
     Tab = TabConfig,
-    Callback = function(v)
-        Window:SetSetting("Blur", v)
+    Callback = function()
+        CFG.CurrentTheme = "Amethyst"
+        Window:SetTheme(Themes.Amethyst)
+        Window:Notify({ Title = "Theme", Description = "Switched to Amethyst", Duration = 2 })
     end,
 })
 
-Window:AddKeybind({
-    Title = "Toggle Keybind",
-    Description = "Key to open/close menu",
+Window:AddButton({
+    Title = "Theme: Midnight",
+    Description = "Deep blue night theme",
     Tab = TabConfig,
-    Callback = function(key)
-        Window:SetSetting("Keybind", key)
+    Callback = function()
+        CFG.CurrentTheme = "Midnight"
+        Window:SetTheme(Themes.Midnight)
+        Window:Notify({ Title = "Theme", Description = "Switched to Midnight", Duration = 2 })
+    end,
+})
+
+Window:AddButton({
+    Title = "Theme: Crimson",
+    Description = "Dark red tones",
+    Tab = TabConfig,
+    Callback = function()
+        CFG.CurrentTheme = "Crimson"
+        Window:SetTheme(Themes.Crimson)
+        Window:Notify({ Title = "Theme", Description = "Switched to Crimson", Duration = 2 })
     end,
 })
 
 Window:AddSection({ Name = "Window", Tab = TabConfig })
 
-Window:AddDropdown({
-    Title = "Window Size",
-    Description = "Resize the menu window",
+Window:AddButton({
+    Title = "Size: Compact (480x300)",
+    Description = "Small window",
     Tab = TabConfig,
-    Options = {
-        ["Compact (480x300)"] = "Compact",
-        ["Default (560x360)"] = "Default",
-        ["Large (650x420)"] = "Large",
-        ["Wide (720x380)"] = "Wide",
-    },
-    Callback = function(v)
-        local sizes = {
-            Compact = UDim2.fromOffset(480, 300),
-            Default = UDim2.fromOffset(560, 360),
-            Large = UDim2.fromOffset(650, 420),
-            Wide = UDim2.fromOffset(720, 380),
-        }
-        Window:SetSetting("Size", sizes[v])
+    Callback = function()
+        Window:SetSetting("Size", UDim2.fromOffset(480, 300))
+        Window:Notify({ Title = "Resize", Description = "Compact", Duration = 2 })
+    end,
+})
+
+Window:AddButton({
+    Title = "Size: Default (560x360)",
+    Description = "Standard window",
+    Tab = TabConfig,
+    Callback = function()
+        Window:SetSetting("Size", UDim2.fromOffset(560, 360))
+        Window:Notify({ Title = "Resize", Description = "Default", Duration = 2 })
+    end,
+})
+
+Window:AddButton({
+    Title = "Size: Large (650x420)",
+    Description = "Bigger window",
+    Tab = TabConfig,
+    Callback = function()
+        Window:SetSetting("Size", UDim2.fromOffset(650, 420))
+        Window:Notify({ Title = "Resize", Description = "Large", Duration = 2 })
     end,
 })
 
@@ -905,13 +1027,13 @@ Window:AddSection({ Name = "About", Tab = TabConfig })
 
 Window:AddParagraph({
     Title = "Eplisma v1.0",
-    Description = "Developer: Frost\nTelegram: @Jokerfros\n\nProfessional cheat suite.\nPress [E] to toggle menu.",
+    Description = "Developer: Frost\nTelegram: @Jokerfros\n\nTap [E] button or press E to toggle.",
     Tab = TabConfig,
 })
 
 Window:AddButton({
     Title = "Destroy Eplisma",
-    Description = "Completely remove the cheat from memory",
+    Description = "Completely remove the cheat",
     Tab = TabConfig,
     Callback = function()
         pcall(function() _G._CleanESP() end)
@@ -924,11 +1046,10 @@ Window:AddButton({
         CFG.Noclip = false
         CFG.ESP = false
         CFG.Aimbot = false
+        pcall(function() ToggleGui:Destroy() end)
         pcall(function()
             for _, g in ipairs(CoreGui:GetChildren()) do
-                if g:FindFirstChild("Main") then
-                    g:Destroy()
-                end
+                if g:FindFirstChild("Main") then g:Destroy() end
             end
         end)
     end,
@@ -1027,12 +1148,10 @@ end
 RunService.RenderStepped:Connect(function()
     local mp = UserInputService:GetMouseLocation()
 
-    -- FOV
     FOV.Visible = CFG.ShowFOV
     FOV.Radius = CFG.AimFOV
     FOV.Position = mp
 
-    -- Aimbot
     if CFG.Aimbot and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
         local t = FindTarget()
         if t and t.Character then
@@ -1044,7 +1163,6 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- ESP
     local vp = Camera.ViewportSize
     for plr, esp in pairs(ESPCache) do
         local c = plr.Character
@@ -1093,7 +1211,6 @@ RunService.RenderStepped:Connect(function()
         esp.Tracer.To = Vector2.new(cx, fp.Y)
     end
 
-    -- Fly
     if CFG.Fly and HRP then
         local bv = HRP:FindFirstChild("_BV")
         local bg = HRP:FindFirstChild("_BG")
@@ -1119,12 +1236,10 @@ RunService.RenderStepped:Connect(function()
         pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Flying) end)
     end
 
-    -- Spin
     if CFG.Spin and HRP then
         HRP.CFrame *= CFrame.Angles(0, math.rad(10), 0)
     end
 
-    -- Time Lock
     if CFG.CustomTime then
         Lighting.ClockTime = CFG.TimeVal
     end
@@ -1213,7 +1328,6 @@ task.spawn(function()
     end
 end)
 
--- Auto-apply hitbox expansion for new players
 Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Connect(function(char)
         if CFG.HitboxExp then
@@ -1239,13 +1353,24 @@ Players.PlayerAdded:Connect(function(plr)
     end)
 end)
 
+-- Фінальна чистка блюрів що могли створитись бібліотекою
+task.delay(2, function()
+    pcall(function()
+        for _, obj in ipairs(Lighting:GetChildren()) do
+            if obj:IsA("BlurEffect") then
+                obj:Destroy()
+            end
+        end
+    end)
+end)
+
 --// ═══════════════════════════════════════════
 --//  STARTUP
 --// ═══════════════════════════════════════════
 
 Window:Notify({
     Title = "Eplisma Loaded",
-    Description = "Welcome, " .. LocalPlayer.DisplayName .. "\nPress [E] to toggle menu\nby Frost | @Jokerfros",
+    Description = "Welcome, " .. LocalPlayer.DisplayName .. "\nTap [E] or press E to toggle\nby Frost | @Jokerfros",
     Duration = 6,
 })
 
