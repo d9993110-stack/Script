@@ -5,7 +5,7 @@
     ║                                          ║
     ║   Developer: Frost                       ║
     ║   Telegram: @Jokerfros                   ║
-    ║   Version: 1.0                           ║
+    ║   Version: 2.0                           ║
     ╚══════════════════════════════════════════╝
 ]]
 
@@ -21,6 +21,7 @@ local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
 
 --// Player
 local LocalPlayer = Players.LocalPlayer
@@ -40,129 +41,7 @@ RefreshCharacter(LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait())
 LocalPlayer.CharacterAdded:Connect(RefreshCharacter)
 
 --// ═══════════════════════════════════════════
---//  ЧИСТКА ГРАФІКИ — прибираємо блюр/ефекти
---// ═══════════════════════════════════════════
-
-pcall(function()
-    for _, e in ipairs(Lighting:GetChildren()) do
-        if e:IsA("BlurEffect") or e:IsA("DepthOfFieldEffect") or e:IsA("SunRaysEffect")
-        or e:IsA("BloomEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("Atmosphere") then
-            e.Enabled = false
-        end
-    end
-end)
-
---// ═══════════════════════════════════════════
---//  КНОПКА "E" — маленька, кругла
---// ═══════════════════════════════════════════
-
-local ToggleGui = Instance.new("ScreenGui")
-ToggleGui.Name = "EplismaToggleBtn"
-ToggleGui.ResetOnSpawn = false
-ToggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ToggleGui.DisplayOrder = 99999
-pcall(function() ToggleGui.Parent = CoreGui end)
-if not ToggleGui.Parent then ToggleGui.Parent = LocalPlayer.PlayerGui end
-
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "EBtn"
-ToggleButton.Size = UDim2.fromOffset(34, 34)
-ToggleButton.Position = UDim2.new(0, 10, 0.5, -17)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
-ToggleButton.BackgroundTransparency = 0.15
-ToggleButton.BorderSizePixel = 0
-ToggleButton.Text = "E"
-ToggleButton.TextColor3 = Color3.fromRGB(160, 120, 240)
-ToggleButton.TextSize = 15
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.AutoButtonColor = false
-ToggleButton.ZIndex = 99999
-ToggleButton.Parent = ToggleGui
-
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(1, 0)
-ToggleCorner.Parent = ToggleButton
-
-local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(100, 60, 180)
-ToggleStroke.Thickness = 1.4
-ToggleStroke.Transparency = 0.3
-ToggleStroke.Parent = ToggleButton
-
--- Drag
-do
-    local dragging = false
-    local dragStart = nil
-    local startPos = nil
-    local hasMoved = false
-    local MenuOpen = true
-
-    ToggleButton.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            hasMoved = false
-            dragStart = inp.Position
-            startPos = ToggleButton.Position
-        end
-    end)
-
-    ToggleButton.InputChanged:Connect(function(inp)
-        if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-            local delta = inp.Position - dragStart
-            if delta.Magnitude > 4 then
-                hasMoved = true
-            end
-            ToggleButton.Position = UDim2.new(
-                startPos.X.Scale, startPos.X.Offset + delta.X,
-                startPos.Y.Scale, startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-
-    UserInputService.InputEnded:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-
-    ToggleButton.MouseButton1Click:Connect(function()
-        if hasMoved then
-            hasMoved = false
-            return
-        end
-
-        MenuOpen = not MenuOpen
-        pcall(function()
-            local screens = {CoreGui, LocalPlayer.PlayerGui}
-            for _, parent in ipairs(screens) do
-                for _, gui in ipairs(parent:GetChildren()) do
-                    if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") and gui ~= ToggleGui then
-                        gui.Main.Visible = MenuOpen
-                    end
-                end
-            end
-        end)
-
-        if MenuOpen then
-            TweenService:Create(ToggleStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(140, 100, 240), Transparency = 0}):Play()
-            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 24, 42)}):Play()
-        else
-            TweenService:Create(ToggleStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(100, 60, 180), Transparency = 0.3}):Play()
-            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(20, 20, 26)}):Play()
-        end
-    end)
-end
-
--- Клавіша E на ПК
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.KeyCode == Enum.KeyCode.E then
-        ToggleButton.MouseButton1Click:Fire()
-    end
-end)
-
---// ═══════════════════════════════════════════
---//  LIBRARY SETUP — без блюру
+--//  LIBRARY SETUP
 --// ═══════════════════════════════════════════
 
 local Library = loadstring(game:HttpGet(
@@ -177,6 +56,17 @@ local Window = Library:CreateWindow({
     Blurring = false,
     MinimizeKeybind = Enum.KeyCode.RightControl,
 })
+
+--// Прибираємо блюр що міг створитись
+task.delay(0.5, function()
+    pcall(function()
+        for _, obj in ipairs(Lighting:GetChildren()) do
+            if obj:IsA("BlurEffect") and (obj.Name == "Blur" or obj.Name == "blur") then
+                obj:Destroy()
+            end
+        end
+    end)
+end)
 
 local Themes = {
     Dark = {
@@ -239,18 +129,167 @@ local Themes = {
         Outline = Color3.fromRGB(72, 32, 32),
         Icon = Color3.fromRGB(240, 150, 150),
     },
+    Emerald = {
+        Primary = Color3.fromRGB(10, 20, 14),
+        Secondary = Color3.fromRGB(14, 28, 18),
+        Component = Color3.fromRGB(20, 38, 26),
+        Interactables = Color3.fromRGB(28, 52, 36),
+        Tab = Color3.fromRGB(140, 210, 160),
+        Title = Color3.fromRGB(200, 255, 210),
+        Description = Color3.fromRGB(130, 190, 145),
+        Shadow = Color3.fromRGB(2, 10, 4),
+        Outline = Color3.fromRGB(32, 62, 40),
+        Icon = Color3.fromRGB(140, 230, 160),
+    },
+    Ocean = {
+        Primary = Color3.fromRGB(8, 18, 24),
+        Secondary = Color3.fromRGB(12, 24, 34),
+        Component = Color3.fromRGB(18, 34, 48),
+        Interactables = Color3.fromRGB(24, 48, 65),
+        Tab = Color3.fromRGB(120, 190, 220),
+        Title = Color3.fromRGB(180, 230, 255),
+        Description = Color3.fromRGB(110, 170, 200),
+        Shadow = Color3.fromRGB(2, 8, 14),
+        Outline = Color3.fromRGB(28, 55, 75),
+        Icon = Color3.fromRGB(130, 200, 240),
+    },
 }
 
 Window:SetTheme(Themes.Dark)
 
--- Прибираємо блюр після створення вікна
-pcall(function()
-    for _, obj in ipairs(Lighting:GetChildren()) do
-        if obj:IsA("BlurEffect") and obj.Name == "Blur" then
-            obj:Destroy()
+--// ═══════════════════════════════════════════
+--//  КНОПКА E — toggle чіту
+--// ═══════════════════════════════════════════
+
+local _mainGui = nil
+
+-- Знаходимо головний GUI чіту
+task.delay(1, function()
+    pcall(function()
+        local screens = {CoreGui, LocalPlayer.PlayerGui}
+        for _, parent in ipairs(screens) do
+            for _, gui in ipairs(parent:GetChildren()) do
+                if gui:IsA("ScreenGui") and gui:FindFirstChild("Main") then
+                    _mainGui = gui
+                    break
+                end
+            end
+            if _mainGui then break end
+        end
+    end)
+end)
+
+local ToggleGui = Instance.new("ScreenGui")
+ToggleGui.Name = "EplismaToggleBtn"
+ToggleGui.ResetOnSpawn = false
+ToggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ToggleGui.DisplayOrder = 999999
+pcall(function() ToggleGui.Parent = CoreGui end)
+if not ToggleGui.Parent then ToggleGui.Parent = LocalPlayer.PlayerGui end
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "EBtn"
+ToggleButton.Size = UDim2.fromOffset(36, 36)
+ToggleButton.Position = UDim2.new(0, 10, 0.4, 0)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+ToggleButton.BackgroundTransparency = 0.1
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Text = "E"
+ToggleButton.TextColor3 = Color3.fromRGB(160, 120, 240)
+ToggleButton.TextSize = 16
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.AutoButtonColor = false
+ToggleButton.ZIndex = 999999
+ToggleButton.Parent = ToggleGui
+
+Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(1, 0)
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(100, 60, 180)
+ToggleStroke.Thickness = 1.4
+ToggleStroke.Transparency = 0.3
+ToggleStroke.Parent = ToggleButton
+
+do
+    local dragging, dragStart, startPos, hasMoved = false, nil, nil, false
+    local MenuOpen = true
+
+    ToggleButton.InputBegan:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            hasMoved = false
+            dragStart = inp.Position
+            startPos = ToggleButton.Position
+        end
+    end)
+
+    ToggleButton.InputChanged:Connect(function(inp)
+        if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+            local delta = inp.Position - dragStart
+            if delta.Magnitude > 4 then hasMoved = true end
+            ToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    local function DoToggle()
+        if hasMoved then hasMoved = false return end
+        MenuOpen = not MenuOpen
+
+        -- Метод 1: через збережений GUI
+        if _mainGui and _mainGui:FindFirstChild("Main") then
+            _mainGui.Main.Visible = MenuOpen
+        end
+
+        -- Метод 2: пошук по всіх GUI
+        pcall(function()
+            local screens = {CoreGui, LocalPlayer.PlayerGui}
+            for _, parent in ipairs(screens) do
+                for _, gui in ipairs(parent:GetChildren()) do
+                    if gui:IsA("ScreenGui") and gui ~= ToggleGui and gui:FindFirstChild("Main") then
+                        gui.Main.Visible = MenuOpen
+                        if not _mainGui then _mainGui = gui end
+                    end
+                end
+            end
+        end)
+
+        -- Метод 3: через Library якщо є
+        pcall(function()
+            if Library and Library.Main then
+                Library.Main.Visible = MenuOpen
+            end
+        end)
+
+        -- Метод 4: MinimizeKeybind simulation
+        pcall(function()
+            Window:SetSetting("Visible", MenuOpen)
+        end)
+
+        if MenuOpen then
+            TweenService:Create(ToggleStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(140, 100, 240), Transparency = 0}):Play()
+            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 24, 42)}):Play()
+        else
+            TweenService:Create(ToggleStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(100, 60, 180), Transparency = 0.3}):Play()
+            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(20, 20, 26)}):Play()
         end
     end
-end)
+
+    ToggleButton.MouseButton1Click:Connect(DoToggle)
+
+    -- Клавіша E на ПК
+    UserInputService.InputBegan:Connect(function(input, gp)
+        if gp then return end
+        if input.KeyCode == Enum.KeyCode.E then
+            DoToggle()
+        end
+    end)
+end
 
 --// ═══════════════════════════════════════════
 --//  TAB SECTIONS
@@ -268,12 +307,15 @@ local CFG = {
     Speed = 16, JumpPower = 50, Gravity = 196.2,
     InfJump = false, Noclip = false,
     Fly = false, FlySpeed = 60,
-    GodMode = false,
+    GodMode = false, FreezeCam = false,
+    FOV = 70, ThirdPerson = false, ThirdDist = 10,
 
     Aimbot = false, AimFOV = 250, AimSmooth = 5,
     AimBone = "Head", ShowFOV = false,
     HitboxExp = false, HitboxSize = 5,
     KillAura = false, AuraRange = 15,
+    SilentAim = false,
+    AutoShoot = false,
 
     ESP = false, BoxESP = false, NameESP = false,
     HealthESP = false, DistESP = false,
@@ -281,10 +323,17 @@ local CFG = {
 
     Fullbright = false, NoFog = false,
     AntiAFK = false, CustomTime = false, TimeVal = 14,
-    ClickTP = false, Spin = false,
+    ClickTP = false, Spin = false, SpinSpeed = 10,
     ChatSpam = false, SpamMsg = "", SpamDelay = 2,
     SavedCF = nil, TpTarget = "",
     CurrentTheme = "Dark",
+
+    -- Нові
+    AntiKick = false, HideName = false,
+    FakeHealth = false, NoReset = false,
+    AutoJump = false, LongJump = false,
+    BunnyHop = false, SpeedGlitch = false,
+    NoClipFly = false, Platform = false,
 }
 
 --// ═══════════════════════════════════════════
@@ -301,7 +350,7 @@ Window:AddSection({ Name = "Movement", Tab = TabChar })
 
 Window:AddSlider({
     Title = "WalkSpeed",
-    Description = "Movement speed modifier",
+    Description = "Movement speed",
     Tab = TabChar,
     MaxValue = 500,
     AllowDecimals = false,
@@ -313,7 +362,7 @@ Window:AddSlider({
 
 Window:AddSlider({
     Title = "JumpPower",
-    Description = "Jump height modifier",
+    Description = "Jump height",
     Tab = TabChar,
     MaxValue = 500,
     AllowDecimals = false,
@@ -328,7 +377,7 @@ Window:AddSlider({
 
 Window:AddSlider({
     Title = "Gravity",
-    Description = "World gravity (default: 196.2)",
+    Description = "World gravity (196.2 default)",
     Tab = TabChar,
     MaxValue = 500,
     AllowDecimals = true,
@@ -341,15 +390,34 @@ Window:AddSlider({
 
 Window:AddToggle({
     Title = "Infinite Jump",
-    Description = "Multi-jump while airborne",
+    Description = "Jump mid-air",
     Default = false,
     Tab = TabChar,
     Callback = function(v) CFG.InfJump = v end,
 })
 
 Window:AddToggle({
+    Title = "Auto Jump",
+    Description = "Automatically jump when walking",
+    Default = false,
+    Tab = TabChar,
+    Callback = function(v)
+        CFG.AutoJump = v
+        pcall(function() Humanoid.AutoJumpEnabled = v end)
+    end,
+})
+
+Window:AddToggle({
+    Title = "Bunny Hop",
+    Description = "Jump instantly on landing",
+    Default = false,
+    Tab = TabChar,
+    Callback = function(v) CFG.BunnyHop = v end,
+})
+
+Window:AddToggle({
     Title = "Noclip",
-    Description = "Phase through solid objects",
+    Description = "Walk through walls",
     Default = false,
     Tab = TabChar,
     Callback = function(v) CFG.Noclip = v end,
@@ -382,19 +450,46 @@ Window:AddSlider({
     Callback = function(v) CFG.FlySpeed = v end,
 })
 
+Window:AddSection({ Name = "Camera", Tab = TabChar })
+
+Window:AddSlider({
+    Title = "Field of View",
+    Description = "Camera FOV (70 default)",
+    Tab = TabChar,
+    MaxValue = 120,
+    AllowDecimals = false,
+    Callback = function(v)
+        CFG.FOV = v
+        Camera.FieldOfView = v
+    end,
+})
+
 Window:AddSection({ Name = "Survivability", Tab = TabChar })
 
 Window:AddToggle({
     Title = "God Mode",
-    Description = "Constant max health (client)",
+    Description = "Max health always (client)",
     Default = false,
     Tab = TabChar,
     Callback = function(v) CFG.GodMode = v end,
 })
 
+Window:AddToggle({
+    Title = "No Reset",
+    Description = "Disable reset character button",
+    Default = false,
+    Tab = TabChar,
+    Callback = function(v)
+        CFG.NoReset = v
+        pcall(function()
+            StarterGui:SetCore("ResetButtonCallback", not v)
+        end)
+    end,
+})
+
 Window:AddButton({
     Title = "Force Reset",
-    Description = "Kill your character instantly",
+    Description = "Kill character instantly",
     Tab = TabChar,
     Callback = function()
         pcall(function() Humanoid.Health = 0 end)
@@ -403,10 +498,22 @@ Window:AddButton({
 
 Window:AddButton({
     Title = "Respawn",
-    Description = "Force character respawn",
+    Description = "Force respawn",
     Tab = TabChar,
     Callback = function()
         pcall(function() LocalPlayer:LoadCharacter() end)
+    end,
+})
+
+Window:AddButton({
+    Title = "Freeze Character",
+    Description = "Stop all movement",
+    Tab = TabChar,
+    Callback = function()
+        pcall(function()
+            HRP.Anchored = not HRP.Anchored
+            Window:Notify({ Title = "Freeze", Description = HRP.Anchored and "Frozen" or "Unfrozen", Duration = 2 })
+        end)
     end,
 })
 
@@ -424,7 +531,7 @@ Window:AddSection({ Name = "Aim Assist", Tab = TabCombat })
 
 Window:AddToggle({
     Title = "Aimbot",
-    Description = "Lock-on aim assist (hold RMB)",
+    Description = "Lock-on aim (hold RMB)",
     Default = false,
     Tab = TabCombat,
     Callback = function(v) CFG.Aimbot = v end,
@@ -432,7 +539,7 @@ Window:AddToggle({
 
 Window:AddSlider({
     Title = "FOV Radius",
-    Description = "Detection circle radius",
+    Description = "Detection radius",
     Tab = TabCombat,
     MaxValue = 900,
     AllowDecimals = false,
@@ -441,7 +548,7 @@ Window:AddSlider({
 
 Window:AddSlider({
     Title = "Smoothing",
-    Description = "Aim interpolation (1 = instant)",
+    Description = "Aim speed (1 = instant)",
     Tab = TabCombat,
     MaxValue = 50,
     AllowDecimals = true,
@@ -451,29 +558,17 @@ Window:AddSlider({
 
 Window:AddToggle({
     Title = "Show FOV Circle",
-    Description = "Render the FOV boundary",
+    Description = "Render FOV boundary",
     Default = false,
     Tab = TabCombat,
     Callback = function(v) CFG.ShowFOV = v end,
 })
 
-Window:AddDropdown({
-    Title = "Target Part",
-    Description = "Body part to track",
-    Tab = TabCombat,
-    Options = {
-        ["Head"] = "Head",
-        ["Torso"] = "UpperTorso",
-        ["Root"] = "HumanoidRootPart",
-    },
-    Callback = function(v) CFG.AimBone = v end,
-})
-
-Window:AddSection({ Name = "Melee Assist", Tab = TabCombat })
+Window:AddSection({ Name = "Melee", Tab = TabCombat })
 
 Window:AddToggle({
     Title = "Hitbox Expander",
-    Description = "Enlarge enemy collision boxes",
+    Description = "Enlarge enemy hitboxes",
     Default = false,
     Tab = TabCombat,
     Callback = function(v)
@@ -492,7 +587,7 @@ Window:AddToggle({
 
 Window:AddSlider({
     Title = "Hitbox Scale",
-    Description = "Size multiplier for hitboxes",
+    Description = "Hitbox size",
     Tab = TabCombat,
     MaxValue = 30,
     AllowDecimals = false,
@@ -509,11 +604,33 @@ Window:AddToggle({
 
 Window:AddSlider({
     Title = "Aura Range",
-    Description = "Kill aura detection distance",
+    Description = "Detection distance",
     Tab = TabCombat,
     MaxValue = 60,
     AllowDecimals = false,
     Callback = function(v) CFG.AuraRange = v end,
+})
+
+Window:AddSection({ Name = "Info", Tab = TabCombat })
+
+Window:AddButton({
+    Title = "Show Nearest Player",
+    Description = "Display closest player info",
+    Tab = TabCombat,
+    Callback = function()
+        local closest, dist = nil, math.huge
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local d = (HRP.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                if d < dist then dist = d; closest = p end
+            end
+        end
+        if closest then
+            Window:Notify({ Title = "Nearest Player", Description = closest.DisplayName .. " — " .. math.floor(dist) .. " studs", Duration = 4 })
+        else
+            Window:Notify({ Title = "Error", Description = "No players nearby", Duration = 3 })
+        end
+    end,
 })
 
 --// ═══════════════════════════════════════════
@@ -530,14 +647,14 @@ Window:AddSection({ Name = "Player Transport", Tab = TabTP })
 
 Window:AddInput({
     Title = "Target Name",
-    Description = "Enter partial or full player name",
+    Description = "Partial or full player name",
     Tab = TabTP,
     Callback = function(t) CFG.TpTarget = t end,
 })
 
 Window:AddButton({
     Title = "Teleport to Target",
-    Description = "Move to the specified player",
+    Description = "Move to player",
     Tab = TabTP,
     Callback = function()
         local query = CFG.TpTarget:lower()
@@ -556,7 +673,7 @@ Window:AddButton({
 
 Window:AddButton({
     Title = "Random Player",
-    Description = "Teleport to a random online player",
+    Description = "Teleport to random player",
     Tab = TabTP,
     Callback = function()
         local pool = {}
@@ -566,7 +683,7 @@ Window:AddButton({
             end
         end
         if #pool == 0 then
-            Window:Notify({ Title = "Error", Description = "No players available", Duration = 3 })
+            Window:Notify({ Title = "Error", Description = "No players", Duration = 3 })
             return
         end
         local t = pool[math.random(#pool)]
@@ -575,11 +692,40 @@ Window:AddButton({
     end,
 })
 
+Window:AddButton({
+    Title = "Teleport to Spawn",
+    Description = "Return to spawn point",
+    Tab = TabTP,
+    Callback = function()
+        pcall(function()
+            local spawn = Workspace:FindFirstChild("SpawnLocation") or Workspace:FindFirstChildOfClass("SpawnLocation")
+            if spawn then
+                HRP.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+                Window:Notify({ Title = "Teleport", Description = "Moved to spawn", Duration = 2 })
+            else
+                HRP.CFrame = CFrame.new(0, 50, 0)
+                Window:Notify({ Title = "Teleport", Description = "Moved to origin", Duration = 2 })
+            end
+        end)
+    end,
+})
+
+Window:AddButton({
+    Title = "Teleport Forward 100",
+    Description = "Jump 100 studs forward",
+    Tab = TabTP,
+    Callback = function()
+        pcall(function()
+            HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * 100
+        end)
+    end,
+})
+
 Window:AddSection({ Name = "Waypoints", Tab = TabTP })
 
 Window:AddButton({
     Title = "Save Position",
-    Description = "Store current coordinates",
+    Description = "Store coordinates",
     Tab = TabTP,
     Callback = function()
         CFG.SavedCF = HRP.CFrame
@@ -589,7 +735,7 @@ Window:AddButton({
 
 Window:AddButton({
     Title = "Load Position",
-    Description = "Return to stored coordinates",
+    Description = "Return to saved spot",
     Tab = TabTP,
     Callback = function()
         if CFG.SavedCF then
@@ -603,7 +749,7 @@ Window:AddButton({
 
 Window:AddToggle({
     Title = "Click Teleport",
-    Description = "Click any surface to teleport there",
+    Description = "Click surface to teleport",
     Default = false,
     Tab = TabTP,
     Callback = function(v) CFG.ClickTP = v end,
@@ -623,7 +769,7 @@ Window:AddSection({ Name = "Rendering", Tab = TabESP })
 
 Window:AddToggle({
     Title = "Enable ESP",
-    Description = "Master switch for all ESP features",
+    Description = "Master ESP switch",
     Default = false,
     Tab = TabESP,
     Callback = function(v) CFG.ESP = v end,
@@ -631,7 +777,7 @@ Window:AddToggle({
 
 Window:AddToggle({
     Title = "Bounding Box",
-    Description = "Draw rectangles around players",
+    Description = "Rectangles around players",
     Default = false,
     Tab = TabESP,
     Callback = function(v) CFG.BoxESP = v end,
@@ -639,7 +785,7 @@ Window:AddToggle({
 
 Window:AddToggle({
     Title = "Name Tags",
-    Description = "Display player names overhead",
+    Description = "Show player names",
     Default = false,
     Tab = TabESP,
     Callback = function(v) CFG.NameESP = v end,
@@ -647,7 +793,7 @@ Window:AddToggle({
 
 Window:AddToggle({
     Title = "Health Bars",
-    Description = "Show health indicator beside players",
+    Description = "Health indicators",
     Default = false,
     Tab = TabESP,
     Callback = function(v) CFG.HealthESP = v end,
@@ -655,7 +801,7 @@ Window:AddToggle({
 
 Window:AddToggle({
     Title = "Distance Tags",
-    Description = "Show distance in studs",
+    Description = "Distance in studs",
     Default = false,
     Tab = TabESP,
     Callback = function(v) CFG.DistESP = v end,
@@ -663,7 +809,7 @@ Window:AddToggle({
 
 Window:AddToggle({
     Title = "Tracers",
-    Description = "Lines from screen edge to targets",
+    Description = "Lines to targets",
     Default = false,
     Tab = TabESP,
     Callback = function(v) CFG.TracerESP = v end,
@@ -671,7 +817,7 @@ Window:AddToggle({
 
 Window:AddToggle({
     Title = "Chams",
-    Description = "Highlight players through geometry",
+    Description = "Highlight through walls",
     Default = false,
     Tab = TabESP,
     Callback = function(v)
@@ -699,7 +845,7 @@ Window:AddSection({ Name = "Filters", Tab = TabESP })
 
 Window:AddToggle({
     Title = "Team Filter",
-    Description = "Exclude teammates from ESP and aimbot",
+    Description = "Exclude teammates",
     Default = false,
     Tab = TabESP,
     Callback = function(v) CFG.TeamCheck = v end,
@@ -715,11 +861,11 @@ local TabEnv = Window:AddTab({
     Icon = "rbxassetid://11963373994",
 })
 
-Window:AddSection({ Name = "Lighting Control", Tab = TabEnv })
+Window:AddSection({ Name = "Lighting", Tab = TabEnv })
 
 Window:AddToggle({
     Title = "Fullbright",
-    Description = "Remove all shadows and darkness",
+    Description = "Remove shadows/darkness",
     Default = false,
     Tab = TabEnv,
     Callback = function(v)
@@ -740,7 +886,7 @@ Window:AddToggle({
 
 Window:AddToggle({
     Title = "No Fog",
-    Description = "Disable fog rendering",
+    Description = "Disable fog",
     Default = false,
     Tab = TabEnv,
     Callback = function(v)
@@ -752,7 +898,7 @@ Window:AddToggle({
 
 Window:AddToggle({
     Title = "Time Lock",
-    Description = "Lock the in-game clock",
+    Description = "Lock time of day",
     Default = false,
     Tab = TabEnv,
     Callback = function(v) CFG.CustomTime = v end,
@@ -760,7 +906,7 @@ Window:AddToggle({
 
 Window:AddSlider({
     Title = "Clock Time",
-    Description = "Set hour of day (0-24)",
+    Description = "Hour (0-24)",
     Tab = TabEnv,
     MaxValue = 24,
     AllowDecimals = true,
@@ -771,11 +917,11 @@ Window:AddSlider({
     end,
 })
 
-Window:AddSection({ Name = "Optimization", Tab = TabEnv })
+Window:AddSection({ Name = "Cleanup", Tab = TabEnv })
 
 Window:AddButton({
-    Title = "Strip Post-Effects",
-    Description = "Remove bloom, blur, DOF, sun rays",
+    Title = "Remove All Effects",
+    Description = "Bloom, blur, DOF, sun rays, atmosphere",
     Tab = TabEnv,
     Callback = function()
         local n = 0
@@ -790,8 +936,8 @@ Window:AddButton({
 })
 
 Window:AddButton({
-    Title = "Strip Particles",
-    Description = "Remove fire, smoke, sparkles, particles",
+    Title = "Remove Particles",
+    Description = "Fire, smoke, sparkles",
     Tab = TabEnv,
     Callback = function()
         local n = 0
@@ -801,6 +947,36 @@ Window:AddButton({
             end
         end
         Window:Notify({ Title = "Cleanup", Description = n .. " particles removed", Duration = 2 })
+    end,
+})
+
+Window:AddButton({
+    Title = "Remove Decals & Textures",
+    Description = "Strip all decals and textures",
+    Tab = TabEnv,
+    Callback = function()
+        local n = 0
+        for _, o in ipairs(Workspace:GetDescendants()) do
+            if o:IsA("Decal") or o:IsA("Texture") then
+                o:Destroy(); n += 1
+            end
+        end
+        Window:Notify({ Title = "Cleanup", Description = n .. " removed", Duration = 2 })
+    end,
+})
+
+Window:AddButton({
+    Title = "Remove Sounds",
+    Description = "Kill all workspace sounds",
+    Tab = TabEnv,
+    Callback = function()
+        local n = 0
+        for _, o in ipairs(Workspace:GetDescendants()) do
+            if o:IsA("Sound") then
+                o:Stop(); o:Destroy(); n += 1
+            end
+        end
+        Window:Notify({ Title = "Cleanup", Description = n .. " sounds removed", Duration = 2 })
     end,
 })
 
@@ -818,10 +994,24 @@ Window:AddSection({ Name = "Protection", Tab = TabUtil })
 
 Window:AddToggle({
     Title = "Anti-AFK",
-    Description = "Prevent idle disconnection",
+    Description = "Prevent idle disconnect",
     Default = false,
     Tab = TabUtil,
     Callback = function(v) CFG.AntiAFK = v end,
+})
+
+Window:AddToggle({
+    Title = "Anti-Kick",
+    Description = "Block kick attempts (not guaranteed)",
+    Default = false,
+    Tab = TabUtil,
+    Callback = function(v)
+        CFG.AntiKick = v
+        if v then
+            local old = LocalPlayer.Kick
+            LocalPlayer.Kick = function() end
+        end
+    end,
 })
 
 Window:AddSection({ Name = "Actions", Tab = TabUtil })
@@ -834,9 +1024,18 @@ Window:AddToggle({
     Callback = function(v) CFG.Spin = v end,
 })
 
+Window:AddSlider({
+    Title = "Spin Speed",
+    Description = "Rotation speed",
+    Tab = TabUtil,
+    MaxValue = 50,
+    AllowDecimals = false,
+    Callback = function(v) CFG.SpinSpeed = v end,
+})
+
 Window:AddButton({
     Title = "Spawn Platform",
-    Description = "Create a neon platform below you",
+    Description = "Neon platform below you",
     Tab = TabUtil,
     Callback = function()
         local p = Instance.new("Part")
@@ -847,31 +1046,62 @@ Window:AddButton({
         p.Material = Enum.Material.Neon
         p.Transparency = 0.3
         p.Parent = Workspace
-        Window:Notify({ Title = "Platform", Description = "Platform created", Duration = 2 })
     end,
 })
 
 Window:AddButton({
     Title = "Force Sit",
-    Description = "Make character sit immediately",
+    Description = "Sit immediately",
     Tab = TabUtil,
     Callback = function()
         pcall(function() Humanoid.Sit = true end)
     end,
 })
 
-Window:AddSection({ Name = "Chat Automation", Tab = TabUtil })
+Window:AddButton({
+    Title = "Force Jump",
+    Description = "Jump right now",
+    Tab = TabUtil,
+    Callback = function()
+        pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
+    end,
+})
+
+Window:AddButton({
+    Title = "Copy Position",
+    Description = "Copy coordinates to clipboard",
+    Tab = TabUtil,
+    Callback = function()
+        local pos = HRP.Position
+        local txt = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
+        pcall(function() setclipboard(txt) end)
+        Window:Notify({ Title = "Copied", Description = txt, Duration = 3 })
+    end,
+})
+
+Window:AddButton({
+    Title = "Copy Game Link",
+    Description = "Copy Roblox place link",
+    Tab = TabUtil,
+    Callback = function()
+        local link = "https://www.roblox.com/games/" .. game.PlaceId
+        pcall(function() setclipboard(link) end)
+        Window:Notify({ Title = "Copied", Description = link, Duration = 3 })
+    end,
+})
+
+Window:AddSection({ Name = "Chat", Tab = TabUtil })
 
 Window:AddInput({
-    Title = "Message",
-    Description = "Text to send repeatedly",
+    Title = "Spam Message",
+    Description = "Text to repeat",
     Tab = TabUtil,
     Callback = function(t) CFG.SpamMsg = t end,
 })
 
 Window:AddSlider({
-    Title = "Interval",
-    Description = "Delay between messages (seconds)",
+    Title = "Spam Interval",
+    Description = "Delay (seconds)",
     Tab = TabUtil,
     MaxValue = 10,
     AllowDecimals = true,
@@ -881,7 +1111,7 @@ Window:AddSlider({
 
 Window:AddToggle({
     Title = "Chat Spam",
-    Description = "Repeat message in chat",
+    Description = "Repeat in chat",
     Default = false,
     Tab = TabUtil,
     Callback = function(v) CFG.ChatSpam = v end,
@@ -890,7 +1120,7 @@ Window:AddToggle({
 Window:AddSection({ Name = "Server", Tab = TabUtil })
 
 Window:AddButton({
-    Title = "Rejoin Server",
+    Title = "Rejoin",
     Description = "Reconnect to this server",
     Tab = TabUtil,
     Callback = function()
@@ -900,7 +1130,7 @@ Window:AddButton({
 
 Window:AddButton({
     Title = "Server Hop",
-    Description = "Jump to a different server",
+    Description = "Jump to different server",
     Tab = TabUtil,
     Callback = function()
         task.spawn(function()
@@ -910,7 +1140,7 @@ Window:AddButton({
                 ))
             end)
             if not ok then
-                Window:Notify({ Title = "Error", Description = "Failed to fetch servers", Duration = 3 })
+                Window:Notify({ Title = "Error", Description = "Failed to fetch", Duration = 3 })
                 return
             end
             for _, sv in ipairs(data.data) do
@@ -919,121 +1149,198 @@ Window:AddButton({
                     return
                 end
             end
-            Window:Notify({ Title = "Error", Description = "No available servers", Duration = 3 })
+            Window:Notify({ Title = "Error", Description = "No servers", Duration = 3 })
         end)
     end,
 })
 
+Window:AddButton({
+    Title = "Server Info",
+    Description = "Show server details",
+    Tab = TabUtil,
+    Callback = function()
+        local info = string.format(
+            "Players: %d/%d\nPlace: %d\nJobId: %s\nPing: ~%dms",
+            #Players:GetPlayers(),
+            Players.MaxPlayers,
+            game.PlaceId,
+            game.JobId:sub(1, 12) .. "...",
+            math.floor(LocalPlayer:GetNetworkPing() * 1000)
+        )
+        Window:Notify({ Title = "Server Info", Description = info, Duration = 6 })
+    end,
+})
+
 --// ═══════════════════════════════════════════
---//  TAB: CONFIG — кнопки замість дропдауну
+--//  TAB: SETTINGS
 --// ═══════════════════════════════════════════
 
 local TabConfig = Window:AddTab({
-    Title = "Configuration",
+    Title = "Settings",
     Section = "Settings",
     Icon = "rbxassetid://11293977610",
 })
 
-Window:AddSection({ Name = "Theme Selection", Tab = TabConfig })
+Window:AddSection({ Name = "Theme", Tab = TabConfig })
+
+local themeNames = {"Dark", "Void", "Amethyst", "Midnight", "Crimson", "Emerald", "Ocean"}
+local currentThemeIndex = 1
 
 Window:AddButton({
-    Title = "Theme: Dark",
-    Description = "Standard dark theme",
+    Title = "◀ Previous Theme",
+    Description = "Switch to previous theme",
     Tab = TabConfig,
     Callback = function()
-        CFG.CurrentTheme = "Dark"
-        Window:SetTheme(Themes.Dark)
-        Window:Notify({ Title = "Theme", Description = "Switched to Dark", Duration = 2 })
+        currentThemeIndex = currentThemeIndex - 1
+        if currentThemeIndex < 1 then currentThemeIndex = #themeNames end
+        local name = themeNames[currentThemeIndex]
+        CFG.CurrentTheme = name
+        Window:SetTheme(Themes[name])
+        Window:Notify({ Title = "Theme", Description = name, Duration = 2 })
     end,
 })
 
 Window:AddButton({
-    Title = "Theme: Void",
-    Description = "Ultra-dark minimal theme",
+    Title = "▶ Next Theme",
+    Description = "Switch to next theme",
     Tab = TabConfig,
     Callback = function()
-        CFG.CurrentTheme = "Void"
-        Window:SetTheme(Themes.Void)
-        Window:Notify({ Title = "Theme", Description = "Switched to Void", Duration = 2 })
+        currentThemeIndex = currentThemeIndex + 1
+        if currentThemeIndex > #themeNames then currentThemeIndex = 1 end
+        local name = themeNames[currentThemeIndex]
+        CFG.CurrentTheme = name
+        Window:SetTheme(Themes[name])
+        Window:Notify({ Title = "Theme", Description = name, Duration = 2 })
     end,
 })
 
 Window:AddButton({
-    Title = "Theme: Amethyst",
-    Description = "Purple crystal tones",
+    Title = "Show Current Theme",
+    Description = "Display active theme name",
     Tab = TabConfig,
     Callback = function()
-        CFG.CurrentTheme = "Amethyst"
-        Window:SetTheme(Themes.Amethyst)
-        Window:Notify({ Title = "Theme", Description = "Switched to Amethyst", Duration = 2 })
+        Window:Notify({ Title = "Current Theme", Description = CFG.CurrentTheme, Duration = 3 })
+    end,
+})
+
+Window:AddSection({ Name = "Graphics", Tab = TabConfig })
+
+Window:AddButton({
+    Title = "Remove Blur Effects",
+    Description = "Delete all blur from Lighting",
+    Tab = TabConfig,
+    Callback = function()
+        local n = 0
+        for _, obj in ipairs(Lighting:GetChildren()) do
+            if obj:IsA("BlurEffect") then
+                obj:Destroy(); n += 1
+            end
+        end
+        Window:Notify({ Title = "Blur", Description = n .. " blur effects removed", Duration = 2 })
     end,
 })
 
 Window:AddButton({
-    Title = "Theme: Midnight",
-    Description = "Deep blue night theme",
+    Title = "Remove ALL Post Effects",
+    Description = "Strip every post-processing effect",
     Tab = TabConfig,
     Callback = function()
-        CFG.CurrentTheme = "Midnight"
-        Window:SetTheme(Themes.Midnight)
-        Window:Notify({ Title = "Theme", Description = "Switched to Midnight", Duration = 2 })
+        local n = 0
+        for _, e in ipairs(Lighting:GetChildren()) do
+            if e:IsA("PostEffect") or e:IsA("Atmosphere") then
+                e:Destroy(); n += 1
+            end
+        end
+        Window:Notify({ Title = "Cleanup", Description = n .. " effects removed", Duration = 2 })
     end,
 })
 
 Window:AddButton({
-    Title = "Theme: Crimson",
-    Description = "Dark red tones",
+    Title = "Low Graphics Mode",
+    Description = "Reduce quality for FPS boost",
     Tab = TabConfig,
     Callback = function()
-        CFG.CurrentTheme = "Crimson"
-        Window:SetTheme(Themes.Crimson)
-        Window:Notify({ Title = "Theme", Description = "Switched to Crimson", Duration = 2 })
+        pcall(function()
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        end)
+        pcall(function()
+            Lighting.GlobalShadows = false
+            Lighting.Brightness = 1
+        end)
+        for _, e in ipairs(Lighting:GetChildren()) do
+            if e:IsA("PostEffect") or e:IsA("Atmosphere") then
+                e.Enabled = false
+            end
+        end
+        for _, o in ipairs(Workspace:GetDescendants()) do
+            if o:IsA("ParticleEmitter") or o:IsA("Trail") then
+                o.Enabled = false
+            end
+        end
+        Window:Notify({ Title = "Graphics", Description = "Low mode enabled", Duration = 2 })
     end,
 })
 
 Window:AddSection({ Name = "Window", Tab = TabConfig })
 
 Window:AddButton({
-    Title = "Size: Compact (480x300)",
-    Description = "Small window",
+    Title = "Size: Compact",
+    Description = "480 × 300",
     Tab = TabConfig,
     Callback = function()
-        Window:SetSetting("Size", UDim2.fromOffset(480, 300))
-        Window:Notify({ Title = "Resize", Description = "Compact", Duration = 2 })
+        pcall(function() Window:SetSetting("Size", UDim2.fromOffset(480, 300)) end)
     end,
 })
 
 Window:AddButton({
-    Title = "Size: Default (560x360)",
-    Description = "Standard window",
+    Title = "Size: Default",
+    Description = "560 × 360",
     Tab = TabConfig,
     Callback = function()
-        Window:SetSetting("Size", UDim2.fromOffset(560, 360))
-        Window:Notify({ Title = "Resize", Description = "Default", Duration = 2 })
+        pcall(function() Window:SetSetting("Size", UDim2.fromOffset(560, 360)) end)
     end,
 })
 
 Window:AddButton({
-    Title = "Size: Large (650x420)",
-    Description = "Bigger window",
+    Title = "Size: Large",
+    Description = "650 × 420",
     Tab = TabConfig,
     Callback = function()
-        Window:SetSetting("Size", UDim2.fromOffset(650, 420))
-        Window:Notify({ Title = "Resize", Description = "Large", Duration = 2 })
+        pcall(function() Window:SetSetting("Size", UDim2.fromOffset(650, 420)) end)
+    end,
+})
+
+Window:AddSection({ Name = "Player Info", Tab = TabConfig })
+
+Window:AddParagraph({
+    Title = "Player",
+    Description = "Name: " .. LocalPlayer.Name .. "\nDisplay: " .. LocalPlayer.DisplayName .. "\nID: " .. LocalPlayer.UserId,
+    Tab = TabConfig,
+})
+
+Window:AddButton({
+    Title = "Copy Player ID",
+    Description = "Copy your UserId",
+    Tab = TabConfig,
+    Callback = function()
+        pcall(function() setclipboard(tostring(LocalPlayer.UserId)) end)
+        Window:Notify({ Title = "Copied", Description = tostring(LocalPlayer.UserId), Duration = 2 })
     end,
 })
 
 Window:AddSection({ Name = "About", Tab = TabConfig })
 
 Window:AddParagraph({
-    Title = "Eplisma v1.0",
-    Description = "Developer: Frost\nTelegram: @Jokerfros\n\nTap [E] button or press E to toggle.",
+    Title = "Eplisma v2.0",
+    Description = "Developer: Frost\nTelegram: @Jokerfros\n\nPress E or tap button to toggle.\n7 themes • No blur • Clean 1080p",
     Tab = TabConfig,
 })
 
+Window:AddSection({ Name = "Danger Zone", Tab = TabConfig })
+
 Window:AddButton({
     Title = "Destroy Eplisma",
-    Description = "Completely remove the cheat",
+    Description = "Remove cheat completely",
     Tab = TabConfig,
     Callback = function()
         pcall(function() _G._CleanESP() end)
@@ -1042,13 +1349,13 @@ Window:AddButton({
             if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
             if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
         end)
-        CFG.Fly = false
-        CFG.Noclip = false
-        CFG.ESP = false
-        CFG.Aimbot = false
+        CFG.Fly = false; CFG.Noclip = false; CFG.ESP = false; CFG.Aimbot = false
         pcall(function() ToggleGui:Destroy() end)
         pcall(function()
             for _, g in ipairs(CoreGui:GetChildren()) do
+                if g:FindFirstChild("Main") then g:Destroy() end
+            end
+            for _, g in ipairs(LocalPlayer.PlayerGui:GetChildren()) do
                 if g:FindFirstChild("Main") then g:Destroy() end
             end
         end)
@@ -1152,6 +1459,7 @@ RunService.RenderStepped:Connect(function()
     FOV.Radius = CFG.AimFOV
     FOV.Position = mp
 
+    -- Aimbot
     if CFG.Aimbot and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
         local t = FindTarget()
         if t and t.Character then
@@ -1163,6 +1471,7 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
+    -- ESP
     local vp = Camera.ViewportSize
     for plr, esp in pairs(ESPCache) do
         local c = plr.Character
@@ -1211,6 +1520,7 @@ RunService.RenderStepped:Connect(function()
         esp.Tracer.To = Vector2.new(cx, fp.Y)
     end
 
+    -- Fly
     if CFG.Fly and HRP then
         local bv = HRP:FindFirstChild("_BV")
         local bg = HRP:FindFirstChild("_BG")
@@ -1236,12 +1546,24 @@ RunService.RenderStepped:Connect(function()
         pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Flying) end)
     end
 
+    -- Spin
     if CFG.Spin and HRP then
-        HRP.CFrame *= CFrame.Angles(0, math.rad(10), 0)
+        HRP.CFrame *= CFrame.Angles(0, math.rad(CFG.SpinSpeed), 0)
     end
 
+    -- Time Lock
     if CFG.CustomTime then
         Lighting.ClockTime = CFG.TimeVal
+    end
+
+    -- WalkSpeed lock
+    if CFG.Speed ~= 16 and Humanoid then
+        pcall(function() Humanoid.WalkSpeed = CFG.Speed end)
+    end
+
+    -- JumpPower lock
+    if CFG.JumpPower ~= 50 and Humanoid then
+        pcall(function() Humanoid.JumpPower = CFG.JumpPower end)
     end
 end)
 
@@ -1257,6 +1579,13 @@ RunService.Heartbeat:Connect(function()
         for _, p in ipairs(Character:GetDescendants()) do
             if p:IsA("BasePart") then p.CanCollide = false end
         end
+    end
+    if CFG.BunnyHop and Humanoid then
+        pcall(function()
+            if Humanoid.FloorMaterial ~= Enum.Material.Air then
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end)
     end
 end)
 
@@ -1328,6 +1657,7 @@ task.spawn(function()
     end
 end)
 
+-- Hitbox + Chams для нових гравців
 Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Connect(function(char)
         if CFG.HitboxExp then
@@ -1353,13 +1683,11 @@ Players.PlayerAdded:Connect(function(plr)
     end)
 end)
 
--- Фінальна чистка блюрів що могли створитись бібліотекою
+-- Фінальна чистка блюрів
 task.delay(2, function()
     pcall(function()
         for _, obj in ipairs(Lighting:GetChildren()) do
-            if obj:IsA("BlurEffect") then
-                obj:Destroy()
-            end
+            if obj:IsA("BlurEffect") then obj:Destroy() end
         end
     end)
 end)
@@ -1369,14 +1697,14 @@ end)
 --// ═══════════════════════════════════════════
 
 Window:Notify({
-    Title = "Eplisma Loaded",
+    Title = "Eplisma v2.0 Loaded",
     Description = "Welcome, " .. LocalPlayer.DisplayName .. "\nTap [E] or press E to toggle\nby Frost | @Jokerfros",
     Duration = 6,
 })
 
 print([[
 ╔══════════════════════════════════════╗
-║         E P L I S M A  v1.0         ║
+║         E P L I S M A  v2.0         ║
 ║     Developer: Frost                ║
 ║     Telegram: @Jokerfros            ║
 ╠══════════════════════════════════════╣
