@@ -312,7 +312,6 @@ local Tabs = {
 do
     local Tab = Tabs.Character
 
-    -- Movement Section
     Tab:AddParagraph({
         Title = "🏃 " .. T("movement"),
         Content = ""
@@ -391,7 +390,6 @@ do
         Callback = function(v) CFG.Noclip = v end
     })
 
-    -- Flight Section
     Tab:AddParagraph({
         Title = "✈️ " .. T("flight"),
         Content = ""
@@ -422,7 +420,6 @@ do
         Callback = function(v) CFG.FlySpeed = v end
     })
 
-    -- Camera Section
     Tab:AddParagraph({
         Title = "📷 " .. T("camera"),
         Content = ""
@@ -441,7 +438,6 @@ do
         end
     })
 
-    -- Survivability Section
     Tab:AddParagraph({
         Title = "🛡️ " .. T("survivability"),
         Content = ""
@@ -503,7 +499,6 @@ end
 do
     local Tab = Tabs.Combat
 
-    -- Aim Assist Section
     Tab:AddParagraph({
         Title = "🎯 " .. T("aimAssist"),
         Content = ""
@@ -543,7 +538,6 @@ do
         Callback = function(v) CFG.ShowFOV = v end
     })
 
-    -- Melee Section
     Tab:AddParagraph({
         Title = "⚔️ " .. T("melee"),
         Content = ""
@@ -594,7 +588,6 @@ do
         Callback = function(v) CFG.AuraRange = v end
     })
 
-    -- Bomb Pass Section
     Tab:AddParagraph({
         Title = "💣 " .. T("bombPass"),
         Content = ""
@@ -617,7 +610,6 @@ do
         Callback = function(v) CFG.BombKeywords = v end
     })
 
-    -- Info Section
     Tab:AddParagraph({
         Title = "ℹ️ " .. T("info"),
         Content = ""
@@ -658,7 +650,6 @@ end
 do
     local Tab = Tabs.Teleport
 
-    -- Player Transport Section
     Tab:AddParagraph({
         Title = "🚀 " .. T("playerTransport"),
         Content = ""
@@ -745,7 +736,6 @@ do
         end
     })
 
-    -- Waypoints Section
     Tab:AddParagraph({
         Title = "📍 " .. T("waypoints"),
         Content = ""
@@ -788,7 +778,6 @@ end
 do
     local Tab = Tabs.ESP
 
-    -- Rendering Section
     Tab:AddParagraph({
         Title = "👁️ " .. T("rendering"),
         Content = ""
@@ -861,7 +850,6 @@ do
         end
     })
 
-    -- Filters Section
     Tab:AddParagraph({
         Title = "🔍 " .. T("filters"),
         Content = ""
@@ -882,7 +870,6 @@ end
 do
     local Tab = Tabs.Environment
 
-    -- Lighting Section
     Tab:AddParagraph({
         Title = "💡 " .. T("lighting"),
         Content = ""
@@ -938,7 +925,6 @@ do
         end
     })
 
-    -- Cleanup Section
     Tab:AddParagraph({
         Title = "🧹 " .. T("cleanup"),
         Content = ""
@@ -1013,7 +999,6 @@ end
 do
     local Tab = Tabs.Utilities
 
-    -- Protection Section
     Tab:AddParagraph({
         Title = "🔒 " .. T("protection"),
         Content = ""
@@ -1033,7 +1018,6 @@ do
         Callback = function(v) CFG.AntiKick = v end
     })
 
-    -- Actions Section
     Tab:AddParagraph({
         Title = "⚡ " .. T("actions"),
         Content = ""
@@ -1108,7 +1092,6 @@ do
         end
     })
 
-    -- Chat Section
     Tab:AddParagraph({
         Title = "💬 " .. T("chat"),
         Content = ""
@@ -1141,7 +1124,6 @@ do
         Callback = function(v) CFG.ChatSpam = v end
     })
 
-    -- Server Section
     Tab:AddParagraph({
         Title = "🌐 " .. T("server"),
         Content = ""
@@ -1200,7 +1182,6 @@ end
 do
     local Tab = Tabs.Settings
 
-    -- Language Section
     Tab:AddParagraph({
         Title = "🌍 " .. T("language"),
         Content = ""
@@ -1232,7 +1213,6 @@ do
         end
     })
 
-    -- Graphics Section
     Tab:AddParagraph({
         Title = "🖥️ " .. T("graphics"),
         Content = ""
@@ -1297,7 +1277,6 @@ do
         end
     })
 
-    -- Player Info Section
     Tab:AddParagraph({
         Title = "👤 " .. T("playerInfo"),
         Content = "Name: " .. LocalPlayer.Name .. "\nDisplay: " .. LocalPlayer.DisplayName .. "\nID: " .. LocalPlayer.UserId
@@ -1312,13 +1291,11 @@ do
         end
     })
 
-    -- About Section
     Tab:AddParagraph({
         Title = "ℹ️ Eplisma v3.0",
         Content = "Developer: Frost\nTelegram: @Jokerfros\n\nRightControl to toggle menu\nFluent UI • 2 languages\nAuto Bomb Pass included"
     })
 
-    -- Danger Zone Section
     Tab:AddParagraph({
         Title = "⚠️ " .. T("dangerZone"),
         Content = ""
@@ -1343,7 +1320,6 @@ do
         end
     })
 
-    -- Fluent Addons
     SaveManager:SetLibrary(Fluent)
     InterfaceManager:SetLibrary(Fluent)
     SaveManager:IgnoreThemeSettings()
@@ -1586,8 +1562,6 @@ RunService.Heartbeat:Connect(function()
             end
         end)
     end
-
-    -- Anti-Blur protection
     if CFG.AntiBlur then
         for _, obj in ipairs(Lighting:GetChildren()) do
             if obj:IsA("BlurEffect") then obj:Destroy() end
