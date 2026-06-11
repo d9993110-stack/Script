@@ -1,1491 +1,1289 @@
---// Завантаження бібліотеки UI
-local Library = loadstring(game:HttpGet("YOUR_UI_LIBRARY_URL"))()
+--[[
+    🎮 Ultra Cheat Script v3.0
+    Built with lxte's UI Library
+    Mobile & PC Friendly
+]]
 
---// Сервіси
+--// Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
-local StarterGui = game:GetService("StarterGui")
-local VirtualInputManager = game:GetService("VirtualInputManager")
 local HttpService = game:GetService("HttpService")
+local VirtualUser = game:GetService("VirtualUser")
+local TeleportService = game:GetService("TeleportService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
---// Гравець
+--// Player
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local Camera = Workspace.CurrentCamera
 local Mouse = LocalPlayer:GetMouse()
+local Camera = Workspace.CurrentCamera
 
---// Автооновлення персонажа
-LocalPlayer.CharacterAdded:Connect(function(char)
+--// Character References
+local Character, Humanoid, HRP, RootPart
+
+local function UpdateCharacter(char)
     Character = char
     Humanoid = char:WaitForChild("Humanoid")
-    HumanoidRootPart = char:WaitForChild("HumanoidRootPart")
-end)
+    HRP = char:WaitForChild("HumanoidRootPart")
+    RootPart = HRP
+end
 
---// Змінні стану
-local States = {
-    -- Player
-    Speed = 16,
-    JumpPower = 50,
-    Gravity = 196.2,
-    Noclip = false,
-    InfiniteJump = false,
-    Fly = false,
-    FlySpeed = 50,
-    GodMode = false,
-    Invisible = false,
-    
-    -- Combat
-    Aimbot = false,
-    AimbotFOV = 200,
-    AimbotSmooth = 5,
-    AimbotBone = "Head",
-    ShowFOV = false,
-    SilentAim = false,
-    Hitbox = false,
-    HitboxSize = 5,
-    KillAura = false,
-    KillAuraRange = 15,
-    
-    -- ESP
-    ESPEnabled = false,
-    ESPBoxes = false,
-    ESPNames = false,
-    ESPHealth = false,
-    ESPDistance = false,
-    ESPTracers = false,
-    ESPChams = false,
-    ESPTeamCheck = true,
-    
-    -- World
-    Fullbright = false,
-    NoFog = false,
-    CustomTime = false,
-    TimeValue = 12,
-    AntiAFK = true,
-    
-    -- Teleport
-    TeleportTarget = "",
-    
-    -- Misc
-    ChatSpam = false,
-    ChatSpamMessage = "Hello!",
-    ChatSpamDelay = 1,
-    ClickTP = false,
-    FreeCam = false,
-    FreeCamSpeed = 1,
+UpdateCharacter(LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait())
+LocalPlayer.CharacterAdded:Connect(UpdateCharacter)
+
+--// ════════════════════════════════
+--// Library Setup
+--// ════════════════════════════════
+
+local Library = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/lxte/lates-lib/main/Main.lua"
+))()
+
+local Window = Library:CreateWindow({
+    Title = "🎮 Ultra Cheat v3.0",
+    Theme = "Dark",
+    Size = UDim2.fromOffset(570, 370),
+    Transparency = 0.1,
+    Blurring = true,
+    MinimizeKeybind = Enum.KeyCode.RightControl,
+})
+
+--// ════════════════════════════════
+--// Themes
+--// ════════════════════════════════
+
+local Themes = {
+    Dark = {
+        Primary = Color3.fromRGB(30, 30, 30),
+        Secondary = Color3.fromRGB(35, 35, 35),
+        Component = Color3.fromRGB(40, 40, 40),
+        Interactables = Color3.fromRGB(45, 45, 45),
+        Tab = Color3.fromRGB(200, 200, 200),
+        Title = Color3.fromRGB(240, 240, 240),
+        Description = Color3.fromRGB(200, 200, 200),
+        Shadow = Color3.fromRGB(0, 0, 0),
+        Outline = Color3.fromRGB(40, 40, 40),
+        Icon = Color3.fromRGB(220, 220, 220),
+    },
+    Light = {
+        Primary = Color3.fromRGB(232, 232, 232),
+        Secondary = Color3.fromRGB(255, 255, 255),
+        Component = Color3.fromRGB(245, 245, 245),
+        Interactables = Color3.fromRGB(235, 235, 235),
+        Tab = Color3.fromRGB(50, 50, 50),
+        Title = Color3.fromRGB(0, 0, 0),
+        Description = Color3.fromRGB(100, 100, 100),
+        Shadow = Color3.fromRGB(255, 255, 255),
+        Outline = Color3.fromRGB(210, 210, 210),
+        Icon = Color3.fromRGB(100, 100, 100),
+    },
+    Void = {
+        Primary = Color3.fromRGB(10, 10, 10),
+        Secondary = Color3.fromRGB(15, 15, 15),
+        Component = Color3.fromRGB(20, 20, 20),
+        Interactables = Color3.fromRGB(25, 25, 25),
+        Tab = Color3.fromRGB(200, 200, 200),
+        Title = Color3.fromRGB(240, 240, 240),
+        Description = Color3.fromRGB(180, 180, 180),
+        Shadow = Color3.fromRGB(0, 0, 0),
+        Outline = Color3.fromRGB(30, 30, 30),
+        Icon = Color3.fromRGB(200, 200, 200),
+    },
+    Purple = {
+        Primary = Color3.fromRGB(20, 15, 35),
+        Secondary = Color3.fromRGB(28, 20, 48),
+        Component = Color3.fromRGB(38, 28, 62),
+        Interactables = Color3.fromRGB(50, 38, 80),
+        Tab = Color3.fromRGB(180, 160, 220),
+        Title = Color3.fromRGB(220, 200, 255),
+        Description = Color3.fromRGB(170, 150, 210),
+        Shadow = Color3.fromRGB(10, 5, 20),
+        Outline = Color3.fromRGB(60, 45, 90),
+        Icon = Color3.fromRGB(180, 150, 255),
+    },
+    Midnight = {
+        Primary = Color3.fromRGB(8, 12, 25),
+        Secondary = Color3.fromRGB(12, 18, 35),
+        Component = Color3.fromRGB(18, 25, 48),
+        Interactables = Color3.fromRGB(25, 35, 65),
+        Tab = Color3.fromRGB(140, 170, 230),
+        Title = Color3.fromRGB(180, 210, 255),
+        Description = Color3.fromRGB(130, 160, 210),
+        Shadow = Color3.fromRGB(0, 0, 15),
+        Outline = Color3.fromRGB(35, 50, 85),
+        Icon = Color3.fromRGB(150, 185, 255),
+    },
 }
 
---// Створення вікна
-local Window = Library:CreateWindow({
-    Title = "🎮 Ultra Cheat v2.0",
-    Size = UDim2.new(0, 550, 0, 400),
-    Transparency = 0,
-    MinimizeKeybind = Enum.KeyCode.RightControl,
-    Blurring = true,
-    Theme = "Dark"
-})
+Window:SetTheme(Themes.Dark)
 
--- ══════════════════════════════════════════
--- 🏃 ВКЛАДКА: PLAYER (Гравець)
--- ══════════════════════════════════════════
+--// ════════════════════════════════
+--// Tab Sections
+--// ════════════════════════════════
 
-local PlayerTab = Window:AddTab({
+Window:AddTabSection({ Name = "⚡ Main",    Order = 1 })
+Window:AddTabSection({ Name = "🎯 Combat",  Order = 2 })
+Window:AddTabSection({ Name = "🌍 World",   Order = 3 })
+Window:AddTabSection({ Name = "⚙️ Config",  Order = 4 })
+
+--// ════════════════════════════════
+--// STATE TABLE
+--// ════════════════════════════════
+
+local State = {
+    -- Movement
+    Speed           = 16,
+    JumpPower       = 50,
+    Gravity         = 196.2,
+    InfiniteJump    = false,
+    Noclip          = false,
+    Fly             = false,
+    FlySpeed        = 60,
+    -- Character
+    GodMode         = false,
+    -- Combat
+    Aimbot          = false,
+    AimbotFOV       = 250,
+    AimbotSmooth    = 5,
+    AimbotBone      = "Head",
+    ShowFOV         = false,
+    HitboxExpand    = false,
+    HitboxSize      = 5,
+    KillAura        = false,
+    KillAuraRange   = 15,
+    -- ESP
+    ESPEnabled      = false,
+    ESPBoxes        = false,
+    ESPNames        = false,
+    ESPHealth       = false,
+    ESPDistance     = false,
+    ESPTracers      = false,
+    ESPChams        = false,
+    ESPTeamCheck    = false,
+    -- World
+    Fullbright      = false,
+    NoFog           = false,
+    AntiAFK         = false,
+    CustomTime      = false,
+    TimeValue       = 14,
+    -- Misc
+    ClickTP         = false,
+    Spin            = false,
+    ChatSpam        = false,
+    SpamMsg         = "Hello!",
+    SpamDelay       = 2,
+    SavedCF         = nil,
+    TpTarget        = "",
+}
+
+--// ════════════════════════════════════════════
+--// TAB ▶ PLAYER
+--// ════════════════════════════════════════════
+
+local TabPlayer = Window:AddTab({
     Title = "🏃 Player",
-    Icon = "rbxassetid://7733964719",
+    Section = "⚡ Main",
+    Icon = "rbxassetid://11963373994",
 })
 
-Window:AddSection({ Name = "Movement", Tab = PlayerTab })
+-- ── Movement ──────────────────────────────────
+Window:AddSection({ Name = "Movement", Tab = TabPlayer })
 
--- Speed Hack
 Window:AddSlider({
-    Title = "🏃 Walk Speed",
-    Description = "Змінити швидкість ходьби",
+    Title = "🏃 WalkSpeed",
+    Description = "Change your movement speed",
+    Tab = TabPlayer,
     MaxValue = 500,
     AllowDecimals = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        States.Speed = Value
-        if Character and Humanoid then
-            Humanoid.WalkSpeed = Value
-        end
-    end
+    Callback = function(v)
+        State.Speed = v
+        pcall(function() Humanoid.WalkSpeed = v end)
+    end,
 })
 
--- Jump Power
 Window:AddSlider({
-    Title = "⬆️ Jump Power",
-    Description = "Змінити силу стрибка",
+    Title = "⬆ JumpPower",
+    Description = "Change your jump height",
+    Tab = TabPlayer,
     MaxValue = 500,
     AllowDecimals = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        States.JumpPower = Value
-        if Character and Humanoid then
-            Humanoid.JumpPower = Value
+    Callback = function(v)
+        State.JumpPower = v
+        pcall(function()
             Humanoid.UseJumpPower = true
-        end
-    end
+            Humanoid.JumpPower = v
+        end)
+    end,
 })
 
--- Gravity
 Window:AddSlider({
     Title = "🌍 Gravity",
-    Description = "Змінити гравітацію (196 = нормальна)",
+    Description = "Change world gravity (default 196)",
+    Tab = TabPlayer,
     MaxValue = 500,
     AllowDecimals = true,
     DecimalAmount = 1,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        States.Gravity = Value
-        Workspace.Gravity = Value
-    end
+    Callback = function(v)
+        State.Gravity = v
+        Workspace.Gravity = v
+    end,
 })
 
--- Infinite Jump
 Window:AddToggle({
-    Title = "♾️ Infinite Jump",
-    Description = "Стрибати безкінечно у повітрі",
+    Title = "♾ Infinite Jump",
+    Description = "Jump endlessly in mid-air",
     Default = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        States.InfiniteJump = Value
-    end
+    Tab = TabPlayer,
+    Callback = function(v) State.InfiniteJump = v end,
 })
 
-UserInputService.JumpRequest:Connect(function()
-    if States.InfiniteJump and Character and Humanoid then
-        Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
-
--- Noclip
 Window:AddToggle({
     Title = "👻 Noclip",
-    Description = "Проходити крізь стіни",
+    Description = "Walk through walls",
     Default = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        States.Noclip = Value
-    end
+    Tab = TabPlayer,
+    Callback = function(v) State.Noclip = v end,
 })
 
-RunService.Stepped:Connect(function()
-    if States.Noclip and Character then
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    end
-end)
-
--- Fly
 Window:AddToggle({
-    Title = "🕊️ Fly",
-    Description = "Літати у повітрі",
+    Title = "🕊 Fly",
+    Description = "Fly freely around the map",
     Default = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        States.Fly = Value
-        if Value then
-            -- Create BodyVelocity & BodyGyro
-            if HumanoidRootPart then
-                local BV = Instance.new("BodyVelocity")
-                BV.Name = "FlyVelocity"
-                BV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                BV.Velocity = Vector3.new(0, 0, 0)
-                BV.Parent = HumanoidRootPart
-                
-                local BG = Instance.new("BodyGyro")
-                BG.Name = "FlyGyro"
-                BG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-                BG.D = 200
-                BG.P = 10000
-                BG.Parent = HumanoidRootPart
-            end
-        else
-            if HumanoidRootPart then
-                local BV = HumanoidRootPart:FindFirstChild("FlyVelocity")
-                local BG = HumanoidRootPart:FindFirstChild("FlyGyro")
-                if BV then BV:Destroy() end
-                if BG then BG:Destroy() end
-            end
+    Tab = TabPlayer,
+    Callback = function(v)
+        State.Fly = v
+        if not v then
+            pcall(function()
+                HRP:FindFirstChild("_FlyBV"):Destroy()
+                HRP:FindFirstChild("_FlyBG"):Destroy()
+            end)
         end
-    end
+    end,
 })
 
 Window:AddSlider({
-    Title = "🕊️ Fly Speed",
-    Description = "Швидкість польоту",
+    Title = "🕊 Fly Speed",
+    Description = "Speed while flying",
+    Tab = TabPlayer,
     MaxValue = 300,
     AllowDecimals = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        States.FlySpeed = Value
-    end
+    Callback = function(v) State.FlySpeed = v end,
 })
 
-RunService.RenderStepped:Connect(function()
-    if States.Fly and HumanoidRootPart then
-        local BV = HumanoidRootPart:FindFirstChild("FlyVelocity")
-        local BG = HumanoidRootPart:FindFirstChild("FlyGyro")
-        
-        if BV and BG then
-            BG.CFrame = Camera.CFrame
-            local Direction = Vector3.new(0, 0, 0)
-            
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                Direction = Direction + Camera.CFrame.LookVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                Direction = Direction - Camera.CFrame.LookVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                Direction = Direction - Camera.CFrame.RightVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                Direction = Direction + Camera.CFrame.RightVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                Direction = Direction + Vector3.new(0, 1, 0)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                Direction = Direction - Vector3.new(0, 1, 0)
-            end
-            
-            BV.Velocity = Direction * States.FlySpeed
-            Humanoid:ChangeState(Enum.HumanoidStateType.Flying)
-        end
-    end
-end)
+-- ── Character ──────────────────────────────────
+Window:AddSection({ Name = "Character", Tab = TabPlayer })
 
-Window:AddSection({ Name = "Character", Tab = PlayerTab })
-
--- God Mode
 Window:AddToggle({
-    Title = "❤️ God Mode",
-    Description = "Нескінченне здоров'я (клієнтське)",
+    Title = "❤ God Mode",
+    Description = "Keep your HP at maximum (client-sided)",
     Default = false,
-    Tab = PlayerTab,
-    Callback = function(Value)
-        States.GodMode = Value
-    end
+    Tab = TabPlayer,
+    Callback = function(v) State.GodMode = v end,
 })
 
-RunService.Heartbeat:Connect(function()
-    if States.GodMode and Character and Humanoid then
-        Humanoid.Health = Humanoid.MaxHealth
-    end
-end)
-
--- Reset Character
 Window:AddButton({
-    Title = "💀 Reset Character",
-    Description = "Перезапустити персонажа",
-    Tab = PlayerTab,
+    Title = "💀 Kill Character",
+    Description = "Instantly kills your character",
+    Tab = TabPlayer,
     Callback = function()
-        if Humanoid then
-            Humanoid.Health = 0
-        end
-    end
+        pcall(function() Humanoid.Health = 0 end)
+    end,
 })
 
--- Respawn
 Window:AddButton({
     Title = "🔄 Respawn",
-    Description = "Респавн персонажа",
-    Tab = PlayerTab,
+    Description = "Force-respawn your character",
+    Tab = TabPlayer,
     Callback = function()
         LocalPlayer:LoadCharacter()
-    end
+    end,
 })
 
--- ══════════════════════════════════════════
--- ⚔️ ВКЛАДКА: COMBAT (Бойовий)
--- ══════════════════════════════════════════
+--// ════════════════════════════════════════════
+--// TAB ▶ TELEPORT
+--// ════════════════════════════════════════════
 
-local CombatTab = Window:AddTab({
-    Title = "⚔️ Combat",
-    Icon = "rbxassetid://7733960981",
+local TabTP = Window:AddTab({
+    Title = "📍 Teleport",
+    Section = "⚡ Main",
+    Icon = "rbxassetid://11963373994",
 })
 
-Window:AddSection({ Name = "Aimbot", Tab = CombatTab })
+Window:AddSection({ Name = "Player Teleport", Tab = TabTP })
 
--- Aimbot Toggle
+Window:AddInput({
+    Title = "👤 Player Name",
+    Description = "Type a player name then press Teleport",
+    Tab = TabTP,
+    Callback = function(t) State.TpTarget = t end,
+})
+
+Window:AddButton({
+    Title = "🚀 Teleport to Player",
+    Description = "Teleport to the entered player",
+    Tab = TabTP,
+    Callback = function()
+        local name = State.TpTarget:lower()
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer
+            and (p.Name:lower():find(name) or p.DisplayName:lower():find(name))
+            and p.Character
+            and p.Character:FindFirstChild("HumanoidRootPart")
+            then
+                HRP.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
+                Window:Notify({ Title = "📍 Teleported",
+                    Description = "Teleported to " .. p.DisplayName, Duration = 3 })
+                return
+            end
+        end
+        Window:Notify({ Title = "❌ Not Found",
+            Description = "Could not find player: " .. State.TpTarget, Duration = 3 })
+    end,
+})
+
+Window:AddButton({
+    Title = "🎲 Random Teleport",
+    Description = "Teleport to a random player",
+    Tab = TabTP,
+    Callback = function()
+        local pool = {}
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                table.insert(pool, p)
+            end
+        end
+        if #pool == 0 then
+            Window:Notify({ Title = "❌ Error", Description = "No other players found!", Duration = 3 })
+            return
+        end
+        local target = pool[math.random(#pool)]
+        HRP.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
+        Window:Notify({ Title = "🎲 Random TP",
+            Description = "Teleported to " .. target.DisplayName, Duration = 3 })
+    end,
+})
+
+Window:AddSection({ Name = "Position", Tab = TabTP })
+
+Window:AddButton({
+    Title = "💾 Save Position",
+    Description = "Save your current CFrame",
+    Tab = TabTP,
+    Callback = function()
+        State.SavedCF = HRP.CFrame
+        Window:Notify({ Title = "💾 Saved", Description = "Position saved!", Duration = 2 })
+    end,
+})
+
+Window:AddButton({
+    Title = "📂 Load Position",
+    Description = "Return to saved position",
+    Tab = TabTP,
+    Callback = function()
+        if State.SavedCF then
+            HRP.CFrame = State.SavedCF
+            Window:Notify({ Title = "📂 Loaded", Description = "Returned to saved position!", Duration = 2 })
+        else
+            Window:Notify({ Title = "❌ Error", Description = "No position saved!", Duration = 2 })
+        end
+    end,
+})
+
 Window:AddToggle({
-    Title = "🎯 Aimbot",
-    Description = "Автоматичне наведення на гравців",
+    Title = "🖱 Click Teleport",
+    Description = "Click anywhere to teleport there",
     Default = false,
-    Tab = CombatTab,
-    Callback = function(Value)
-        States.Aimbot = Value
-    end
+    Tab = TabTP,
+    Callback = function(v) State.ClickTP = v end,
 })
 
--- Aimbot FOV
+--// ════════════════════════════════════════════
+--// TAB ▶ AIMBOT
+--// ════════════════════════════════════════════
+
+local TabAimbot = Window:AddTab({
+    Title = "🎯 Aimbot",
+    Section = "🎯 Combat",
+    Icon = "rbxassetid://11293977610",
+})
+
+Window:AddSection({ Name = "Aimbot", Tab = TabAimbot })
+
+Window:AddToggle({
+    Title = "🎯 Enable Aimbot",
+    Description = "Auto-aim at the nearest enemy (Hold RMB)",
+    Default = false,
+    Tab = TabAimbot,
+    Callback = function(v) State.Aimbot = v end,
+})
+
 Window:AddSlider({
-    Title = "🔴 FOV Size",
-    Description = "Радіус поля зору аімбота",
-    MaxValue = 800,
+    Title = "🔴 FOV Radius",
+    Description = "Size of the aimbot detection circle",
+    Tab = TabAimbot,
+    MaxValue = 900,
     AllowDecimals = false,
-    Tab = CombatTab,
-    Callback = function(Value)
-        States.AimbotFOV = Value
-    end
+    Callback = function(v) State.AimbotFOV = v end,
 })
 
--- Aimbot Smoothness
 Window:AddSlider({
     Title = "🎯 Smoothness",
-    Description = "Плавність наведення (1 = миттєво)",
+    Description = "Higher = slower aim (1 = instant)",
+    Tab = TabAimbot,
     MaxValue = 50,
     AllowDecimals = true,
     DecimalAmount = 1,
-    Tab = CombatTab,
-    Callback = function(Value)
-        States.AimbotSmooth = Value
-    end
+    Callback = function(v) State.AimbotSmooth = v end,
 })
 
--- Show FOV Circle
 Window:AddToggle({
-    Title = "⭕ Show FOV Circle",
-    Description = "Показати коло FOV на екрані",
+    Title = "⭕ Show FOV",
+    Description = "Display the FOV circle on screen",
     Default = false,
-    Tab = CombatTab,
-    Callback = function(Value)
-        States.ShowFOV = Value
-    end
+    Tab = TabAimbot,
+    Callback = function(v) State.ShowFOV = v end,
 })
 
--- Aimbot Bone
 Window:AddDropdown({
     Title = "🦴 Target Bone",
-    Description = "Частина тіла для наведення",
+    Description = "Which body part to aim at",
+    Tab = TabAimbot,
     Options = {
-        ["Head"] = "Head",
-        ["HumanoidRootPart"] = "HumanoidRootPart",
-        ["UpperTorso"] = "UpperTorso",
-        ["LowerTorso"] = "LowerTorso",
+        ["Head"]           = "Head",
+        ["Upper Torso"]    = "UpperTorso",
+        ["Root"]           = "HumanoidRootPart",
     },
-    Tab = CombatTab,
-    Callback = function(Value)
-        States.AimbotBone = Value
-    end
+    Callback = function(v) State.AimbotBone = v end,
 })
 
--- FOV Circle Drawing
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Thickness = 1.5
-FOVCircle.NumSides = 64
-FOVCircle.Radius = States.AimbotFOV
-FOVCircle.Filled = false
-FOVCircle.Visible = false
-FOVCircle.ZIndex = 999
-FOVCircle.Transparency = 0.8
-FOVCircle.Color = Color3.fromRGB(255, 50, 50)
+Window:AddSection({ Name = "Other Combat", Tab = TabAimbot })
 
--- Aimbot Functions
-local function GetClosestPlayer()
-    local ClosestPlayer = nil
-    local ShortestDistance = States.AimbotFOV
-    
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local char = player.Character
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            local targetPart = char:FindFirstChild(States.AimbotBone) or char:FindFirstChild("HumanoidRootPart")
-            
-            if humanoid and humanoid.Health > 0 and targetPart then
-                if States.ESPTeamCheck and player.Team == LocalPlayer.Team then
-                    continue
-                end
-                
-                local screenPos, onScreen = Camera:WorldToScreenPoint(targetPart.Position)
-                if onScreen then
-                    local mousePos = UserInputService:GetMouseLocation()
-                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                    
-                    if distance < ShortestDistance then
-                        ShortestDistance = distance
-                        ClosestPlayer = player
-                    end
-                end
-            end
-        end
-    end
-    
-    return ClosestPlayer
-end
-
-RunService.RenderStepped:Connect(function()
-    -- FOV Circle
-    FOVCircle.Visible = States.ShowFOV
-    FOVCircle.Radius = States.AimbotFOV
-    FOVCircle.Position = UserInputService:GetMouseLocation()
-    
-    -- Aimbot
-    if States.Aimbot and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
-        local target = GetClosestPlayer()
-        if target and target.Character then
-            local targetPart = target.Character:FindFirstChild(States.AimbotBone) or target.Character:FindFirstChild("HumanoidRootPart")
-            if targetPart then
-                local targetPos = Camera:WorldToScreenPoint(targetPart.Position)
-                local mousePos = UserInputService:GetMouseLocation()
-                
-                local smoothFactor = 1 / math.max(States.AimbotSmooth, 0.1)
-                Camera.CFrame = Camera.CFrame:Lerp(
-                    CFrame.new(Camera.CFrame.Position, targetPart.Position),
-                    smoothFactor
-                )
-            end
-        end
-    end
-end)
-
-Window:AddSection({ Name = "Melee & Misc", Tab = CombatTab })
-
--- Hitbox Expander
 Window:AddToggle({
     Title = "📦 Hitbox Expander",
-    Description = "Збільшити хітбокси гравців",
+    Description = "Make enemy hitboxes larger",
     Default = false,
-    Tab = CombatTab,
-    Callback = function(Value)
-        States.Hitbox = Value
-        
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+    Tab = TabAimbot,
+    Callback = function(v)
+        State.HitboxExpand = v
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
                 if hrp then
-                    if Value then
-                        hrp.Size = Vector3.new(States.HitboxSize, States.HitboxSize, States.HitboxSize)
-                        hrp.Transparency = 0.5
-                    else
-                        hrp.Size = Vector3.new(2, 2, 1)
-                        hrp.Transparency = 1
-                    end
+                    hrp.Size = v and Vector3.new(State.HitboxSize, State.HitboxSize, State.HitboxSize)
+                                  or Vector3.new(2, 2, 1)
+                    hrp.Transparency = v and 0.5 or 1
                 end
             end
         end
-    end
+    end,
 })
 
 Window:AddSlider({
     Title = "📦 Hitbox Size",
-    Description = "Розмір хітбоксу",
-    MaxValue = 50,
+    Description = "Size of expanded hitboxes",
+    Tab = TabAimbot,
+    MaxValue = 30,
     AllowDecimals = false,
-    Tab = CombatTab,
-    Callback = function(Value)
-        States.HitboxSize = Value
-    end
+    Callback = function(v) State.HitboxSize = v end,
 })
 
--- Kill Aura
 Window:AddToggle({
     Title = "💫 Kill Aura",
-    Description = "Автоматичне вбивство поблизу (якщо підтримується)",
+    Description = "Auto-damage nearby players",
     Default = false,
-    Tab = CombatTab,
-    Callback = function(Value)
-        States.KillAura = Value
-    end
+    Tab = TabAimbot,
+    Callback = function(v) State.KillAura = v end,
 })
 
 Window:AddSlider({
-    Title = "💫 Kill Aura Range",
-    Description = "Дальність Kill Aura",
-    MaxValue = 50,
+    Title = "💫 Aura Range",
+    Description = "Kill aura detection radius",
+    Tab = TabAimbot,
+    MaxValue = 60,
     AllowDecimals = false,
-    Tab = CombatTab,
-    Callback = function(Value)
-        States.KillAuraRange = Value
-    end
+    Callback = function(v) State.KillAuraRange = v end,
 })
 
--- Kill Aura Loop
-task.spawn(function()
-    while task.wait(0.1) do
-        if States.KillAura and Character and HumanoidRootPart then
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character then
-                    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-                    local hum = player.Character:FindFirstChildOfClass("Humanoid")
-                    
-                    if hrp and hum and hum.Health > 0 then
-                        local distance = (HumanoidRootPart.Position - hrp.Position).Magnitude
-                        if distance <= States.KillAuraRange then
-                            -- Simulate click on nearby players
-                            pcall(function()
-                                VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-                                VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-                            end)
-                        end
-                    end
-                end
-            end
-        end
-    end
-end)
+--// ════════════════════════════════════════════
+--// TAB ▶ ESP
+--// ════════════════════════════════════════════
 
--- ══════════════════════════════════════════
--- 👁️ ВКЛАДКА: ESP (Візуалізація)
--- ══════════════════════════════════════════
-
-local ESPTab = Window:AddTab({
-    Title = "👁️ ESP",
-    Icon = "rbxassetid://7733968307",
+local TabESP = Window:AddTab({
+    Title = "👁 ESP",
+    Section = "🎯 Combat",
+    Icon = "rbxassetid://11293977610",
 })
 
-Window:AddSection({ Name = "Player ESP", Tab = ESPTab })
+Window:AddSection({ Name = "Player ESP", Tab = TabESP })
 
--- ESP Storage
-local ESPObjects = {}
-
-local function CreateESP(player)
-    if player == LocalPlayer then return end
-    
-    local esp = {
-        Box = Drawing.new("Square"),
-        Name = Drawing.new("Text"),
-        Health = Drawing.new("Line"),
-        HealthBG = Drawing.new("Line"),
-        Distance = Drawing.new("Text"),
-        Tracer = Drawing.new("Line"),
-    }
-    
-    -- Box
-    esp.Box.Thickness = 1.5
-    esp.Box.Filled = false
-    esp.Box.Color = Color3.fromRGB(0, 255, 0)
-    esp.Box.Visible = false
-    esp.Box.ZIndex = 5
-    
-    -- Name
-    esp.Name.Size = 14
-    esp.Name.Center = true
-    esp.Name.Outline = true
-    esp.Name.Color = Color3.fromRGB(255, 255, 255)
-    esp.Name.Visible = false
-    esp.Name.ZIndex = 5
-    esp.Name.Font = 2
-    
-    -- Health Bar BG
-    esp.HealthBG.Thickness = 3
-    esp.HealthBG.Color = Color3.fromRGB(0, 0, 0)
-    esp.HealthBG.Visible = false
-    esp.HealthBG.ZIndex = 4
-    
-    -- Health Bar
-    esp.Health.Thickness = 1.5
-    esp.Health.Color = Color3.fromRGB(0, 255, 0)
-    esp.Health.Visible = false
-    esp.Health.ZIndex = 5
-    
-    -- Distance
-    esp.Distance.Size = 12
-    esp.Distance.Center = true
-    esp.Distance.Outline = true
-    esp.Distance.Color = Color3.fromRGB(200, 200, 200)
-    esp.Distance.Visible = false
-    esp.Distance.ZIndex = 5
-    esp.Distance.Font = 2
-    
-    -- Tracer
-    esp.Tracer.Thickness = 1.5
-    esp.Tracer.Color = Color3.fromRGB(255, 255, 0)
-    esp.Tracer.Visible = false
-    esp.Tracer.ZIndex = 5
-    
-    ESPObjects[player] = esp
-end
-
-local function RemoveESP(player)
-    if ESPObjects[player] then
-        for _, drawing in pairs(ESPObjects[player]) do
-            drawing:Remove()
-        end
-        ESPObjects[player] = nil
-    end
-end
-
-local function UpdateESP()
-    for player, esp in pairs(ESPObjects) do
-        local char = player.Character
-        local humanoid = char and char:FindFirstChildOfClass("Humanoid")
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        local head = char and char:FindFirstChild("Head")
-        
-        if char and humanoid and humanoid.Health > 0 and hrp and head then
-            if States.ESPTeamCheck and player.Team == LocalPlayer.Team then
-                for _, d in pairs(esp) do d.Visible = false end
-                continue
-            end
-            
-            local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
-            local headPos = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
-            local footPos = Camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
-            
-            if onScreen and States.ESPEnabled then
-                local boxHeight = math.abs(headPos.Y - footPos.Y)
-                local boxWidth = boxHeight * 0.6
-                
-                -- Box ESP
-                esp.Box.Visible = States.ESPBoxes
-                esp.Box.Size = Vector2.new(boxWidth, boxHeight)
-                esp.Box.Position = Vector2.new(pos.X - boxWidth / 2, headPos.Y)
-                
-                -- Team Color
-                local teamColor = Color3.fromRGB(255, 0, 0)
-                pcall(function()
-                    if player.Team then
-                        teamColor = player.TeamColor.Color
-                    end
-                end)
-                esp.Box.Color = teamColor
-                
-                -- Name ESP
-                esp.Name.Visible = States.ESPNames
-                esp.Name.Text = player.DisplayName .. " [" .. player.Name .. "]"
-                esp.Name.Position = Vector2.new(pos.X, headPos.Y - 18)
-                
-                -- Health ESP
-                local healthPct = humanoid.Health / humanoid.MaxHealth
-                esp.HealthBG.Visible = States.ESPHealth
-                esp.HealthBG.From = Vector2.new(pos.X - boxWidth / 2 - 5, footPos.Y)
-                esp.HealthBG.To = Vector2.new(pos.X - boxWidth / 2 - 5, headPos.Y)
-                
-                esp.Health.Visible = States.ESPHealth
-                esp.Health.From = Vector2.new(pos.X - boxWidth / 2 - 5, footPos.Y)
-                esp.Health.To = Vector2.new(pos.X - boxWidth / 2 - 5, footPos.Y - (boxHeight * healthPct))
-                esp.Health.Color = Color3.fromRGB(255 * (1 - healthPct), 255 * healthPct, 0)
-                
-                -- Distance ESP
-                local dist = (HumanoidRootPart.Position - hrp.Position).Magnitude
-                esp.Distance.Visible = States.ESPDistance
-                esp.Distance.Text = math.floor(dist) .. " studs"
-                esp.Distance.Position = Vector2.new(pos.X, footPos.Y + 2)
-                
-                -- Tracer ESP
-                local viewportSize = Camera.ViewportSize
-                esp.Tracer.Visible = States.ESPTracers
-                esp.Tracer.From = Vector2.new(viewportSize.X / 2, viewportSize.Y)
-                esp.Tracer.To = Vector2.new(pos.X, footPos.Y)
-                esp.Tracer.Color = teamColor
-            else
-                for _, d in pairs(esp) do d.Visible = false end
-            end
-        else
-            for _, d in pairs(esp) do d.Visible = false end
-        end
-    end
-end
-
--- Initialize ESP for all players
-for _, player in pairs(Players:GetPlayers()) do
-    CreateESP(player)
-end
-Players.PlayerAdded:Connect(CreateESP)
-Players.PlayerRemoving:Connect(RemoveESP)
-
-RunService.RenderStepped:Connect(UpdateESP)
-
--- ESP Toggles
 Window:AddToggle({
-    Title = "👁️ Enable ESP",
-    Description = "Увімкнути систему ESP",
+    Title = "👁 Master ESP Switch",
+    Description = "Enable/disable all ESP features",
     Default = false,
-    Tab = ESPTab,
-    Callback = function(Value)
-        States.ESPEnabled = Value
-        if not Value then
-            for _, esp in pairs(ESPObjects) do
-                for _, d in pairs(esp) do d.Visible = false end
-            end
-        end
-    end
+    Tab = TabESP,
+    Callback = function(v)
+        State.ESPEnabled = v
+    end,
 })
 
 Window:AddToggle({
     Title = "📦 Box ESP",
-    Description = "Показати рамки навколо гравців",
+    Description = "Draw boxes around players",
     Default = false,
-    Tab = ESPTab,
-    Callback = function(Value)
-        States.ESPBoxes = Value
-    end
+    Tab = TabESP,
+    Callback = function(v) State.ESPBoxes = v end,
 })
 
 Window:AddToggle({
     Title = "📛 Name ESP",
-    Description = "Показати імена гравців",
+    Description = "Show player names",
     Default = false,
-    Tab = ESPTab,
-    Callback = function(Value)
-        States.ESPNames = Value
-    end
+    Tab = TabESP,
+    Callback = function(v) State.ESPNames = v end,
 })
 
 Window:AddToggle({
-    Title = "❤️ Health ESP",
-    Description = "Показати здоров'я гравців",
+    Title = "❤ Health ESP",
+    Description = "Show health bar beside players",
     Default = false,
-    Tab = ESPTab,
-    Callback = function(Value)
-        States.ESPHealth = Value
-    end
+    Tab = TabESP,
+    Callback = function(v) State.ESPHealth = v end,
 })
 
 Window:AddToggle({
     Title = "📏 Distance ESP",
-    Description = "Показати відстань до гравців",
+    Description = "Show distance to each player",
     Default = false,
-    Tab = ESPTab,
-    Callback = function(Value)
-        States.ESPDistance = Value
-    end
+    Tab = TabESP,
+    Callback = function(v) State.ESPDistance = v end,
 })
 
 Window:AddToggle({
     Title = "📍 Tracers",
-    Description = "Лінії від екрану до гравців",
+    Description = "Draw lines from screen bottom to players",
     Default = false,
-    Tab = ESPTab,
-    Callback = function(Value)
-        States.ESPTracers = Value
-    end
+    Tab = TabESP,
+    Callback = function(v) State.ESPTracers = v end,
 })
 
 Window:AddToggle({
-    Title = "👥 Team Check",
-    Description = "Не показувати ESP тіммейтів",
-    Default = true,
-    Tab = ESPTab,
-    Callback = function(Value)
-        States.ESPTeamCheck = Value
-    end
-})
-
-Window:AddSection({ Name = "Chams", Tab = ESPTab })
-
-Window:AddToggle({
-    Title = "🌈 Chams / Highlight",
-    Description = "Підсвітка гравців крізь стіни",
+    Title = "🌈 Chams (Highlight)",
+    Description = "Highlight players through walls",
     Default = false,
-    Tab = ESPTab,
-    Callback = function(Value)
-        States.ESPChams = Value
-        
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                local existing = player.Character:FindFirstChild("ESPHighlight")
-                if Value and not existing then
-                    local highlight = Instance.new("Highlight")
-                    highlight.Name = "ESPHighlight"
-                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
-                    highlight.FillTransparency = 0.5
-                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    highlight.OutlineTransparency = 0
-                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    highlight.Parent = player.Character
-                elseif not Value and existing then
+    Tab = TabESP,
+    Callback = function(v)
+        State.ESPChams = v
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                local existing = p.Character:FindFirstChild("_ESPHighlight")
+                if v and not existing then
+                    local h = Instance.new("Highlight")
+                    h.Name            = "_ESPHighlight"
+                    h.FillColor       = Color3.fromRGB(255, 50, 50)
+                    h.FillTransparency = 0.4
+                    h.OutlineColor    = Color3.fromRGB(255, 255, 255)
+                    h.DepthMode       = Enum.HighlightDepthMode.AlwaysOnTop
+                    h.Parent          = p.Character
+                elseif not v and existing then
                     existing:Destroy()
                 end
             end
         end
-    end
+    end,
 })
 
--- ══════════════════════════════════════════
--- 🌍 ВКЛАДКА: WORLD (Світ)
--- ══════════════════════════════════════════
+Window:AddToggle({
+    Title = "👥 Team Check",
+    Description = "Skip teammates in ESP & aimbot",
+    Default = false,
+    Tab = TabESP,
+    Callback = function(v) State.ESPTeamCheck = v end,
+})
 
-local WorldTab = Window:AddTab({
+--// ════════════════════════════════════════════
+--// TAB ▶ WORLD
+--// ════════════════════════════════════════════
+
+local TabWorld = Window:AddTab({
     Title = "🌍 World",
-    Icon = "rbxassetid://7733971194",
+    Section = "🌍 World",
+    Icon = "rbxassetid://11963373994",
 })
 
-Window:AddSection({ Name = "Lighting", Tab = WorldTab })
+Window:AddSection({ Name = "Lighting", Tab = TabWorld })
 
--- Fullbright
 Window:AddToggle({
     Title = "💡 Fullbright",
-    Description = "Прибрати всю темряву",
+    Description = "Remove all darkness",
     Default = false,
-    Tab = WorldTab,
-    Callback = function(Value)
-        States.Fullbright = Value
-        
-        if Value then
+    Tab = TabWorld,
+    Callback = function(v)
+        State.Fullbright = v
+        if v then
             Lighting.Brightness = 2
-            Lighting.ClockTime = 14
-            Lighting.FogEnd = 100000
             Lighting.GlobalShadows = false
             Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
             Lighting.Ambient = Color3.fromRGB(200, 200, 200)
         else
             Lighting.Brightness = 1
-            Lighting.ClockTime = 14
-            Lighting.FogEnd = 100000
             Lighting.GlobalShadows = true
             Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
             Lighting.Ambient = Color3.fromRGB(0, 0, 0)
         end
-    end
+    end,
 })
 
--- No Fog
 Window:AddToggle({
-    Title = "🌫️ No Fog",
-    Description = "Прибрати туман",
+    Title = "🌫 No Fog",
+    Description = "Remove all fog effects",
     Default = false,
-    Tab = WorldTab,
-    Callback = function(Value)
-        States.NoFog = Value
-        if Value then
-            Lighting.FogStart = 0
-            Lighting.FogEnd = 9999999
-        else
-            Lighting.FogStart = 0
-            Lighting.FogEnd = 100000
-        end
-    end
+    Tab = TabWorld,
+    Callback = function(v)
+        State.NoFog = v
+        Lighting.FogEnd = v and 9999999 or 100000
+        Lighting.FogStart = 0
+    end,
 })
 
--- Custom Time
 Window:AddToggle({
     Title = "🕐 Custom Time",
-    Description = "Встановити власний час доби",
+    Description = "Lock the time of day",
     Default = false,
-    Tab = WorldTab,
-    Callback = function(Value)
-        States.CustomTime = Value
-    end
+    Tab = TabWorld,
+    Callback = function(v) State.CustomTime = v end,
 })
 
 Window:AddSlider({
     Title = "🕐 Time of Day",
-    Description = "Час доби (0-24)",
+    Description = "0 = midnight  |  14 = day  |  24 = midnight",
+    Tab = TabWorld,
     MaxValue = 24,
     AllowDecimals = true,
     DecimalAmount = 1,
-    Tab = WorldTab,
-    Callback = function(Value)
-        States.TimeValue = Value
-        if States.CustomTime then
-            Lighting.ClockTime = Value
-        end
-    end
+    Callback = function(v)
+        State.TimeValue = v
+        if State.CustomTime then Lighting.ClockTime = v end
+    end,
 })
 
-RunService.RenderStepped:Connect(function()
-    if States.CustomTime then
-        Lighting.ClockTime = States.TimeValue
-    end
-end)
+Window:AddSection({ Name = "Cleanup", Tab = TabWorld })
 
-Window:AddSection({ Name = "Effects", Tab = WorldTab })
-
--- Remove Effects
 Window:AddButton({
     Title = "🎨 Remove Atmosphere",
-    Description = "Видалити ефекти атмосфери",
-    Tab = WorldTab,
+    Description = "Delete all lighting post-effects",
+    Tab = TabWorld,
     Callback = function()
-        for _, effect in pairs(Lighting:GetChildren()) do
-            if effect:IsA("Atmosphere") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") or
-               effect:IsA("ColorCorrectionEffect") or effect:IsA("DepthOfFieldEffect") or effect:IsA("SunRaysEffect") then
-                effect:Destroy()
+        local n = 0
+        for _, e in ipairs(Lighting:GetChildren()) do
+            if e:IsA("Atmosphere") or e:IsA("BloomEffect") or e:IsA("BlurEffect")
+            or e:IsA("ColorCorrectionEffect") or e:IsA("DepthOfFieldEffect") or e:IsA("SunRaysEffect") then
+                e:Destroy(); n += 1
             end
         end
-        Window:Notify({
-            Title = "✅ Success",
-            Description = "Atmosphere effects removed!",
-            Duration = 2
-        })
-    end
+        Window:Notify({ Title = "✅ Done",
+            Description = n .. " effects removed!", Duration = 2 })
+    end,
 })
 
--- Remove Decorations
 Window:AddButton({
-    Title = "🧹 Remove Decorations",
-    Description = "Видалити декорації для FPS",
-    Tab = WorldTab,
+    Title = "🧹 Remove Particles",
+    Description = "Delete all particles, fire, smoke, sparks",
+    Tab = TabWorld,
     Callback = function()
-        local count = 0
-        for _, obj in pairs(Workspace:GetDescendants()) do
-            if obj:IsA("Decal") or obj:IsA("Texture") or obj:IsA("ParticleEmitter") or
-               obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
-                obj:Destroy()
-                count = count + 1
+        local n = 0
+        for _, o in ipairs(Workspace:GetDescendants()) do
+            if o:IsA("ParticleEmitter") or o:IsA("Fire")
+            or o:IsA("Smoke") or o:IsA("Sparkles") then
+                o:Destroy(); n += 1
             end
         end
-        Window:Notify({
-            Title = "✅ Cleaned",
-            Description = count .. " decorations removed!",
-            Duration = 2
-        })
-    end
+        Window:Notify({ Title = "✅ Done",
+            Description = n .. " particles removed!", Duration = 2 })
+    end,
 })
 
--- ══════════════════════════════════════════
--- 📍 ВКЛАДКА: TELEPORT (Телепортація)
--- ══════════════════════════════════════════
+--// ════════════════════════════════════════════
+--// TAB ▶ MISC
+--// ════════════════════════════════════════════
 
-local TeleportTab = Window:AddTab({
-    Title = "📍 Teleport",
-    Icon = "rbxassetid://7733972851",
+local TabMisc = Window:AddTab({
+    Title = "🛠 Misc",
+    Section = "🌍 World",
+    Icon = "rbxassetid://11963373994",
 })
 
-Window:AddSection({ Name = "Player Teleport", Tab = TeleportTab })
+Window:AddSection({ Name = "Utility", Tab = TabMisc })
 
--- Teleport to Player
-Window:AddInput({
-    Title = "📍 Teleport to Player",
-    Description = "Введіть ім'я гравця для телепортації",
-    Tab = TeleportTab,
-    Callback = function(Text)
-        States.TeleportTarget = Text
-    end
-})
-
-Window:AddButton({
-    Title = "🚀 Teleport!",
-    Description = "Телепортуватися до вказаного гравця",
-    Tab = TeleportTab,
-    Callback = function()
-        local targetName = States.TeleportTarget:lower()
-        for _, player in pairs(Players:GetPlayers()) do
-            if player.Name:lower():find(targetName) or player.DisplayName:lower():find(targetName) then
-                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
-                    Window:Notify({
-                        Title = "📍 Teleported",
-                        Description = "Teleported to " .. player.DisplayName,
-                        Duration = 2
-                    })
-                    return
-                end
-            end
-        end
-        Window:Notify({
-            Title = "❌ Error",
-            Description = "Player not found!",
-            Duration = 2
-        })
-    end
-})
-
--- Click TP
-Window:AddToggle({
-    Title = "🖱️ Click Teleport",
-    Description = "Натисніть щоб телепортуватись (Ctrl + Click)",
-    Default = false,
-    Tab = TeleportTab,
-    Callback = function(Value)
-        States.ClickTP = Value
-    end
-})
-
-Mouse.Button1Down:Connect(function()
-    if States.ClickTP and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-        local target = Mouse.Hit
-        if target then
-            HumanoidRootPart.CFrame = CFrame.new(target.Position + Vector3.new(0, 3, 0))
-        end
-    end
-end)
-
-Window:AddSection({ Name = "Quick Teleports", Tab = TeleportTab })
-
--- Teleport to all players buttons
-Window:AddButton({
-    Title = "📋 Show All Players",
-    Description = "Показати список всіх гравців",
-    Tab = TeleportTab,
-    Callback = function()
-        local list = ""
-        for i, player in pairs(Players:GetPlayers()) do
-            list = list .. i .. ". " .. player.DisplayName .. " (" .. player.Name .. ")\n"
-        end
-        Window:Notify({
-            Title = "📋 Players Online",
-            Description = list,
-            Duration = 5
-        })
-    end
-})
-
--- Teleport to Random Player
-Window:AddButton({
-    Title = "🎲 Random Teleport",
-    Description = "Телепортуватися до випадкового гравця",
-    Tab = TeleportTab,
-    Callback = function()
-        local otherPlayers = {}
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                table.insert(otherPlayers, player)
-            end
-        end
-        if #otherPlayers > 0 then
-            local random = otherPlayers[math.random(1, #otherPlayers)]
-            HumanoidRootPart.CFrame = random.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
-            Window:Notify({
-                Title = "🎲 Random TP",
-                Description = "Teleported to " .. random.DisplayName,
-                Duration = 2
-            })
-        end
-    end
-})
-
--- Save/Load Position
-local SavedPosition = nil
-
-Window:AddButton({
-    Title = "💾 Save Position",
-    Description = "Зберегти поточну позицію",
-    Tab = TeleportTab,
-    Callback = function()
-        SavedPosition = HumanoidRootPart.CFrame
-        Window:Notify({
-            Title = "💾 Saved",
-            Description = "Position saved!",
-            Duration = 2
-        })
-    end
-})
-
-Window:AddButton({
-    Title = "📂 Load Position",
-    Description = "Повернутися до збереженої позиції",
-    Tab = TeleportTab,
-    Callback = function()
-        if SavedPosition then
-            HumanoidRootPart.CFrame = SavedPosition
-            Window:Notify({
-                Title = "📂 Loaded",
-                Description = "Teleported to saved position!",
-                Duration = 2
-            })
-        else
-            Window:Notify({
-                Title = "❌ Error",
-                Description = "No position saved!",
-                Duration = 2
-            })
-        end
-    end
-})
-
--- ══════════════════════════════════════════
--- 🛠️ ВКЛАДКА: MISC (Додаткове)
--- ══════════════════════════════════════════
-
-local MiscTab = Window:AddTab({
-    Title = "🛠️ Misc",
-    Icon = "rbxassetid://7733975741",
-})
-
-Window:AddSection({ Name = "Anti", Tab = MiscTab })
-
--- Anti AFK
 Window:AddToggle({
     Title = "🚫 Anti-AFK",
-    Description = "Запобігти кікам за AFK",
-    Default = true,
-    Tab = MiscTab,
-    Callback = function(Value)
-        States.AntiAFK = Value
-    end
-})
-
--- Anti-AFK Connection
-local VirtualUser = game:GetService("VirtualUser")
-LocalPlayer.Idled:Connect(function()
-    if States.AntiAFK then
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
-    end
-end)
-
-Window:AddSection({ Name = "Chat", Tab = MiscTab })
-
--- Chat Spam
-Window:AddToggle({
-    Title = "💬 Chat Spam",
-    Description = "Автоматичний спам у чаті",
+    Description = "Prevent automatic AFK kick",
     Default = false,
-    Tab = MiscTab,
-    Callback = function(Value)
-        States.ChatSpam = Value
-    end
+    Tab = TabMisc,
+    Callback = function(v) State.AntiAFK = v end,
 })
-
-Window:AddInput({
-    Title = "💬 Spam Message",
-    Description = "Повідомлення для спаму",
-    Tab = MiscTab,
-    Callback = function(Text)
-        States.ChatSpamMessage = Text
-    end
-})
-
-Window:AddSlider({
-    Title = "⏱️ Spam Delay",
-    Description = "Затримка між повідомленнями (секунди)",
-    MaxValue = 10,
-    AllowDecimals = true,
-    DecimalAmount = 1,
-    Tab = MiscTab,
-    Callback = function(Value)
-        States.ChatSpamDelay = Value
-    end
-})
-
-task.spawn(function()
-    while true do
-        if States.ChatSpam then
-            pcall(function()
-                local args = {
-                    States.ChatSpamMessage,
-                    "All"
-                }
-                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
-            end)
-        end
-        task.wait(States.ChatSpamDelay)
-    end
-end)
-
-Window:AddSection({ Name = "Fun", Tab = MiscTab })
-
--- Spin
-local spinning = false
-local spinConnection
 
 Window:AddToggle({
     Title = "🌀 Spin",
-    Description = "Обертати персонажа",
+    Description = "Rotate your character continuously",
     Default = false,
-    Tab = MiscTab,
-    Callback = function(Value)
-        spinning = Value
-        if Value then
-            local spinSpeed = 20
-            spinConnection = RunService.RenderStepped:Connect(function()
-                if HumanoidRootPart and spinning then
-                    HumanoidRootPart.CFrame = HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(spinSpeed), 0)
-                end
-            end)
-        else
-            if spinConnection then
-                spinConnection:Disconnect()
-            end
-        end
-    end
+    Tab = TabMisc,
+    Callback = function(v) State.Spin = v end,
 })
 
--- Headless
 Window:AddButton({
-    Title = "👤 Fake Headless",
-    Description = "Зробити персонажа без голови (візуально)",
-    Tab = MiscTab,
+    Title = "🟩 Spawn Platform",
+    Description = "Create a platform below your feet",
+    Tab = TabMisc,
     Callback = function()
-        if Character and Character:FindFirstChild("Head") then
-            Character.Head.Transparency = 1
-            for _, child in pairs(Character.Head:GetChildren()) do
-                if child:IsA("Decal") or child:IsA("SpecialMesh") then
-                    child.Transparency = 1
-                end
-            end
-            -- Hide hat accessories
-            for _, acc in pairs(Character:GetChildren()) do
-                if acc:IsA("Accessory") then
-                    local handle = acc:FindFirstChild("Handle")
-                    if handle then
-                        handle.Transparency = 1
-                    end
-                end
-            end
-        end
-    end
+        local p = Instance.new("Part")
+        p.Size = Vector3.new(20, 1, 20)
+        p.CFrame = HRP.CFrame * CFrame.new(0, -4, 0)
+        p.Anchored = true
+        p.BrickColor = BrickColor.new("Bright green")
+        p.Material = Enum.Material.Neon
+        p.Transparency = 0.3
+        p.Parent = Workspace
+        Window:Notify({ Title = "🟩 Platform", Description = "Platform spawned!", Duration = 2 })
+    end,
 })
 
--- Sit
 Window:AddButton({
-    Title = "🪑 Sit",
-    Description = "Сісти",
-    Tab = MiscTab,
+    Title = "🪑 Sit Down",
+    Description = "Force your character to sit",
+    Tab = TabMisc,
     Callback = function()
-        if Humanoid then
-            Humanoid.Sit = true
-        end
-    end
+        pcall(function() Humanoid.Sit = true end)
+    end,
 })
 
--- Platform
+Window:AddSection({ Name = "Chat", Tab = TabMisc })
+
+Window:AddInput({
+    Title = "💬 Spam Message",
+    Description = "Message to repeat in chat",
+    Tab = TabMisc,
+    Callback = function(t) State.SpamMsg = t end,
+})
+
+Window:AddSlider({
+    Title = "⏱ Spam Delay",
+    Description = "Seconds between each message",
+    Tab = TabMisc,
+    MaxValue = 10,
+    AllowDecimals = true,
+    DecimalAmount = 1,
+    Callback = function(v) State.SpamDelay = v end,
+})
+
+Window:AddToggle({
+    Title = "💬 Chat Spam",
+    Description = "Repeatedly send the message above",
+    Default = false,
+    Tab = TabMisc,
+    Callback = function(v) State.ChatSpam = v end,
+})
+
+Window:AddSection({ Name = "Server", Tab = TabMisc })
+
 Window:AddButton({
-    Title = "🟩 Create Platform",
-    Description = "Створити платформу під ногами",
-    Tab = MiscTab,
+    Title = "🔄 Rejoin",
+    Description = "Rejoin the current server",
+    Tab = TabMisc,
     Callback = function()
-        local platform = Instance.new("Part")
-        platform.Size = Vector3.new(20, 1, 20)
-        platform.Position = HumanoidRootPart.Position - Vector3.new(0, 3, 0)
-        platform.Anchored = true
-        platform.BrickColor = BrickColor.new("Lime green")
-        platform.Material = Enum.Material.Neon
-        platform.Transparency = 0.3
-        platform.Parent = Workspace
-        
-        Window:Notify({
-            Title = "🟩 Platform",
-            Description = "Platform created below you!",
-            Duration = 2
-        })
-    end
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+    end,
 })
 
--- Rejoin
-Window:AddButton({
-    Title = "🔄 Rejoin Server",
-    Description = "Перезайти на сервер",
-    Tab = MiscTab,
-    Callback = function()
-        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-    end
-})
-
--- Server Hop
 Window:AddButton({
     Title = "🔀 Server Hop",
-    Description = "Перейти на інший сервер",
-    Tab = MiscTab,
+    Description = "Jump to a different server",
+    Tab = TabMisc,
     Callback = function()
-        pcall(function()
-            local servers = HttpService:JSONDecode(game:HttpGet(
-                "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
-            ))
-            
-            for _, server in pairs(servers.data) do
-                if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
-                    break
+        task.spawn(function()
+            local ok, servers = pcall(function()
+                return HttpService:JSONDecode(game:HttpGet(
+                    ("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100")
+                    :format(game.PlaceId)
+                ))
+            end)
+            if not ok then
+                Window:Notify({ Title = "❌ Error", Description = "Failed to fetch servers.", Duration = 3 })
+                return
+            end
+            for _, sv in ipairs(servers.data) do
+                if sv.id ~= game.JobId and sv.playing < sv.maxPlayers then
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, sv.id, LocalPlayer)
+                    return
                 end
             end
+            Window:Notify({ Title = "❌ Error", Description = "No suitable server found.", Duration = 3 })
         end)
-    end
+    end,
 })
 
--- ══════════════════════════════════════════
--- ⚙️ ВКЛАДКА: SETTINGS (Налаштування)
--- ══════════════════════════════════════════
+--// ════════════════════════════════════════════
+--// TAB ▶ SETTINGS
+--// ════════════════════════════════════════════
 
-local SettingsTab = Window:AddTab({
+local TabSettings = Window:AddTab({
     Title = "⚙️ Settings",
-    Icon = "rbxassetid://7733974797",
+    Section = "⚙️ Config",
+    Icon = "rbxassetid://11293977610",
 })
 
-Window:AddSection({ Name = "UI Settings", Tab = SettingsTab })
+Window:AddSection({ Name = "UI Settings", Tab = TabSettings })
+
+Window:AddDropdown({
+    Title = "🎨 Theme",
+    Description = "Choose a colour theme",
+    Tab = TabSettings,
+    Options = {
+        ["🌑 Dark"]      = "Dark",
+        ["☀️ Light"]     = "Light",
+        ["⬛ Void"]      = "Void",
+        ["💜 Purple"]    = "Purple",
+        ["🌌 Midnight"]  = "Midnight",
+    },
+    Callback = function(v)
+        Window:SetTheme(Themes[v])
+    end,
+})
+
+Window:AddSlider({
+    Title = "💧 UI Transparency",
+    Description = "Window background opacity",
+    Tab = TabSettings,
+    MaxValue = 1,
+    AllowDecimals = true,
+    DecimalAmount = 2,
+    Callback = function(v)
+        Window:SetSetting("Transparency", v)
+    end,
+})
+
+Window:AddToggle({
+    Title = "🌀 UI Blur",
+    Description = "Blur behind the window (needs Graphics 8+)",
+    Default = true,
+    Tab = TabSettings,
+    Callback = function(v)
+        Window:SetSetting("Blur", v)
+    end,
+})
+
+Window:AddKeybind({
+    Title = "⌨ Minimize Keybind",
+    Description = "Key to show / hide the menu",
+    Tab = TabSettings,
+    Callback = function(key)
+        Window:SetSetting("Keybind", key)
+    end,
+})
+
+Window:AddSection({ Name = "Info", Tab = TabSettings })
 
 Window:AddParagraph({
-    Title = "🎮 Ultra Cheat v2.0",
-    Description = "Universal Roblox cheat script with mobile support.\nMade with ❤️\n\nHotkey: Right Control to toggle menu",
-    Tab = SettingsTab,
+    Title = "🎮 Ultra Cheat v3.0",
+    Description = "Universal Roblox cheat.\nDefault toggle key: Right Control\n\nMobile: drag the 🎮 button to anywhere.",
+    Tab = TabSettings,
 })
 
 Window:AddButton({
-    Title = "🎨 Dark Theme",
-    Description = "Встановити темну тему",
-    Tab = SettingsTab,
+    Title = "🗑 Destroy UI",
+    Description = "Completely remove this cheat menu",
+    Tab = TabSettings,
     Callback = function()
-        Window:SetSetting("Theme", {
-            Primary = Color3.fromRGB(30, 30, 30),
-            Secondary = Color3.fromRGB(35, 35, 35),
-            Component = Color3.fromRGB(40, 40, 40),
-            Interactables = Color3.fromRGB(45, 45, 45),
-            Tab = Color3.fromRGB(200, 200, 200),
-            Title = Color3.fromRGB(240, 240, 240),
-            Description = Color3.fromRGB(200, 200, 200),
-            Shadow = Color3.fromRGB(0, 0, 0),
-            Outline = Color3.fromRGB(40, 40, 40),
-            Icon = Color3.fromRGB(220, 220, 220),
-        })
-    end
-})
-
-Window:AddButton({
-    Title = "🎨 Blue Theme",
-    Description = "Встановити синю тему",
-    Tab = SettingsTab,
-    Callback = function()
-        Window:SetSetting("Theme", {
-            Primary = Color3.fromRGB(20, 25, 40),
-            Secondary = Color3.fromRGB(25, 30, 50),
-            Component = Color3.fromRGB(30, 40, 60),
-            Interactables = Color3.fromRGB(40, 50, 75),
-            Tab = Color3.fromRGB(150, 180, 255),
-            Title = Color3.fromRGB(200, 220, 255),
-            Description = Color3.fromRGB(150, 170, 220),
-            Shadow = Color3.fromRGB(0, 0, 20),
-            Outline = Color3.fromRGB(40, 50, 80),
-            Icon = Color3.fromRGB(150, 180, 255),
-        })
-    end
-})
-
-Window:AddButton({
-    Title = "🎨 Red Theme",
-    Description = "Встановити червону тему",
-    Tab = SettingsTab,
-    Callback = function()
-        Window:SetSetting("Theme", {
-            Primary = Color3.fromRGB(35, 20, 20),
-            Secondary = Color3.fromRGB(45, 25, 25),
-            Component = Color3.fromRGB(55, 30, 30),
-            Interactables = Color3.fromRGB(70, 35, 35),
-            Tab = Color3.fromRGB(255, 150, 150),
-            Title = Color3.fromRGB(255, 200, 200),
-            Description = Color3.fromRGB(220, 150, 150),
-            Shadow = Color3.fromRGB(20, 0, 0),
-            Outline = Color3.fromRGB(80, 40, 40),
-            Icon = Color3.fromRGB(255, 150, 150),
-        })
-    end
-})
-
-Window:AddButton({
-    Title = "🗑️ Destroy UI",
-    Description = "Повністю видалити чит меню",
-    Tab = SettingsTab,
-    Callback = function()
-        -- Clean up ESP
-        for _, esp in pairs(ESPObjects) do
-            for _, d in pairs(esp) do
-                pcall(function() d:Remove() end)
-            end
-        end
-        -- Clean up FOV circle
-        pcall(function() FOVCircle:Remove() end)
-        -- Clean up fly
+        -- cleanup drawings
+        pcall(function() _G._ESPClean() end)
+        pcall(function() _G._FOVCircle:Remove() end)
         pcall(function()
-            local BV = HumanoidRootPart:FindFirstChild("FlyVelocity")
-            local BG = HumanoidRootPart:FindFirstChild("FlyGyro")
-            if BV then BV:Destroy() end
-            if BG then BG:Destroy() end
+            game.CoreGui:FindFirstChild("UltraCheat"):Destroy()
         end)
-        -- Reset states
-        States.Fly = false
-        States.Noclip = false
-        States.GodMode = false
-        States.Aimbot = false
-        States.ESPEnabled = false
-        -- Destroy screen
-        pcall(function()
-            game.CoreGui:FindFirstChild("UILibrary"):Destroy()
-        end)
-    end
+    end,
 })
 
--- ══════════════════════════════════════════
--- 📱 MOBILE SUPPORT
--- ══════════════════════════════════════════
+--// ════════════════════════════════════════════
+--// DRAWING – FOV CIRCLE
+--// ════════════════════════════════════════════
 
--- Кнопка для мобільних пристроїв для відкриття/закриття меню
-if UserInputService.TouchEnabled then
-    local MobileButton = Instance.new("ScreenGui")
-    MobileButton.Name = "MobileToggle"
-    MobileButton.ResetOnSpawn = false
-    MobileButton.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    
-    local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
-    ToggleBtn.Position = UDim2.new(0, 10, 0.5, -25)
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(153, 155, 255)
-    ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleBtn.Text = "🎮"
-    ToggleBtn.TextSize = 24
-    ToggleBtn.Font = Enum.Font.GothamBold
-    ToggleBtn.Parent = MobileButton
-    ToggleBtn.BackgroundTransparency = 0.3
-    ToggleBtn.AutoButtonColor = true
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 25)
-    corner.Parent = ToggleBtn
-    
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(100, 100, 255)
-    stroke.Thickness = 2
-    stroke.Parent = ToggleBtn
-    
-    -- Draggable mobile button
-    local dragging = false
-    local dragStart, startPos
-    
-    ToggleBtn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = ToggleBtn.Position
-        end
-    end)
-    
-    ToggleBtn.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch and dragging then
-            local delta = input.Position - dragStart
-            ToggleBtn.Position = UDim2.new(
-                startPos.X.Scale, startPos.X.Offset + delta.X,
-                startPos.Y.Scale, startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-    
-    ToggleBtn.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-    
-    ToggleBtn.MouseButton1Click:Connect(function()
-        -- Toggle the main UI
-        UserInputService.InputBegan:Fire(
-            Instance.new("InputObject", {
-                KeyCode = Enum.KeyCode.RightControl,
-                UserInputType = Enum.UserInputType.Keyboard
-            })
-        )
-    end)
-    
-    pcall(function()
-        MobileButton.Parent = game.CoreGui
-    end)
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Thickness    = 1.5
+FOVCircle.NumSides     = 64
+FOVCircle.Radius       = State.AimbotFOV
+FOVCircle.Filled       = false
+FOVCircle.Visible      = false
+FOVCircle.ZIndex       = 999
+FOVCircle.Transparency = 0.8
+FOVCircle.Color        = Color3.fromRGB(255, 60, 60)
+_G._FOVCircle          = FOVCircle
+
+--// ════════════════════════════════════════════
+--// DRAWING – ESP OBJECTS
+--// ════════════════════════════════════════════
+
+local ESPData = {}
+
+local function NewDrawing(class, props)
+    local d = Drawing.new(class)
+    for k, v in pairs(props) do d[k] = v end
+    return d
 end
 
--- ══════════════════════════════════════════
--- 🔔 СТАРТОВЕ ПОВІДОМЛЕННЯ
--- ══════════════════════════════════════════
+local function CreateESPFor(player)
+    if player == LocalPlayer or ESPData[player] then return end
+    ESPData[player] = {
+        Box      = NewDrawing("Square", { Thickness=1.5, Filled=false,
+                        Color=Color3.fromRGB(255,80,80), Visible=false, ZIndex=5 }),
+        Name     = NewDrawing("Text",   { Size=13, Center=true, Outline=true,
+                        Color=Color3.fromRGB(255,255,255), Visible=false, ZIndex=5, Font=2 }),
+        HpBG     = NewDrawing("Line",   { Thickness=4,
+                        Color=Color3.fromRGB(0,0,0), Visible=false, ZIndex=4 }),
+        Hp       = NewDrawing("Line",   { Thickness=2,
+                        Color=Color3.fromRGB(0,255,0), Visible=false, ZIndex=5 }),
+        Dist     = NewDrawing("Text",   { Size=11, Center=true, Outline=true,
+                        Color=Color3.fromRGB(200,200,200), Visible=false, ZIndex=5, Font=2 }),
+        Tracer   = NewDrawing("Line",   { Thickness=1.5,
+                        Color=Color3.fromRGB(255,220,0), Visible=false, ZIndex=5 }),
+    }
+end
 
-task.delay(1, function()
-    Window:Notify({
-        Title = "🎮 Ultra Cheat v2.0 Loaded!",
-        Description = "Welcome, " .. LocalPlayer.DisplayName .. "!\nPress RightCtrl or tap 🎮 button to toggle.",
-        Duration = 5
-    })
+local function DestroyESPFor(player)
+    if ESPData[player] then
+        for _, d in pairs(ESPData[player]) do pcall(function() d:Remove() end) end
+        ESPData[player] = nil
+    end
+end
+
+local function HideESP(esp)
+    for _, d in pairs(esp) do d.Visible = false end
+end
+
+_G._ESPClean = function()
+    for p in pairs(ESPData) do DestroyESPFor(p) end
+end
+
+for _, p in ipairs(Players:GetPlayers()) do CreateESPFor(p) end
+Players.PlayerAdded:Connect(CreateESPFor)
+Players.PlayerRemoving:Connect(DestroyESPFor)
+
+--// ════════════════════════════════════════════
+--// AIMBOT HELPERS
+--// ════════════════════════════════════════════
+
+local function IsTeammate(player)
+    if not State.ESPTeamCheck then return false end
+    return pcall(function() return player.Team == LocalPlayer.Team end) and player.Team == LocalPlayer.Team
+end
+
+local function GetClosestEnemy()
+    local best, bestDist = nil, State.AimbotFOV
+    local mousePos = UserInputService:GetMouseLocation()
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p == LocalPlayer or IsTeammate(p) then continue end
+        local char = p.Character
+        if not char then continue end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        local part = char:FindFirstChild(State.AimbotBone) or char:FindFirstChild("HumanoidRootPart")
+        if not (hum and hum.Health > 0 and part) then continue end
+
+        local sp, onScreen = Camera:WorldToScreenPoint(part.Position)
+        if not onScreen then continue end
+        local dist = (Vector2.new(sp.X, sp.Y) - mousePos).Magnitude
+        if dist < bestDist then bestDist = dist; best = p end
+    end
+    return best
+end
+
+--// ════════════════════════════════════════════
+--// MAIN RENDER LOOP
+--// ════════════════════════════════════════════
+
+RunService.RenderStepped:Connect(function(dt)
+    local mouse = UserInputService:GetMouseLocation()
+
+    --// FOV Circle
+    FOVCircle.Visible  = State.ShowFOV
+    FOVCircle.Radius   = State.AimbotFOV
+    FOVCircle.Position = mouse
+
+    --// Aimbot (hold RMB)
+    if State.Aimbot and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+        local target = GetClosestEnemy()
+        if target and target.Character then
+            local part = target.Character:FindFirstChild(State.AimbotBone)
+                      or target.Character:FindFirstChild("HumanoidRootPart")
+            if part then
+                local smooth = 1 / math.max(State.AimbotSmooth, 0.01)
+                Camera.CFrame = Camera.CFrame:Lerp(
+                    CFrame.new(Camera.CFrame.Position, part.Position), smooth)
+            end
+        end
+    end
+
+    --// ESP update
+    local vp = Camera.ViewportSize
+    for player, esp in pairs(ESPData) do
+        local char = player.Character
+        local hum  = char and char:FindFirstChildOfClass("Humanoid")
+        local hrp  = char and char:FindFirstChild("HumanoidRootPart")
+        local head = char and char:FindFirstChild("Head")
+
+        if not (char and hum and hum.Health > 0 and hrp and head and State.ESPEnabled)
+        or IsTeammate(player) then
+            HideESP(esp); continue
+        end
+
+        local wp, vis = Camera:WorldToViewportPoint(hrp.Position)
+        local hp2     = Camera:WorldToViewportPoint(head.Position + Vector3.new(0,.5,0))
+        local fp2     = Camera:WorldToViewportPoint(hrp.Position - Vector3.new(0,3,0))
+
+        if not vis then HideESP(esp); continue end
+
+        local bH = math.abs(hp2.Y - fp2.Y)
+        local bW = bH * 0.55
+        local cx = wp.X
+
+        -- Box
+        esp.Box.Visible  = State.ESPBoxes
+        esp.Box.Size     = Vector2.new(bW, bH)
+        esp.Box.Position = Vector2.new(cx - bW*.5, hp2.Y)
+
+        -- Name
+        esp.Name.Visible  = State.ESPNames
+        esp.Name.Text     = player.DisplayName
+        esp.Name.Position = Vector2.new(cx, hp2.Y - 16)
+
+        -- Health
+        local pct = hum.Health / hum.MaxHealth
+        esp.HpBG.Visible = State.ESPHealth
+        esp.HpBG.From    = Vector2.new(cx - bW*.5 - 5, fp2.Y)
+        esp.HpBG.To      = Vector2.new(cx - bW*.5 - 5, hp2.Y)
+        esp.Hp.Visible   = State.ESPHealth
+        esp.Hp.From      = Vector2.new(cx - bW*.5 - 5, fp2.Y)
+        esp.Hp.To        = Vector2.new(cx - bW*.5 - 5, fp2.Y - bH * pct)
+        esp.Hp.Color     = Color3.new(1-pct, pct, 0)
+
+        -- Distance
+        local dist3d = (HRP.Position - hrp.Position).Magnitude
+        esp.Dist.Visible  = State.ESPDistance
+        esp.Dist.Text     = math.floor(dist3d) .. " st"
+        esp.Dist.Position = Vector2.new(cx, fp2.Y + 3)
+
+        -- Tracer
+        esp.Tracer.Visible = State.ESPTracers
+        esp.Tracer.From    = Vector2.new(vp.X*.5, vp.Y)
+        esp.Tracer.To      = Vector2.new(cx, fp2.Y)
+    end
+
+    --// Fly
+    if State.Fly and HRP then
+        local bv = HRP:FindFirstChild("_FlyBV")
+        local bg = HRP:FindFirstChild("_FlyBG")
+        if not bv then
+            bv = Instance.new("BodyVelocity")
+            bv.Name = "_FlyBV"
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.Parent = HRP
+        end
+        if not bg then
+            bg = Instance.new("BodyGyro")
+            bg.Name = "_FlyBG"
+            bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            bg.D = 200; bg.P = 10000
+            bg.Parent = HRP
+        end
+        bg.CFrame = Camera.CFrame
+        local dir = Vector3.zero
+        local uis = UserInputService
+        if uis:IsKeyDown(Enum.KeyCode.W) then dir += Camera.CFrame.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.S) then dir -= Camera.CFrame.LookVector end
+        if uis:IsKeyDown(Enum.KeyCode.A) then dir -= Camera.CFrame.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.D) then dir += Camera.CFrame.RightVector end
+        if uis:IsKeyDown(Enum.KeyCode.Space) or uis:IsKeyDown(Enum.KeyCode.ButtonA) then
+            dir += Vector3.new(0,1,0)
+        end
+        if uis:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0,1,0) end
+        bv.Velocity = dir * State.FlySpeed
+        pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Flying) end)
+    end
+
+    --// Spin
+    if State.Spin and HRP then
+        HRP.CFrame *= CFrame.Angles(0, math.rad(10), 0)
+    end
+
+    --// Custom time
+    if State.CustomTime then
+        Lighting.ClockTime = State.TimeValue
+    end
 end)
 
-print("═══════════════════════════════════")
-print("  🎮 Ultra Cheat v2.0 - Loaded!")
-print("  👤 Player: " .. LocalPlayer.DisplayName)
-print("  🎯 Game: " .. game.PlaceId)
-print("═══════════════════════════════════")
+--// ════════════════════════════════════════════
+--// HEARTBEAT LOOP
+--// ════════════════════════════════════════════
+
+RunService.Heartbeat:Connect(function()
+    --// God Mode
+    if State.GodMode and Humanoid then
+        pcall(function() Humanoid.Health = Humanoid.MaxHealth end)
+    end
+
+    --// Noclip
+    if State.Noclip and Character then
+        for _, p in ipairs(Character:GetDescendants()) do
+            if p:IsA("BasePart") then p.CanCollide = false end
+        end
+    end
+end)
+
+--// ════════════════════════════════════════════
+--// INPUT EVENTS
+--// ════════════════════════════════════════════
+
+--// Infinite Jump
+UserInputService.JumpRequest:Connect(function()
+    if State.InfiniteJump and Humanoid then
+        pcall(function()
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end)
+    end
+end)
+
+--// Click Teleport
+Mouse.Button1Down:Connect(function()
+    if State.ClickTP and Mouse.Hit then
+        pcall(function()
+            HRP.CFrame = CFrame.new(Mouse.Hit.Position + Vector3.new(0, 3, 0))
+        end)
+    end
+end)
+
+--// ════════════════════════════════════════════
+--// TASK LOOPS
+--// ════════════════════════════════════════════
+
+--// Anti-AFK
+LocalPlayer.Idled:Connect(function()
+    if State.AntiAFK then
+        pcall(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+        end)
+    end
+end)
+
+--// Chat Spam
+task.spawn(function()
+    while true do
+        if State.ChatSpam and State.SpamMsg ~= "" then
+            pcall(function()
+                ReplicatedStorage
+                    :FindFirstChild("DefaultChatSystemChatEvents", true)
+                    :FindFirstChild("SayMessageRequest")
+                    :FireServer(State.SpamMsg, "All")
+            end)
+        end
+        task.wait(math.max(State.SpamDelay, 0.5))
+    end
+end)
+
+--// Kill Aura
+task.spawn(function()
+    while task.wait(0.15) do
+        if not State.KillAura or not HRP then continue end
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p == LocalPlayer or IsTeammate(p) then continue end
+            local char = p.Character
+            local hrp2 = char and char:FindFirstChild("HumanoidRootPart")
+            local hum2 = char and char:FindFirstChildOfClass("Humanoid")
+            if hrp2 and hum2 and hum2.Health > 0 then
+                if (HRP.Position - hrp2.Position).Magnitude <= State.KillAuraRange then
+                    -- simulate a tool click / touch event
+                    pcall(function()
+                        local tool = Character:FindFirstChildOfClass("Tool")
+                        if tool and tool:FindFirstChild("Handle") then
+                            local re = tool:FindFirstChildOfClass("RemoteEvent")
+                                    or tool:FindFirstChildOfClass("RemoteFunction")
+                            if re then re:FireServer(hrp2.CFrame) end
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end)
+
+--// ════════════════════════════════════════════
+--// MOBILE BUTTON
+--// ════════════════════════════════════════════
+
+if UserInputService.TouchEnabled then
+    local MobileGui = Instance.new("ScreenGui")
+    MobileGui.Name            = "UltraCheatMobile"
+    MobileGui.ResetOnSpawn    = false
+    MobileGui.DisplayOrder    = 999
+    MobileGui.ZIndexBehavior  = Enum.ZIndexBehavior.Sibling
+
+    local Btn = Instance.new("TextButton")
+    Btn.Size                  = UDim2.fromOffset(54, 54)
+    Btn.Position              = UDim2.new(0, 8, 0.5, -27)
+    Btn.BackgroundColor3      = Color3.fromRGB(100, 90, 200)
+    Btn.TextColor3            = Color3.new(1,1,1)
+    Btn.Text                  = "🎮"
+    Btn.TextScaled            = true
+    Btn.Font                  = Enum.Font.GothamBold
+    Btn.BackgroundTransparency = 0.2
+    Btn.Parent                = MobileGui
+
+    local c1 = Instance.new("UICorner"); c1.CornerRadius = UDim.new(0,27); c1.Parent = Btn
+    local c2 = Instance.new("UIStroke"); c2.Color = Color3.fromRGB(140,130,255); c2.Thickness = 2; c2.Parent = Btn
+
+    --// Drag logic
+    local dragging, dStart, dPos = false, nil, nil
+    Btn.InputBegan:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; dStart = inp.Position; dPos = Btn.Position
+        end
+    end)
+    Btn.InputChanged:Connect(function(inp)
+        if dragging and inp.UserInputType == Enum.UserInputType.Touch then
+            local d = inp.Position - dStart
+            Btn.Position = UDim2.new(dPos.X.Scale, dPos.X.Offset+d.X,
+                                     dPos.Y.Scale, dPos.Y.Offset+d.Y)
+        end
+    end)
+    Btn.InputEnded:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.Touch then dragging = false end
+    end)
+
+    -- Toggle menu visibility
+    local menuVisible = true
+    Btn.MouseButton1Click:Connect(function()
+        menuVisible = not menuVisible
+        -- fire the library's built-in keybind handler indirectly
+        pcall(function()
+            local screen = game.CoreGui:FindFirstChild("UILibrary")
+                        or game.Players.LocalPlayer.PlayerGui:FindFirstChild("UILibrary")
+            if screen then screen.Main.Visible = menuVisible end
+        end)
+    end)
+
+    pcall(function() MobileGui.Parent = game.CoreGui end)
+    if not MobileGui.Parent then MobileGui.Parent = LocalPlayer.PlayerGui end
+end
+
+--// ════════════════════════════════════════════
+--// STARTUP NOTIFICATION
+--// ════════════════════════════════════════════
+
+Window:Notify({
+    Title = "🎮 Ultra Cheat v3.0 Ready!",
+    Description = ("Welcome, %s!\nToggle: RightCtrl  |  Mobile: tap 🎮"):format(LocalPlayer.DisplayName),
+    Duration = 6,
+})
+
+print(("[ Ultra Cheat v3.0 ] Loaded — %s | PlaceId %d"):format(LocalPlayer.Name, game.PlaceId))
