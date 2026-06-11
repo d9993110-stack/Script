@@ -5,7 +5,7 @@
     ║                                          ║
     ║   Developer: Frost                       ║
     ║   Telegram: @Jokerfros                   ║
-    ║   Version: 3.0 (Orion UI)                ║
+    ║   Version: 3.0 (Void UI)                 ║
     ╚══════════════════════════════════════════╝
 ]]
 
@@ -51,30 +51,23 @@ local L = {
         character = "Character", combat = "Combat", teleport = "Teleport",
         esp = "ESP", environment = "Environment", utilities = "Utilities",
         settings = "Settings",
-        walkspeed = "WalkSpeed", walkspeedDesc = "Movement speed",
-        jumppower = "JumpPower", jumppowerDesc = "Jump height",
-        gravity = "Gravity", gravityDesc = "World gravity (196.2 default)",
-        infJump = "Infinite Jump", infJumpDesc = "Jump mid-air",
-        autoJump = "Auto Jump", autoJumpDesc = "Jump automatically",
-        bunnyHop = "Bunny Hop", bunnyHopDesc = "Jump on landing",
-        noclip = "Noclip", noclipDesc = "Walk through walls",
-        fly = "Fly", flyDesc = "Free flight mode",
-        flySpeed = "Fly Speed", flySpeedDesc = "Flight velocity",
-        fov = "Field of View", fovDesc = "Camera FOV",
-        godMode = "God Mode", godModeDesc = "Max health always",
-        noReset = "No Reset", noResetDesc = "Disable reset button",
-        forceReset = "Force Reset", respawn = "Respawn",
-        freeze = "Freeze Character", frozen = "Frozen", unfrozen = "Unfrozen",
-        aimbot = "Aimbot", aimbotDesc = "Lock-on aim (hold RMB)",
-        fovRadius = "FOV Radius", smoothing = "Smoothing",
-        showFov = "Show FOV Circle", hitbox = "Hitbox Expander",
-        hitboxScale = "Hitbox Scale", killAura = "Kill Aura",
-        auraRange = "Aura Range", nearestPlayer = "Show Nearest Player",
-        noPlayersNear = "No players nearby",
-        targetName = "Target Name", tpToTarget = "Teleport to Target",
+        walkspeed = "WalkSpeed", jumppower = "JumpPower",
+        gravity = "Gravity", infJump = "Infinite Jump",
+        autoJump = "Auto Jump", bunnyHop = "Bunny Hop",
+        noclip = "Noclip", fly = "Fly", flySpeed = "Fly Speed",
+        fov = "Field of View", godMode = "God Mode",
+        noReset = "No Reset", forceReset = "Force Reset",
+        respawn = "Respawn", freeze = "Freeze Character",
+        frozen = "Frozen", unfrozen = "Unfrozen",
+        aimbot = "Aimbot", fovRadius = "FOV Radius",
+        smoothing = "Smoothing", showFov = "Show FOV Circle",
+        hitbox = "Hitbox Expander", hitboxScale = "Hitbox Scale",
+        killAura = "Kill Aura", auraRange = "Aura Range",
+        nearestPlayer = "Nearest Player", noPlayersNear = "No players nearby",
+        targetName = "Target Name", tpToTarget = "TP to Target",
         randomPlayer = "Random Player", tpSpawn = "TP to Spawn",
         tpForward = "TP Forward 100", savePos = "Save Position",
-        loadPos = "Load Position", clickTp = "Click Teleport",
+        loadPos = "Load Position", clickTp = "Click TP",
         saved = "Saved", loaded = "Loaded", posStored = "Position stored",
         posRestored = "Position restored", nothingSaved = "Nothing saved",
         notFound = "Player not found", noPlayers = "No players",
@@ -85,7 +78,7 @@ local L = {
         chams = "Chams", teamFilter = "Team Filter",
         fullbright = "Fullbright", noFog = "No Fog",
         timeLock = "Time Lock", clockTime = "Clock Time",
-        removeEffects = "Remove All Effects", removeParticles = "Remove Particles",
+        removeEffects = "Remove Effects", removeParticles = "Remove Particles",
         removeDecals = "Remove Decals", removeSounds = "Remove Sounds",
         effectsRemoved = "effects removed", particlesRemoved = "particles removed",
         antiAfk = "Anti-AFK", antiKick = "Anti-Kick",
@@ -96,38 +89,29 @@ local L = {
         spamInterval = "Spam Interval", chatSpam = "Chat Spam",
         rejoin = "Rejoin", serverHop = "Server Hop", serverInfo = "Server Info",
         copied = "Copied",
-        autoBomb = "Auto Bomb Pass", autoBombDesc = "Auto-pass bomb to nearest",
-        bombKeywords = "Bomb Keywords",
+        autoBomb = "Auto Bomb Pass", bombKeywords = "Bomb Keywords",
         removeBlur = "Remove Blur", blurEnabled = "Blur Protection",
-        removeAllPost = "Remove ALL Post Effects",
-        lowGraphics = "Low Graphics Mode",
+        removeAllPost = "Remove ALL Effects", lowGraphics = "Low Graphics",
         copyId = "Copy Player ID", destroy = "Destroy Eplisma",
-        welcome = "Welcome", pressE = "RightControl to toggle menu",
+        welcome = "Welcome",
     },
     RU = {
         character = "Персонаж", combat = "Бой", teleport = "Телепорт",
         esp = "ESP", environment = "Окружение", utilities = "Утилиты",
         settings = "Настройки",
-        walkspeed = "Скорость", walkspeedDesc = "Скорость передвижения",
-        jumppower = "Прыжок", jumppowerDesc = "Высота прыжка",
-        gravity = "Гравитация", gravityDesc = "Гравитация мира (196.2)",
-        infJump = "Бесконечный прыжок", infJumpDesc = "Прыжок в воздухе",
-        autoJump = "Авто-прыжок", autoJumpDesc = "Прыгать автоматически",
-        bunnyHop = "Банни-хоп", bunnyHopDesc = "Прыжок при приземлении",
-        noclip = "Ноклип", noclipDesc = "Проходить сквозь стены",
-        fly = "Полёт", flyDesc = "Свободный полёт",
-        flySpeed = "Скорость полёта", flySpeedDesc = "Скорость в полёте",
-        fov = "Угол обзора", fovDesc = "FOV камеры",
-        godMode = "Бессмертие", godModeDesc = "Максимальное здоровье",
-        noReset = "Без ресета", noResetDesc = "Отключить ресет",
-        forceReset = "Убить себя", respawn = "Респавн",
-        freeze = "Заморозить", frozen = "Заморожен", unfrozen = "Разморожен",
-        aimbot = "Аимбот", aimbotDesc = "Автоприцел (ПКМ)",
-        fovRadius = "Радиус FOV", smoothing = "Плавность",
-        showFov = "Показать FOV", hitbox = "Расширение хитбокса",
-        hitboxScale = "Размер хитбокса", killAura = "Аура убийства",
-        auraRange = "Радиус ауры", nearestPlayer = "Ближайший игрок",
-        noPlayersNear = "Нет игроков рядом",
+        walkspeed = "Скорость", jumppower = "Прыжок",
+        gravity = "Гравитация", infJump = "Бесконечный прыжок",
+        autoJump = "Авто-прыжок", bunnyHop = "Банни-хоп",
+        noclip = "Ноклип", fly = "Полёт", flySpeed = "Скорость полёта",
+        fov = "Угол обзора", godMode = "Бессмертие",
+        noReset = "Без ресета", forceReset = "Убить себя",
+        respawn = "Респавн", freeze = "Заморозить",
+        frozen = "Заморожен", unfrozen = "Разморожен",
+        aimbot = "Аимбот", fovRadius = "Радиус FOV",
+        smoothing = "Плавность", showFov = "Показать FOV",
+        hitbox = "Хитбокс", hitboxScale = "Размер хитбокса",
+        killAura = "Аура убийства", auraRange = "Радиус ауры",
+        nearestPlayer = "Ближайший игрок", noPlayersNear = "Нет игроков рядом",
         targetName = "Имя цели", tpToTarget = "ТП к цели",
         randomPlayer = "Случайный игрок", tpSpawn = "ТП на спавн",
         tpForward = "ТП вперёд 100", savePos = "Сохранить позицию",
@@ -142,24 +126,22 @@ local L = {
         chams = "Хамс", teamFilter = "Фильтр команды",
         fullbright = "Яркий свет", noFog = "Без тумана",
         timeLock = "Блокировка времени", clockTime = "Время суток",
-        removeEffects = "Убрать все эффекты", removeParticles = "Убрать частицы",
+        removeEffects = "Убрать эффекты", removeParticles = "Убрать частицы",
         removeDecals = "Убрать декали", removeSounds = "Убрать звуки",
         effectsRemoved = "эффектов удалено", particlesRemoved = "частиц удалено",
         antiAfk = "Анти-АФК", antiKick = "Анти-Кик",
         spin = "Вращение", spinSpeed = "Скорость вращения",
-        spawnPlatform = "Создать платформу", forceSit = "Сесть",
+        spawnPlatform = "Платформа", forceSit = "Сесть",
         forceJump = "Прыгнуть", copyPos = "Копировать позицию",
         copyLink = "Копировать ссылку", spamMsg = "Сообщение спама",
         spamInterval = "Интервал", chatSpam = "Спам в чат",
         rejoin = "Реджойн", serverHop = "Сменить сервер", serverInfo = "Инфо сервера",
         copied = "Скопировано",
-        autoBomb = "Авто-передача бомбы", autoBombDesc = "Передать бомбу ближайшему",
-        bombKeywords = "Ключевые слова бомбы",
+        autoBomb = "Авто-бомба", bombKeywords = "Ключевые слова бомбы",
         removeBlur = "Убрать блюр", blurEnabled = "Защита от блюра",
-        removeAllPost = "Убрать ВСЕ эффекты",
-        lowGraphics = "Низкая графика",
+        removeAllPost = "Убрать ВСЕ эффекты", lowGraphics = "Низкая графика",
         copyId = "Копировать ID", destroy = "Удалить Eplisma",
-        welcome = "Добро пожаловать", pressE = "RightControl для меню",
+        welcome = "Добро пожаловать",
     },
 }
 
@@ -168,18 +150,17 @@ local function T(key)
 end
 
 --// ═══════════════════════════════════════════
---//  ORION UI LIBRARY
+--//  VOID UI LIBRARY
 --// ═══════════════════════════════════════════
 
-local libery = loadstring(game:HttpGet("https://raw.githubusercontent.com/raphaelmaboi/ui-libraries/refs/heads/main/VoidUi/source.lua"))()
+local VoidUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/raphaelmaboi/ui-libraries/refs/heads/main/VoidUi/source.lua"))()
 
-local Window = OrionLib:MakeWindow({
-    Name = "Eplisma v3.0 | by Frost",
-    HidePremium = true,
-    SaveConfig = false,
-    ConfigFolder = "Eplisma",
-    IntroText = "Eplisma v3.0",
-    IntroIcon = "rbxassetid://4483345998",
+local Window = VoidUI:CreateWindow({
+    Title = "Eplisma v3.0",
+    SubTitle = "by Frost | @Jokerfros",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(500, 400),
+    Theme = "Dark",
 })
 
 --// ═══════════════════════════════════════════
@@ -218,899 +199,568 @@ local CFG = {
 --//  TAB: CHARACTER
 --// ═══════════════════════════════════════════
 
-local TabChar = Window:MakeTab({
-    Name = T("character"),
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local TabChar = Window:AddTab(T("character"))
 
-TabChar:AddLabel("🏃 Movement")
+local SectMovement = TabChar:AddSection(T("character") .. " - Movement")
 
-TabChar:AddSlider({
-    Name = T("walkspeed"),
-    Min = 0,
-    Max = 500,
-    Default = 16,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "speed",
-    Callback = function(v)
-        CFG.Speed = v
-        pcall(function() Humanoid.WalkSpeed = v end)
-    end
-})
+SectMovement:AddSlider(T("walkspeed"), 0, 500, 16, function(v)
+    CFG.Speed = v
+    pcall(function() Humanoid.WalkSpeed = v end)
+end)
 
-TabChar:AddSlider({
-    Name = T("jumppower"),
-    Min = 0,
-    Max = 500,
-    Default = 50,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "power",
-    Callback = function(v)
-        CFG.JumpPower = v
+SectMovement:AddSlider(T("jumppower"), 0, 500, 50, function(v)
+    CFG.JumpPower = v
+    pcall(function()
+        Humanoid.UseJumpPower = true
+        Humanoid.JumpPower = v
+    end)
+end)
+
+SectMovement:AddSlider(T("gravity"), 0, 500, 196, function(v)
+    CFG.Gravity = v
+    Workspace.Gravity = v
+end)
+
+SectMovement:AddToggle(T("infJump"), false, function(v)
+    CFG.InfJump = v
+end)
+
+SectMovement:AddToggle(T("autoJump"), false, function(v)
+    CFG.AutoJump = v
+    pcall(function() Humanoid.AutoJumpEnabled = v end)
+end)
+
+SectMovement:AddToggle(T("bunnyHop"), false, function(v)
+    CFG.BunnyHop = v
+end)
+
+SectMovement:AddToggle(T("noclip"), false, function(v)
+    CFG.Noclip = v
+end)
+
+local SectFlight = TabChar:AddSection("Flight")
+
+SectFlight:AddToggle(T("fly"), false, function(v)
+    CFG.Fly = v
+    if not v then
         pcall(function()
-            Humanoid.UseJumpPower = true
-            Humanoid.JumpPower = v
+            if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
+            if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
         end)
     end
-})
+end)
 
-TabChar:AddSlider({
-    Name = T("gravity"),
-    Min = 0,
-    Max = 500,
-    Default = 196,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "gravity",
-    Callback = function(v)
-        CFG.Gravity = v
-        Workspace.Gravity = v
-    end
-})
+SectFlight:AddSlider(T("flySpeed"), 0, 300, 60, function(v)
+    CFG.FlySpeed = v
+end)
 
-TabChar:AddToggle({
-    Name = T("infJump"),
-    Default = false,
-    Callback = function(v) CFG.InfJump = v end
-})
+local SectCamera = TabChar:AddSection("Camera")
 
-TabChar:AddToggle({
-    Name = T("autoJump"),
-    Default = false,
-    Callback = function(v)
-        CFG.AutoJump = v
-        pcall(function() Humanoid.AutoJumpEnabled = v end)
-    end
-})
+SectCamera:AddSlider(T("fov"), 10, 120, 70, function(v)
+    CFG.FOV = v
+    Camera.FieldOfView = v
+end)
 
-TabChar:AddToggle({
-    Name = T("bunnyHop"),
-    Default = false,
-    Callback = function(v) CFG.BunnyHop = v end
-})
+local SectSurvival = TabChar:AddSection("Survivability")
 
-TabChar:AddToggle({
-    Name = T("noclip"),
-    Default = false,
-    Callback = function(v) CFG.Noclip = v end
-})
+SectSurvival:AddToggle(T("godMode"), false, function(v)
+    CFG.GodMode = v
+end)
 
-TabChar:AddLabel("✈️ Flight")
+SectSurvival:AddToggle(T("noReset"), false, function(v)
+    CFG.NoReset = v
+    pcall(function() StarterGui:SetCore("ResetButtonCallback", not v) end)
+end)
 
-TabChar:AddToggle({
-    Name = T("fly"),
-    Default = false,
-    Callback = function(v)
-        CFG.Fly = v
-        if not v then
-            pcall(function()
-                if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
-                if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
-            end)
-        end
-    end
-})
+SectSurvival:AddButton(T("forceReset"), function()
+    pcall(function() Humanoid.Health = 0 end)
+end)
 
-TabChar:AddSlider({
-    Name = T("flySpeed"),
-    Min = 0,
-    Max = 300,
-    Default = 60,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "speed",
-    Callback = function(v) CFG.FlySpeed = v end
-})
+SectSurvival:AddButton(T("respawn"), function()
+    pcall(function() LocalPlayer:LoadCharacter() end)
+end)
 
-TabChar:AddLabel("📷 Camera")
-
-TabChar:AddSlider({
-    Name = T("fov"),
-    Min = 10,
-    Max = 120,
-    Default = 70,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "fov",
-    Callback = function(v)
-        CFG.FOV = v
-        Camera.FieldOfView = v
-    end
-})
-
-TabChar:AddLabel("🛡️ Survivability")
-
-TabChar:AddToggle({
-    Name = T("godMode"),
-    Default = false,
-    Callback = function(v) CFG.GodMode = v end
-})
-
-TabChar:AddToggle({
-    Name = T("noReset"),
-    Default = false,
-    Callback = function(v)
-        CFG.NoReset = v
-        pcall(function() StarterGui:SetCore("ResetButtonCallback", not v) end)
-    end
-})
-
-TabChar:AddButton({
-    Name = T("forceReset"),
-    Callback = function()
-        pcall(function() Humanoid.Health = 0 end)
-    end
-})
-
-TabChar:AddButton({
-    Name = T("respawn"),
-    Callback = function()
-        pcall(function() LocalPlayer:LoadCharacter() end)
-    end
-})
-
-TabChar:AddButton({
-    Name = T("freeze"),
-    Callback = function()
-        pcall(function()
-            HRP.Anchored = not HRP.Anchored
-            OrionLib:MakeNotification({
-                Name = T("freeze"),
-                Content = HRP.Anchored and T("frozen") or T("unfrozen"),
-                Time = 2
-            })
-        end)
-    end
-})
+SectSurvival:AddButton(T("freeze"), function()
+    pcall(function()
+        HRP.Anchored = not HRP.Anchored
+    end)
+end)
 
 --// ═══════════════════════════════════════════
 --//  TAB: COMBAT
 --// ═══════════════════════════════════════════
 
-local TabCombat = Window:MakeTab({
-    Name = T("combat"),
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local TabCombat = Window:AddTab(T("combat"))
 
-TabCombat:AddLabel("🎯 Aim Assist")
+local SectAim = TabCombat:AddSection("Aim Assist")
 
-TabCombat:AddToggle({
-    Name = T("aimbot"),
-    Default = false,
-    Callback = function(v) CFG.Aimbot = v end
-})
+SectAim:AddToggle(T("aimbot"), false, function(v)
+    CFG.Aimbot = v
+end)
 
-TabCombat:AddSlider({
-    Name = T("fovRadius"),
-    Min = 10,
-    Max = 900,
-    Default = 250,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 5,
-    ValueName = "px",
-    Callback = function(v) CFG.AimFOV = v end
-})
+SectAim:AddSlider(T("fovRadius"), 10, 900, 250, function(v)
+    CFG.AimFOV = v
+end)
 
-TabCombat:AddSlider({
-    Name = T("smoothing"),
-    Min = 1,
-    Max = 50,
-    Default = 5,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "smooth",
-    Callback = function(v) CFG.AimSmooth = v end
-})
+SectAim:AddSlider(T("smoothing"), 1, 50, 5, function(v)
+    CFG.AimSmooth = v
+end)
 
-TabCombat:AddToggle({
-    Name = T("showFov"),
-    Default = false,
-    Callback = function(v) CFG.ShowFOV = v end
-})
+SectAim:AddToggle(T("showFov"), false, function(v)
+    CFG.ShowFOV = v
+end)
 
-TabCombat:AddLabel("⚔️ Melee")
+local SectMelee = TabCombat:AddSection("Melee")
 
-TabCombat:AddToggle({
-    Name = T("hitbox"),
-    Default = false,
-    Callback = function(v)
-        CFG.HitboxExp = v
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                local h = p.Character:FindFirstChild("HumanoidRootPart")
-                if h then
-                    h.Size = v and Vector3.new(CFG.HitboxSize, CFG.HitboxSize, CFG.HitboxSize) or Vector3.new(2, 2, 1)
-                    h.Transparency = v and 0.5 or 1
-                end
+SectMelee:AddToggle(T("hitbox"), false, function(v)
+    CFG.HitboxExp = v
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local h = p.Character:FindFirstChild("HumanoidRootPart")
+            if h then
+                h.Size = v and Vector3.new(CFG.HitboxSize, CFG.HitboxSize, CFG.HitboxSize) or Vector3.new(2, 2, 1)
+                h.Transparency = v and 0.5 or 1
             end
         end
     end
-})
+end)
 
-TabCombat:AddSlider({
-    Name = T("hitboxScale"),
-    Min = 1,
-    Max = 30,
-    Default = 5,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "size",
-    Callback = function(v) CFG.HitboxSize = v end
-})
+SectMelee:AddSlider(T("hitboxScale"), 1, 30, 5, function(v)
+    CFG.HitboxSize = v
+end)
 
-TabCombat:AddToggle({
-    Name = T("killAura"),
-    Default = false,
-    Callback = function(v) CFG.KillAura = v end
-})
+SectMelee:AddToggle(T("killAura"), false, function(v)
+    CFG.KillAura = v
+end)
 
-TabCombat:AddSlider({
-    Name = T("auraRange"),
-    Min = 1,
-    Max = 60,
-    Default = 15,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "studs",
-    Callback = function(v) CFG.AuraRange = v end
-})
+SectMelee:AddSlider(T("auraRange"), 1, 60, 15, function(v)
+    CFG.AuraRange = v
+end)
 
-TabCombat:AddLabel("💣 Bomb Pass")
+local SectBomb = TabCombat:AddSection("Bomb Pass")
 
-TabCombat:AddToggle({
-    Name = T("autoBomb"),
-    Default = false,
-    Callback = function(v) CFG.AutoBomb = v end
-})
+SectBomb:AddToggle(T("autoBomb"), false, function(v)
+    CFG.AutoBomb = v
+end)
 
-TabCombat:AddTextbox({
-    Name = T("bombKeywords"),
-    Default = "bomb,бомба,tnt,dynamite,explosive",
-    TextDisappear = false,
-    Callback = function(v) CFG.BombKeywords = v end
-})
+SectBomb:AddTextbox(T("bombKeywords"), "bomb,бомба,tnt,dynamite,explosive", function(v)
+    CFG.BombKeywords = v
+end)
 
-TabCombat:AddLabel("ℹ️ Info")
+local SectInfo = TabCombat:AddSection("Info")
 
-TabCombat:AddButton({
-    Name = T("nearestPlayer"),
-    Callback = function()
-        local closest, dist = nil, math.huge
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                local d = (HRP.Position - p.Character.HumanoidRootPart.Position).Magnitude
-                if d < dist then dist = d; closest = p end
-            end
-        end
-        if closest then
-            OrionLib:MakeNotification({
-                Name = T("nearestPlayer"),
-                Content = closest.DisplayName .. " — " .. math.floor(dist) .. " studs",
-                Time = 4
-            })
-        else
-            OrionLib:MakeNotification({
-                Name = "Error",
-                Content = T("noPlayersNear"),
-                Time = 3
-            })
+SectInfo:AddButton(T("nearestPlayer"), function()
+    local closest, dist = nil, math.huge
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local d = (HRP.Position - p.Character.HumanoidRootPart.Position).Magnitude
+            if d < dist then dist = d; closest = p end
         end
     end
-})
+    if closest then
+        VoidUI:Notification(T("nearestPlayer"), closest.DisplayName .. " — " .. math.floor(dist) .. " studs", 4)
+    else
+        VoidUI:Notification("Error", T("noPlayersNear"), 3)
+    end
+end)
 
 --// ═══════════════════════════════════════════
 --//  TAB: TELEPORT
 --// ═══════════════════════════════════════════
 
-local TabTP = Window:MakeTab({
-    Name = T("teleport"),
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local TabTP = Window:AddTab(T("teleport"))
 
-TabTP:AddLabel("🚀 Player Transport")
+local SectPlayerTP = TabTP:AddSection("Player Transport")
 
-TabTP:AddTextbox({
-    Name = T("targetName"),
-    Default = "",
-    TextDisappear = false,
-    Callback = function(v) CFG.TpTarget = v end
-})
+SectPlayerTP:AddTextbox(T("targetName"), "", function(v)
+    CFG.TpTarget = v
+end)
 
-TabTP:AddButton({
-    Name = T("tpToTarget"),
-    Callback = function()
-        local query = CFG.TpTarget:lower()
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and (p.Name:lower():find(query) or p.DisplayName:lower():find(query)) and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                HRP.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
-                OrionLib:MakeNotification({
-                    Name = T("teleport"),
-                    Content = T("movedTo") .. " " .. p.DisplayName,
-                    Time = 3
-                })
-                return
-            end
-        end
-        OrionLib:MakeNotification({
-            Name = "Error",
-            Content = T("notFound"),
-            Time = 3
-        })
-    end
-})
-
-TabTP:AddButton({
-    Name = T("randomPlayer"),
-    Callback = function()
-        local pool = {}
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                table.insert(pool, p)
-            end
-        end
-        if #pool == 0 then
-            OrionLib:MakeNotification({ Name = "Error", Content = T("noPlayers"), Time = 3 })
+SectPlayerTP:AddButton(T("tpToTarget"), function()
+    local query = CFG.TpTarget:lower()
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and (p.Name:lower():find(query) or p.DisplayName:lower():find(query)) and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            HRP.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
+            VoidUI:Notification(T("teleport"), T("movedTo") .. " " .. p.DisplayName, 3)
             return
         end
-        local t = pool[math.random(#pool)]
-        HRP.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
-        OrionLib:MakeNotification({
-            Name = T("randomPlayer"),
-            Content = T("movedTo") .. " " .. t.DisplayName,
-            Time = 3
-        })
     end
-})
+    VoidUI:Notification("Error", T("notFound"), 3)
+end)
 
-TabTP:AddButton({
-    Name = T("tpSpawn"),
-    Callback = function()
-        pcall(function()
-            local sp = Workspace:FindFirstChildOfClass("SpawnLocation")
-            if sp then
-                HRP.CFrame = sp.CFrame + Vector3.new(0, 5, 0)
-            else
-                HRP.CFrame = CFrame.new(0, 50, 0)
-            end
-        end)
-    end
-})
-
-TabTP:AddButton({
-    Name = T("tpForward"),
-    Callback = function()
-        pcall(function() HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * 100 end)
-    end
-})
-
-TabTP:AddLabel("📍 Waypoints")
-
-TabTP:AddButton({
-    Name = T("savePos"),
-    Callback = function()
-        CFG.SavedCF = HRP.CFrame
-        OrionLib:MakeNotification({ Name = T("saved"), Content = T("posStored"), Time = 2 })
-    end
-})
-
-TabTP:AddButton({
-    Name = T("loadPos"),
-    Callback = function()
-        if CFG.SavedCF then
-            HRP.CFrame = CFG.SavedCF
-            OrionLib:MakeNotification({ Name = T("loaded"), Content = T("posRestored"), Time = 2 })
-        else
-            OrionLib:MakeNotification({ Name = "Error", Content = T("nothingSaved"), Time = 2 })
+SectPlayerTP:AddButton(T("randomPlayer"), function()
+    local pool = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            table.insert(pool, p)
         end
     end
-})
+    if #pool == 0 then
+        VoidUI:Notification("Error", T("noPlayers"), 3)
+        return
+    end
+    local t = pool[math.random(#pool)]
+    HRP.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
+    VoidUI:Notification(T("randomPlayer"), T("movedTo") .. " " .. t.DisplayName, 3)
+end)
 
-TabTP:AddToggle({
-    Name = T("clickTp"),
-    Default = false,
-    Callback = function(v) CFG.ClickTP = v end
-})
+SectPlayerTP:AddButton(T("tpSpawn"), function()
+    pcall(function()
+        local sp = Workspace:FindFirstChildOfClass("SpawnLocation")
+        if sp then
+            HRP.CFrame = sp.CFrame + Vector3.new(0, 5, 0)
+        else
+            HRP.CFrame = CFrame.new(0, 50, 0)
+        end
+    end)
+end)
+
+SectPlayerTP:AddButton(T("tpForward"), function()
+    pcall(function() HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * 100 end)
+end)
+
+local SectWaypoints = TabTP:AddSection("Waypoints")
+
+SectWaypoints:AddButton(T("savePos"), function()
+    CFG.SavedCF = HRP.CFrame
+    VoidUI:Notification(T("saved"), T("posStored"), 2)
+end)
+
+SectWaypoints:AddButton(T("loadPos"), function()
+    if CFG.SavedCF then
+        HRP.CFrame = CFG.SavedCF
+        VoidUI:Notification(T("loaded"), T("posRestored"), 2)
+    else
+        VoidUI:Notification("Error", T("nothingSaved"), 2)
+    end
+end)
+
+SectWaypoints:AddToggle(T("clickTp"), false, function(v)
+    CFG.ClickTP = v
+end)
 
 --// ═══════════════════════════════════════════
 --//  TAB: ESP
 --// ═══════════════════════════════════════════
 
-local TabESP = Window:MakeTab({
-    Name = T("esp"),
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local TabESP = Window:AddTab(T("esp"))
 
-TabESP:AddLabel("👁️ Rendering")
+local SectRendering = TabESP:AddSection("Rendering")
 
-TabESP:AddToggle({
-    Name = T("enableEsp"),
-    Default = false,
-    Callback = function(v) CFG.ESP = v end
-})
+SectRendering:AddToggle(T("enableEsp"), false, function(v)
+    CFG.ESP = v
+end)
 
-TabESP:AddToggle({
-    Name = T("boundBox"),
-    Default = false,
-    Callback = function(v) CFG.BoxESP = v end
-})
+SectRendering:AddToggle(T("boundBox"), false, function(v)
+    CFG.BoxESP = v
+end)
 
-TabESP:AddToggle({
-    Name = T("nameTags"),
-    Default = false,
-    Callback = function(v) CFG.NameESP = v end
-})
+SectRendering:AddToggle(T("nameTags"), false, function(v)
+    CFG.NameESP = v
+end)
 
-TabESP:AddToggle({
-    Name = T("healthBars"),
-    Default = false,
-    Callback = function(v) CFG.HealthESP = v end
-})
+SectRendering:AddToggle(T("healthBars"), false, function(v)
+    CFG.HealthESP = v
+end)
 
-TabESP:AddToggle({
-    Name = T("distTags"),
-    Default = false,
-    Callback = function(v) CFG.DistESP = v end
-})
+SectRendering:AddToggle(T("distTags"), false, function(v)
+    CFG.DistESP = v
+end)
 
-TabESP:AddToggle({
-    Name = T("tracers"),
-    Default = false,
-    Callback = function(v) CFG.TracerESP = v end
-})
+SectRendering:AddToggle(T("tracers"), false, function(v)
+    CFG.TracerESP = v
+end)
 
-TabESP:AddToggle({
-    Name = T("chams"),
-    Default = false,
-    Callback = function(v)
-        CFG.ChamsESP = v
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                local ex = p.Character:FindFirstChild("_Highlight")
-                if v and not ex then
-                    local h = Instance.new("Highlight")
-                    h.Name = "_Highlight"
-                    h.FillColor = Color3.fromRGB(130, 80, 220)
-                    h.FillTransparency = 0.4
-                    h.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    h.Parent = p.Character
-                elseif not v and ex then
-                    ex:Destroy()
-                end
+SectRendering:AddToggle(T("chams"), false, function(v)
+    CFG.ChamsESP = v
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local ex = p.Character:FindFirstChild("_Highlight")
+            if v and not ex then
+                local h = Instance.new("Highlight")
+                h.Name = "_Highlight"
+                h.FillColor = Color3.fromRGB(130, 80, 220)
+                h.FillTransparency = 0.4
+                h.OutlineColor = Color3.fromRGB(255, 255, 255)
+                h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                h.Parent = p.Character
+            elseif not v and ex then
+                ex:Destroy()
             end
         end
     end
-})
+end)
 
-TabESP:AddLabel("🔍 Filters")
+local SectFilters = TabESP:AddSection("Filters")
 
-TabESP:AddToggle({
-    Name = T("teamFilter"),
-    Default = false,
-    Callback = function(v) CFG.TeamCheck = v end
-})
+SectFilters:AddToggle(T("teamFilter"), false, function(v)
+    CFG.TeamCheck = v
+end)
 
 --// ═══════════════════════════════════════════
 --//  TAB: ENVIRONMENT
 --// ═══════════════════════════════════════════
 
-local TabEnv = Window:MakeTab({
-    Name = T("environment"),
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local TabEnv = Window:AddTab(T("environment"))
 
-TabEnv:AddLabel("💡 Lighting")
+local SectLighting = TabEnv:AddSection("Lighting")
 
-TabEnv:AddToggle({
-    Name = T("fullbright"),
-    Default = false,
-    Callback = function(v)
-        CFG.Fullbright = v
-        if v then
-            Lighting.Brightness = 2
-            Lighting.GlobalShadows = false
-            Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
-            Lighting.Ambient = Color3.fromRGB(200, 200, 200)
-        else
-            Lighting.Brightness = 1
-            Lighting.GlobalShadows = true
-            Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-            Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+SectLighting:AddToggle(T("fullbright"), false, function(v)
+    CFG.Fullbright = v
+    if v then
+        Lighting.Brightness = 2
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
+        Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+    else
+        Lighting.Brightness = 1
+        Lighting.GlobalShadows = true
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+        Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+    end
+end)
+
+SectLighting:AddToggle(T("noFog"), false, function(v)
+    CFG.NoFog = v
+    Lighting.FogEnd = v and 9999999 or 100000
+end)
+
+SectLighting:AddToggle(T("timeLock"), false, function(v)
+    CFG.CustomTime = v
+end)
+
+SectLighting:AddSlider(T("clockTime"), 0, 24, 14, function(v)
+    CFG.TimeVal = v
+    if CFG.CustomTime then Lighting.ClockTime = v end
+end)
+
+local SectCleanup = TabEnv:AddSection("Cleanup")
+
+SectCleanup:AddButton(T("removeEffects"), function()
+    local n = 0
+    for _, e in ipairs(Lighting:GetChildren()) do
+        if e:IsA("Atmosphere") or e:IsA("BloomEffect") or e:IsA("BlurEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("DepthOfFieldEffect") or e:IsA("SunRaysEffect") then
+            e:Destroy(); n += 1
         end
     end
-})
+    VoidUI:Notification("Cleanup", n .. " " .. T("effectsRemoved"), 2)
+end)
 
-TabEnv:AddToggle({
-    Name = T("noFog"),
-    Default = false,
-    Callback = function(v)
-        CFG.NoFog = v
-        Lighting.FogEnd = v and 9999999 or 100000
-    end
-})
-
-TabEnv:AddToggle({
-    Name = T("timeLock"),
-    Default = false,
-    Callback = function(v) CFG.CustomTime = v end
-})
-
-TabEnv:AddSlider({
-    Name = T("clockTime"),
-    Min = 0,
-    Max = 24,
-    Default = 14,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "hour",
-    Callback = function(v)
-        CFG.TimeVal = v
-        if CFG.CustomTime then Lighting.ClockTime = v end
-    end
-})
-
-TabEnv:AddLabel("🧹 Cleanup")
-
-TabEnv:AddButton({
-    Name = T("removeEffects"),
-    Callback = function()
-        local n = 0
-        for _, e in ipairs(Lighting:GetChildren()) do
-            if e:IsA("Atmosphere") or e:IsA("BloomEffect") or e:IsA("BlurEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("DepthOfFieldEffect") or e:IsA("SunRaysEffect") then
-                e:Destroy()
-                n += 1
-            end
+SectCleanup:AddButton(T("removeParticles"), function()
+    local n = 0
+    for _, o in ipairs(Workspace:GetDescendants()) do
+        if o:IsA("ParticleEmitter") or o:IsA("Fire") or o:IsA("Smoke") or o:IsA("Sparkles") then
+            o:Destroy(); n += 1
         end
-        OrionLib:MakeNotification({ Name = "Cleanup", Content = n .. " " .. T("effectsRemoved"), Time = 2 })
     end
-})
+    VoidUI:Notification("Cleanup", n .. " " .. T("particlesRemoved"), 2)
+end)
 
-TabEnv:AddButton({
-    Name = T("removeParticles"),
-    Callback = function()
-        local n = 0
-        for _, o in ipairs(Workspace:GetDescendants()) do
-            if o:IsA("ParticleEmitter") or o:IsA("Fire") or o:IsA("Smoke") or o:IsA("Sparkles") then
-                o:Destroy()
-                n += 1
-            end
-        end
-        OrionLib:MakeNotification({ Name = "Cleanup", Content = n .. " " .. T("particlesRemoved"), Time = 2 })
+SectCleanup:AddButton(T("removeDecals"), function()
+    local n = 0
+    for _, o in ipairs(Workspace:GetDescendants()) do
+        if o:IsA("Decal") or o:IsA("Texture") then o:Destroy(); n += 1 end
     end
-})
+    VoidUI:Notification("Cleanup", n .. " removed", 2)
+end)
 
-TabEnv:AddButton({
-    Name = T("removeDecals"),
-    Callback = function()
-        local n = 0
-        for _, o in ipairs(Workspace:GetDescendants()) do
-            if o:IsA("Decal") or o:IsA("Texture") then o:Destroy(); n += 1 end
-        end
-        OrionLib:MakeNotification({ Name = "Cleanup", Content = n .. " removed", Time = 2 })
+SectCleanup:AddButton(T("removeSounds"), function()
+    local n = 0
+    for _, o in ipairs(Workspace:GetDescendants()) do
+        if o:IsA("Sound") then o:Stop(); o:Destroy(); n += 1 end
     end
-})
-
-TabEnv:AddButton({
-    Name = T("removeSounds"),
-    Callback = function()
-        local n = 0
-        for _, o in ipairs(Workspace:GetDescendants()) do
-            if o:IsA("Sound") then o:Stop(); o:Destroy(); n += 1 end
-        end
-        OrionLib:MakeNotification({ Name = "Cleanup", Content = n .. " removed", Time = 2 })
-    end
-})
+    VoidUI:Notification("Cleanup", n .. " removed", 2)
+end)
 
 --// ═══════════════════════════════════════════
 --//  TAB: UTILITIES
 --// ═══════════════════════════════════════════
 
-local TabUtil = Window:MakeTab({
-    Name = T("utilities"),
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local TabUtil = Window:AddTab(T("utilities"))
 
-TabUtil:AddLabel("🔒 Protection")
+local SectProtect = TabUtil:AddSection("Protection")
 
-TabUtil:AddToggle({
-    Name = T("antiAfk"),
-    Default = false,
-    Callback = function(v) CFG.AntiAFK = v end
-})
+SectProtect:AddToggle(T("antiAfk"), false, function(v)
+    CFG.AntiAFK = v
+end)
 
-TabUtil:AddToggle({
-    Name = T("antiKick"),
-    Default = false,
-    Callback = function(v) CFG.AntiKick = v end
-})
+SectProtect:AddToggle(T("antiKick"), false, function(v)
+    CFG.AntiKick = v
+end)
 
-TabUtil:AddLabel("⚡ Actions")
+local SectActions = TabUtil:AddSection("Actions")
 
-TabUtil:AddToggle({
-    Name = T("spin"),
-    Default = false,
-    Callback = function(v) CFG.Spin = v end
-})
+SectActions:AddToggle(T("spin"), false, function(v)
+    CFG.Spin = v
+end)
 
-TabUtil:AddSlider({
-    Name = T("spinSpeed"),
-    Min = 1,
-    Max = 50,
-    Default = 10,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "speed",
-    Callback = function(v) CFG.SpinSpeed = v end
-})
+SectActions:AddSlider(T("spinSpeed"), 1, 50, 10, function(v)
+    CFG.SpinSpeed = v
+end)
 
-TabUtil:AddButton({
-    Name = T("spawnPlatform"),
-    Callback = function()
-        local p = Instance.new("Part")
-        p.Size = Vector3.new(20, 1, 20)
-        p.CFrame = HRP.CFrame * CFrame.new(0, -4, 0)
-        p.Anchored = true
-        p.BrickColor = BrickColor.new("Bright violet")
-        p.Material = Enum.Material.Neon
-        p.Transparency = 0.3
-        p.Parent = Workspace
-    end
-})
+SectActions:AddButton(T("spawnPlatform"), function()
+    local p = Instance.new("Part")
+    p.Size = Vector3.new(20, 1, 20)
+    p.CFrame = HRP.CFrame * CFrame.new(0, -4, 0)
+    p.Anchored = true
+    p.BrickColor = BrickColor.new("Bright violet")
+    p.Material = Enum.Material.Neon
+    p.Transparency = 0.3
+    p.Parent = Workspace
+end)
 
-TabUtil:AddButton({
-    Name = T("forceSit"),
-    Callback = function()
-        pcall(function() Humanoid.Sit = true end)
-    end
-})
+SectActions:AddButton(T("forceSit"), function()
+    pcall(function() Humanoid.Sit = true end)
+end)
 
-TabUtil:AddButton({
-    Name = T("forceJump"),
-    Callback = function()
-        pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
-    end
-})
+SectActions:AddButton(T("forceJump"), function()
+    pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
+end)
 
-TabUtil:AddButton({
-    Name = T("copyPos"),
-    Callback = function()
-        local pos = HRP.Position
-        local txt = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
-        pcall(function() setclipboard(txt) end)
-        OrionLib:MakeNotification({ Name = T("copied"), Content = txt, Time = 3 })
-    end
-})
+SectActions:AddButton(T("copyPos"), function()
+    local pos = HRP.Position
+    local txt = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
+    pcall(function() setclipboard(txt) end)
+    VoidUI:Notification(T("copied"), txt, 3)
+end)
 
-TabUtil:AddButton({
-    Name = T("copyLink"),
-    Callback = function()
-        local link = "https://www.roblox.com/games/" .. game.PlaceId
-        pcall(function() setclipboard(link) end)
-        OrionLib:MakeNotification({ Name = T("copied"), Content = link, Time = 3 })
-    end
-})
+SectActions:AddButton(T("copyLink"), function()
+    local link = "https://www.roblox.com/games/" .. game.PlaceId
+    pcall(function() setclipboard(link) end)
+    VoidUI:Notification(T("copied"), link, 3)
+end)
 
-TabUtil:AddLabel("💬 Chat")
+local SectChat = TabUtil:AddSection("Chat")
 
-TabUtil:AddTextbox({
-    Name = T("spamMsg"),
-    Default = "",
-    TextDisappear = false,
-    Callback = function(v) CFG.SpamMsg = v end
-})
+SectChat:AddTextbox(T("spamMsg"), "", function(v)
+    CFG.SpamMsg = v
+end)
 
-TabUtil:AddSlider({
-    Name = T("spamInterval"),
-    Min = 1,
-    Max = 10,
-    Default = 2,
-    Color = Color3.fromRGB(130, 80, 220),
-    Increment = 1,
-    ValueName = "sec",
-    Callback = function(v) CFG.SpamDelay = v end
-})
+SectChat:AddSlider(T("spamInterval"), 1, 10, 2, function(v)
+    CFG.SpamDelay = v
+end)
 
-TabUtil:AddToggle({
-    Name = T("chatSpam"),
-    Default = false,
-    Callback = function(v) CFG.ChatSpam = v end
-})
+SectChat:AddToggle(T("chatSpam"), false, function(v)
+    CFG.ChatSpam = v
+end)
 
-TabUtil:AddLabel("🌐 Server")
+local SectServer = TabUtil:AddSection("Server")
 
-TabUtil:AddButton({
-    Name = T("rejoin"),
-    Callback = function()
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-    end
-})
+SectServer:AddButton(T("rejoin"), function()
+    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end)
 
-TabUtil:AddButton({
-    Name = T("serverHop"),
-    Callback = function()
-        task.spawn(function()
-            local ok, data = pcall(function()
-                return HttpService:JSONDecode(game:HttpGet(("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"):format(game.PlaceId)))
-            end)
-            if not ok then
-                OrionLib:MakeNotification({ Name = "Error", Content = "Failed", Time = 3 })
+SectServer:AddButton(T("serverHop"), function()
+    task.spawn(function()
+        local ok, data = pcall(function()
+            return HttpService:JSONDecode(game:HttpGet(("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"):format(game.PlaceId)))
+        end)
+        if not ok then
+            VoidUI:Notification("Error", "Failed", 3)
+            return
+        end
+        for _, sv in ipairs(data.data) do
+            if sv.id ~= game.JobId and sv.playing < sv.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, sv.id, LocalPlayer)
                 return
             end
-            for _, sv in ipairs(data.data) do
-                if sv.id ~= game.JobId and sv.playing < sv.maxPlayers then
-                    TeleportService:TeleportToPlaceInstance(game.PlaceId, sv.id, LocalPlayer)
-                    return
-                end
-            end
-            OrionLib:MakeNotification({ Name = "Error", Content = "No servers", Time = 3 })
-        end)
-    end
-})
+        end
+        VoidUI:Notification("Error", "No servers", 3)
+    end)
+end)
 
-TabUtil:AddButton({
-    Name = T("serverInfo"),
-    Callback = function()
-        OrionLib:MakeNotification({
-            Name = T("serverInfo"),
-            Content = string.format("Players: %d/%d | Place: %d | Ping: ~%dms",
-                #Players:GetPlayers(), Players.MaxPlayers, game.PlaceId,
-                math.floor(LocalPlayer:GetNetworkPing() * 1000)),
-            Time = 6
-        })
-    end
-})
+SectServer:AddButton(T("serverInfo"), function()
+    VoidUI:Notification(T("serverInfo"), string.format("Players: %d/%d | Place: %d | Ping: ~%dms",
+        #Players:GetPlayers(), Players.MaxPlayers, game.PlaceId,
+        math.floor(LocalPlayer:GetNetworkPing() * 1000)), 6)
+end)
 
 --// ═══════════════════════════════════════════
 --//  TAB: SETTINGS
 --// ═══════════════════════════════════════════
 
-local TabSettings = Window:MakeTab({
-    Name = T("settings"),
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local TabSettings = Window:AddTab(T("settings"))
 
-TabSettings:AddLabel("🌍 Language")
+local SectLang = TabSettings:AddSection("Language")
 
-TabSettings:AddButton({
-    Name = "🇬🇧 English",
-    Callback = function()
-        Lang = "EN"
-        OrionLib:MakeNotification({
-            Name = "Language",
-            Content = "English selected. Rejoin to apply.",
-            Time = 4
-        })
-    end
-})
+SectLang:AddButton("🇬🇧 English", function()
+    Lang = "EN"
+    VoidUI:Notification("Language", "English selected. Rejoin to apply.", 4)
+end)
 
-TabSettings:AddButton({
-    Name = "🇷🇺 Русский",
-    Callback = function()
-        Lang = "RU"
-        OrionLib:MakeNotification({
-            Name = "Язык",
-            Content = "Русский выбран. Перезайдите.",
-            Time = 4
-        })
-    end
-})
+SectLang:AddButton("🇷🇺 Русский", function()
+    Lang = "RU"
+    VoidUI:Notification("Язык", "Русский выбран. Перезайдите.", 4)
+end)
 
-TabSettings:AddLabel("🖥️ Graphics")
+local SectGfx = TabSettings:AddSection("Graphics")
 
-TabSettings:AddToggle({
-    Name = T("blurEnabled"),
-    Default = false,
-    Callback = function(v)
-        CFG.AntiBlur = v
-        if v then
-            for _, obj in ipairs(Lighting:GetChildren()) do
-                if obj:IsA("BlurEffect") then obj:Destroy() end
-            end
-        end
-    end
-})
-
-TabSettings:AddButton({
-    Name = T("removeBlur"),
-    Callback = function()
-        local n = 0
+SectGfx:AddToggle(T("blurEnabled"), false, function(v)
+    CFG.AntiBlur = v
+    if v then
         for _, obj in ipairs(Lighting:GetChildren()) do
-            if obj:IsA("BlurEffect") then obj:Destroy(); n += 1 end
+            if obj:IsA("BlurEffect") then obj:Destroy() end
         end
-        OrionLib:MakeNotification({ Name = "Blur", Content = n .. " removed", Time = 2 })
     end
-})
+end)
 
-TabSettings:AddButton({
-    Name = T("removeAllPost"),
-    Callback = function()
-        local n = 0
-        for _, e in ipairs(Lighting:GetChildren()) do
-            if e:IsA("PostEffect") or e:IsA("Atmosphere") then e:Destroy(); n += 1 end
-        end
-        OrionLib:MakeNotification({ Name = "Cleanup", Content = n .. " removed", Time = 2 })
+SectGfx:AddButton(T("removeBlur"), function()
+    local n = 0
+    for _, obj in ipairs(Lighting:GetChildren()) do
+        if obj:IsA("BlurEffect") then obj:Destroy(); n += 1 end
     end
-})
+    VoidUI:Notification("Blur", n .. " removed", 2)
+end)
 
-TabSettings:AddButton({
-    Name = T("lowGraphics"),
-    Callback = function()
-        pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
-        Lighting.GlobalShadows = false
-        for _, e in ipairs(Lighting:GetChildren()) do
-            if e:IsA("PostEffect") or e:IsA("Atmosphere") then e.Enabled = false end
-        end
-        for _, o in ipairs(Workspace:GetDescendants()) do
-            if o:IsA("ParticleEmitter") or o:IsA("Trail") then o.Enabled = false end
-        end
-        OrionLib:MakeNotification({ Name = "Graphics", Content = "Low mode ON", Time = 2 })
+SectGfx:AddButton(T("removeAllPost"), function()
+    local n = 0
+    for _, e in ipairs(Lighting:GetChildren()) do
+        if e:IsA("PostEffect") or e:IsA("Atmosphere") then e:Destroy(); n += 1 end
     end
-})
+    VoidUI:Notification("Cleanup", n .. " removed", 2)
+end)
 
-TabSettings:AddLabel("👤 Player Info")
-
-TabSettings:AddParagraph("Player Info", "Name: " .. LocalPlayer.Name .. "\nDisplay: " .. LocalPlayer.DisplayName .. "\nID: " .. LocalPlayer.UserId)
-
-TabSettings:AddButton({
-    Name = T("copyId"),
-    Callback = function()
-        pcall(function() setclipboard(tostring(LocalPlayer.UserId)) end)
-        OrionLib:MakeNotification({ Name = T("copied"), Content = tostring(LocalPlayer.UserId), Time = 2 })
+SectGfx:AddButton(T("lowGraphics"), function()
+    pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
+    Lighting.GlobalShadows = false
+    for _, e in ipairs(Lighting:GetChildren()) do
+        if e:IsA("PostEffect") or e:IsA("Atmosphere") then e.Enabled = false end
     end
-})
-
-TabSettings:AddLabel("ℹ️ About")
-
-TabSettings:AddParagraph("Eplisma v3.0", "Developer: Frost\nTelegram: @Jokerfros\n\nOrion UI • 2 languages\nAuto Bomb Pass included")
-
-TabSettings:AddLabel("⚠️ Danger Zone")
-
-TabSettings:AddButton({
-    Name = T("destroy"),
-    Callback = function()
-        pcall(function() _G._CleanESP() end)
-        pcall(function() _G._FOV:Remove() end)
-        pcall(function()
-            if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
-            if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
-        end)
-        CFG.Fly = false
-        CFG.Noclip = false
-        CFG.ESP = false
-        CFG.Aimbot = false
-        CFG.AutoBomb = false
-        OrionLib:Destroy()
+    for _, o in ipairs(Workspace:GetDescendants()) do
+        if o:IsA("ParticleEmitter") or o:IsA("Trail") then o.Enabled = false end
     end
-})
+    VoidUI:Notification("Graphics", "Low mode ON", 2)
+end)
+
+local SectPlayerInfo = TabSettings:AddSection("Player Info")
+
+SectPlayerInfo:AddButton(T("copyId") .. " (" .. LocalPlayer.UserId .. ")", function()
+    pcall(function() setclipboard(tostring(LocalPlayer.UserId)) end)
+    VoidUI:Notification(T("copied"), tostring(LocalPlayer.UserId), 2)
+end)
+
+local SectAbout = TabSettings:AddSection("About")
+
+SectAbout:AddButton("Eplisma v3.0 | Frost | @Jokerfros", function()
+    VoidUI:Notification("Eplisma v3.0", "Developer: Frost\nTelegram: @Jokerfros\nVoid UI Edition", 5)
+end)
+
+local SectDanger = TabSettings:AddSection("Danger Zone")
+
+SectDanger:AddButton(T("destroy"), function()
+    pcall(function() _G._CleanESP() end)
+    pcall(function() _G._FOV:Remove() end)
+    pcall(function()
+        if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
+        if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
+    end)
+    CFG.Fly = false
+    CFG.Noclip = false
+    CFG.ESP = false
+    CFG.Aimbot = false
+    CFG.AutoBomb = false
+    pcall(function() VoidUI:Destroy() end)
+end)
 
 --// ═══════════════════════════════════════════
 --//  DRAWING: FOV CIRCLE
@@ -1230,7 +880,6 @@ RunService.RenderStepped:Connect(function()
     FOVCircle.Radius = CFG.AimFOV
     FOVCircle.Position = mp
 
-    -- Aimbot
     if CFG.Aimbot and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
         local t = FindTarget()
         if t and t.Character then
@@ -1242,7 +891,6 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- ESP
     local vp = Camera.ViewportSize
     for plr, esp in pairs(ESPCache) do
         local c = plr.Character
@@ -1288,7 +936,6 @@ RunService.RenderStepped:Connect(function()
         esp.Tracer.To = Vector2.new(cx, fp.Y)
     end
 
-    -- Fly
     if CFG.Fly and HRP then
         local bv = HRP:FindFirstChild("_BV")
         local bg = HRP:FindFirstChild("_BG")
@@ -1381,7 +1028,6 @@ LocalPlayer.Idled:Connect(function()
     end
 end)
 
--- Chat Spam
 task.spawn(function()
     while true do
         if CFG.ChatSpam and CFG.SpamMsg ~= "" then
@@ -1393,7 +1039,6 @@ task.spawn(function()
     end
 end)
 
--- Kill Aura
 task.spawn(function()
     while task.wait(0.15) do
         if not CFG.KillAura or not HRP then continue end
@@ -1467,7 +1112,6 @@ task.spawn(function()
     end
 end)
 
--- Hitbox + Chams for new players
 Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Connect(function(char)
         if CFG.HitboxExp then
@@ -1493,7 +1137,6 @@ Players.PlayerAdded:Connect(function(plr)
     end)
 end)
 
--- Final blur cleanup
 task.delay(2, function()
     pcall(function()
         for _, obj in ipairs(Lighting:GetChildren()) do
@@ -1503,24 +1146,17 @@ task.delay(2, function()
 end)
 
 --// ═══════════════════════════════════════════
---//  INIT
+--//  STARTUP
 --// ═══════════════════════════════════════════
 
-OrionLib:Init()
-
-OrionLib:MakeNotification({
-    Name = "Eplisma v3.0",
-    Content = T("welcome") .. ", " .. LocalPlayer.DisplayName .. "! " .. T("pressE"),
-    Image = "rbxassetid://4483345998",
-    Time = 6
-})
+VoidUI:Notification("Eplisma v3.0", T("welcome") .. ", " .. LocalPlayer.DisplayName .. "!\nby Frost | @Jokerfros", 6)
 
 print([[
 ╔══════════════════════════════════════╗
 ║         E P L I S M A  v3.0         ║
 ║     Developer: Frost                ║
 ║     Telegram: @Jokerfros            ║
-║     UI: Orion Library               ║
+║     UI: Void UI Library             ║
 ╠══════════════════════════════════════╣
 ║  Player: ]] .. LocalPlayer.Name .. [[
 
