@@ -59,11 +59,13 @@ local L = {
         noReset = "No Reset", forceReset = "Force Reset",
         respawn = "Respawn", freeze = "Freeze Character",
         frozen = "Frozen", unfrozen = "Unfrozen",
-        aimbot = "Aimbot", fovRadius = "FOV Radius",
-        smoothing = "Smoothing", showFov = "Show FOV Circle",
-        hitbox = "Hitbox Expander", hitboxScale = "Hitbox Scale",
-        killAura = "Kill Aura", auraRange = "Aura Range",
-        nearestPlayer = "Nearest Player", noPlayersNear = "No players nearby",
+        aimbot = "Aimbot (Hold RMB / Touch)",
+        aimbotMobile = "Aimbot (Auto - Mobile)",
+        fovRadius = "FOV Radius", smoothing = "Smoothing",
+        showFov = "Show FOV Circle", hitbox = "Hitbox Expander",
+        hitboxScale = "Hitbox Scale", killAura = "Kill Aura",
+        auraRange = "Aura Range", nearestPlayer = "Nearest Player",
+        noPlayersNear = "No players nearby",
         targetName = "Target Name", tpToTarget = "TP to Target",
         randomPlayer = "Random Player", tpSpawn = "TP to Spawn",
         tpForward = "TP Forward 100", savePos = "Save Position",
@@ -90,10 +92,15 @@ local L = {
         rejoin = "Rejoin", serverHop = "Server Hop", serverInfo = "Server Info",
         copied = "Copied",
         autoBomb = "Auto Bomb Pass", bombKeywords = "Bomb Keywords",
+        bombExclude = "Excluded Players",
         removeBlur = "Remove Blur", blurEnabled = "Blur Protection",
         removeAllPost = "Remove ALL Effects", lowGraphics = "Low Graphics",
         copyId = "Copy Player ID", destroy = "Destroy Eplisma",
         welcome = "Welcome",
+        aimbotTarget = "Aim Target Bone",
+        auraMethod = "Aura Attack Method",
+        auraDelay = "Aura Delay",
+        autoAim = "Auto Aim (no RMB needed)",
     },
     RU = {
         character = "Персонаж", combat = "Бой", teleport = "Телепорт",
@@ -107,11 +114,13 @@ local L = {
         noReset = "Без ресета", forceReset = "Убить себя",
         respawn = "Респавн", freeze = "Заморозить",
         frozen = "Заморожен", unfrozen = "Разморожен",
-        aimbot = "Аимбот", fovRadius = "Радиус FOV",
-        smoothing = "Плавность", showFov = "Показать FOV",
-        hitbox = "Хитбокс", hitboxScale = "Размер хитбокса",
-        killAura = "Аура убийства", auraRange = "Радиус ауры",
-        nearestPlayer = "Ближайший игрок", noPlayersNear = "Нет игроков рядом",
+        aimbot = "Аимбот (ПКМ / Тач)",
+        aimbotMobile = "Аимбот (Авто - Мобильный)",
+        fovRadius = "Радиус FOV", smoothing = "Плавность",
+        showFov = "Показать FOV", hitbox = "Хитбокс",
+        hitboxScale = "Размер хитбокса", killAura = "Аура убийства",
+        auraRange = "Радиус ауры", nearestPlayer = "Ближайший игрок",
+        noPlayersNear = "Нет игроков рядом",
         targetName = "Имя цели", tpToTarget = "ТП к цели",
         randomPlayer = "Случайный", tpSpawn = "ТП на спавн",
         tpForward = "ТП вперёд 100", savePos = "Сохранить позицию",
@@ -138,10 +147,15 @@ local L = {
         rejoin = "Реджойн", serverHop = "Сменить сервер", serverInfo = "Инфо сервера",
         copied = "Скопировано",
         autoBomb = "Авто-бомба", bombKeywords = "Ключевые слова бомбы",
+        bombExclude = "Исключённые игроки",
         removeBlur = "Убрать блюр", blurEnabled = "Защита от блюра",
         removeAllPost = "Убрать ВСЕ эффекты", lowGraphics = "Низкая графика",
         copyId = "Копировать ID", destroy = "Удалить Eplisma",
         welcome = "Добро пожаловать",
+        aimbotTarget = "Цель прицела",
+        auraMethod = "Метод атаки ауры",
+        auraDelay = "Задержка ауры",
+        autoAim = "Авто прицел (без ПКМ)",
     },
 }
 
@@ -169,6 +183,7 @@ local Window = Library:CreateWindow({
     NotifySide = "Right",
     ShowCustomCursor = true,
     AutoShow = true,
+    MobileButtonsSide = "Right",
 })
 
 --// ═══════════════════════════════════════════
@@ -184,8 +199,9 @@ local CFG = {
 
     Aimbot = false, AimFOV = 250, AimSmooth = 5,
     AimBone = "Head", ShowFOV = false,
+    AutoAim = false,
     HitboxExp = false, HitboxSize = 5,
-    KillAura = false, AuraRange = 15,
+    KillAura = false, AuraRange = 15, AuraDelay = 0.15,
 
     ESP = false, BoxESP = false, NameESP = false,
     HealthESP = false, DistESP = false,
@@ -201,6 +217,7 @@ local CFG = {
 
     AutoBomb = false,
     BombKeywords = "bomb,бомба,tnt,dynamite,explosive",
+    BombExcluded = {},
 }
 
 --// ═══════════════════════════════════════════
@@ -218,6 +235,20 @@ local Tabs = {
 }
 
 --// ═══════════════════════════════════════════
+--//  HELPER: Get player list (excluding local)
+--// ═══════════════════════════════════════════
+
+local function GetPlayerNames()
+    local names = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(names, p.Name)
+        end
+    end
+    return names
+end
+
+--// ═══════════════════════════════════════════
 --//  TAB: CHARACTER
 --// ═══════════════════════════════════════════
 
@@ -226,11 +257,7 @@ do
 
     MovementBox:AddSlider("WalkSpeed", {
         Text = T("walkspeed"),
-        Default = 16,
-        Min = 0,
-        Max = 500,
-        Rounding = 0,
-        Compact = false,
+        Default = 16, Min = 0, Max = 500, Rounding = 0,
         Callback = function(v)
             CFG.Speed = v
             pcall(function() Humanoid.WalkSpeed = v end)
@@ -239,57 +266,38 @@ do
 
     MovementBox:AddSlider("JumpPower", {
         Text = T("jumppower"),
-        Default = 50,
-        Min = 0,
-        Max = 500,
-        Rounding = 0,
+        Default = 50, Min = 0, Max = 500, Rounding = 0,
         Callback = function(v)
             CFG.JumpPower = v
-            pcall(function()
-                Humanoid.UseJumpPower = true
-                Humanoid.JumpPower = v
-            end)
+            pcall(function() Humanoid.UseJumpPower = true; Humanoid.JumpPower = v end)
         end,
     })
 
     MovementBox:AddSlider("Gravity", {
         Text = T("gravity"),
-        Default = 196,
-        Min = 0,
-        Max = 500,
-        Rounding = 0,
-        Callback = function(v)
-            CFG.Gravity = v
-            Workspace.Gravity = v
-        end,
+        Default = 196, Min = 0, Max = 500, Rounding = 0,
+        Callback = function(v) CFG.Gravity = v; Workspace.Gravity = v end,
     })
 
     MovementBox:AddDivider()
 
     MovementBox:AddToggle("InfJump", {
-        Text = T("infJump"),
-        Default = false,
+        Text = T("infJump"), Default = false,
         Callback = function(v) CFG.InfJump = v end,
     })
 
     MovementBox:AddToggle("AutoJump", {
-        Text = T("autoJump"),
-        Default = false,
-        Callback = function(v)
-            CFG.AutoJump = v
-            pcall(function() Humanoid.AutoJumpEnabled = v end)
-        end,
+        Text = T("autoJump"), Default = false,
+        Callback = function(v) CFG.AutoJump = v; pcall(function() Humanoid.AutoJumpEnabled = v end) end,
     })
 
     MovementBox:AddToggle("BunnyHop", {
-        Text = T("bunnyHop"),
-        Default = false,
+        Text = T("bunnyHop"), Default = false,
         Callback = function(v) CFG.BunnyHop = v end,
     })
 
     MovementBox:AddToggle("Noclip", {
-        Text = T("noclip"),
-        Default = false,
+        Text = T("noclip"), Default = false,
         Callback = function(v) CFG.Noclip = v end,
     })
 
@@ -297,8 +305,7 @@ do
     local FlightBox = Tabs.Character:AddRightGroupbox("Flight")
 
     FlightBox:AddToggle("Fly", {
-        Text = T("fly"),
-        Default = false,
+        Text = T("fly"), Default = false,
         Callback = function(v)
             CFG.Fly = v
             if not v then
@@ -311,11 +318,7 @@ do
     })
 
     FlightBox:AddSlider("FlySpeed", {
-        Text = T("flySpeed"),
-        Default = 60,
-        Min = 0,
-        Max = 300,
-        Rounding = 0,
+        Text = T("flySpeed"), Default = 60, Min = 0, Max = 300, Rounding = 0,
         Callback = function(v) CFG.FlySpeed = v end,
     })
 
@@ -323,49 +326,33 @@ do
     local CameraBox = Tabs.Character:AddRightGroupbox("Camera")
 
     CameraBox:AddSlider("FOV", {
-        Text = T("fov"),
-        Default = 70,
-        Min = 10,
-        Max = 120,
-        Rounding = 0,
-        Callback = function(v)
-            CFG.FOV = v
-            Camera.FieldOfView = v
-        end,
+        Text = T("fov"), Default = 70, Min = 10, Max = 120, Rounding = 0,
+        Callback = function(v) CFG.FOV = v; Camera.FieldOfView = v end,
     })
 
     -- Survivability
     local SurvivalBox = Tabs.Character:AddRightGroupbox("Survivability")
 
     SurvivalBox:AddToggle("GodMode", {
-        Text = T("godMode"),
-        Default = false,
+        Text = T("godMode"), Default = false,
         Callback = function(v) CFG.GodMode = v end,
     })
 
     SurvivalBox:AddToggle("NoReset", {
-        Text = T("noReset"),
-        Default = false,
-        Callback = function(v)
-            CFG.NoReset = v
-            pcall(function() StarterGui:SetCore("ResetButtonCallback", not v) end)
-        end,
+        Text = T("noReset"), Default = false,
+        Callback = function(v) CFG.NoReset = v; pcall(function() StarterGui:SetCore("ResetButtonCallback", not v) end) end,
     })
 
     SurvivalBox:AddDivider()
 
     SurvivalBox:AddButton({
         Text = T("forceReset"),
-        Func = function()
-            pcall(function() Humanoid.Health = 0 end)
-        end,
+        Func = function() pcall(function() Humanoid.Health = 0 end) end,
     })
 
     SurvivalBox:AddButton({
         Text = T("respawn"),
-        Func = function()
-            pcall(function() LocalPlayer:LoadCharacter() end)
-        end,
+        Func = function() pcall(function() LocalPlayer:LoadCharacter() end) end,
     })
 
     SurvivalBox:AddButton({
@@ -373,18 +360,14 @@ do
         Func = function()
             pcall(function()
                 HRP.Anchored = not HRP.Anchored
-                Library:Notify({
-                    Title = T("freeze"),
-                    Description = HRP.Anchored and T("frozen") or T("unfrozen"),
-                    Time = 2,
-                })
+                Library:Notify({ Title = T("freeze"), Description = HRP.Anchored and T("frozen") or T("unfrozen"), Time = 2 })
             end)
         end,
     })
 end
 
 --// ═══════════════════════════════════════════
---//  TAB: COMBAT
+--//  TAB: COMBAT (FIXED AIMBOT + KILLAURA)
 --// ═══════════════════════════════════════════
 
 do
@@ -393,40 +376,69 @@ do
     AimBox:AddToggle("Aimbot", {
         Text = T("aimbot"),
         Default = false,
-        Tooltip = "Hold RMB to aim",
+        Tooltip = "Hold RMB on PC or enable Auto Aim for mobile",
         Callback = function(v) CFG.Aimbot = v end,
+    })
+
+    AimBox:AddToggle("AutoAim", {
+        Text = T("autoAim"),
+        Default = false,
+        Tooltip = "For mobile: aims automatically without RMB",
+        Callback = function(v) CFG.AutoAim = v end,
     })
 
     AimBox:AddSlider("AimFOV", {
         Text = T("fovRadius"),
-        Default = 250,
-        Min = 10,
-        Max = 900,
-        Rounding = 0,
+        Default = 250, Min = 10, Max = 900, Rounding = 0,
         Callback = function(v) CFG.AimFOV = v end,
     })
 
     AimBox:AddSlider("AimSmooth", {
         Text = T("smoothing"),
-        Default = 5,
-        Min = 1,
-        Max = 50,
-        Rounding = 1,
+        Default = 5, Min = 1, Max = 50, Rounding = 1,
         Callback = function(v) CFG.AimSmooth = v end,
     })
 
+    AimBox:AddDropdown("AimBone", {
+        Values = { "Head", "HumanoidRootPart", "UpperTorso", "LowerTorso" },
+        Default = "Head",
+        Text = T("aimbotTarget"),
+        Callback = function(v) CFG.AimBone = v end,
+    })
+
     AimBox:AddToggle("ShowFOV", {
-        Text = T("showFov"),
-        Default = false,
+        Text = T("showFov"), Default = false,
         Callback = function(v) CFG.ShowFOV = v end,
     })
 
-    -- Melee
-    local MeleeBox = Tabs.Combat:AddLeftGroupbox("Melee")
+    -- Melee (FIXED KILLAURA)
+    local MeleeBox = Tabs.Combat:AddLeftGroupbox("Melee / Kill Aura")
+
+    MeleeBox:AddToggle("KillAura", {
+        Text = T("killAura"),
+        Default = false,
+        Risky = true,
+        Tooltip = "Auto-attacks nearby players with equipped tool",
+        Callback = function(v) CFG.KillAura = v end,
+    })
+
+    MeleeBox:AddSlider("AuraRange", {
+        Text = T("auraRange"),
+        Default = 15, Min = 1, Max = 60, Rounding = 0,
+        Callback = function(v) CFG.AuraRange = v end,
+    })
+
+    MeleeBox:AddSlider("AuraDelay", {
+        Text = T("auraDelay"),
+        Default = 0.15, Min = 0.05, Max = 1, Rounding = 2,
+        Suffix = "s",
+        Callback = function(v) CFG.AuraDelay = v end,
+    })
+
+    MeleeBox:AddDivider()
 
     MeleeBox:AddToggle("HitboxExp", {
-        Text = T("hitbox"),
-        Default = false,
+        Text = T("hitbox"), Default = false,
         Callback = function(v)
             CFG.HitboxExp = v
             for _, p in ipairs(Players:GetPlayers()) do
@@ -443,45 +455,58 @@ do
 
     MeleeBox:AddSlider("HitboxSize", {
         Text = T("hitboxScale"),
-        Default = 5,
-        Min = 1,
-        Max = 30,
-        Rounding = 0,
+        Default = 5, Min = 1, Max = 30, Rounding = 0,
         Callback = function(v) CFG.HitboxSize = v end,
     })
 
-    MeleeBox:AddToggle("KillAura", {
-        Text = T("killAura"),
-        Default = false,
-        Risky = true,
-        Callback = function(v) CFG.KillAura = v end,
-    })
-
-    MeleeBox:AddSlider("AuraRange", {
-        Text = T("auraRange"),
-        Default = 15,
-        Min = 1,
-        Max = 60,
-        Rounding = 0,
-        Callback = function(v) CFG.AuraRange = v end,
-    })
-
-    -- Bomb Pass
+    -- Bomb Pass (WITH EXCLUDE PLAYERS)
     local BombBox = Tabs.Combat:AddRightGroupbox("Bomb Pass")
 
     BombBox:AddToggle("AutoBomb", {
         Text = T("autoBomb"),
         Default = false,
         Risky = true,
+        Tooltip = "Auto-teleports to nearest player and passes bomb",
         Callback = function(v) CFG.AutoBomb = v end,
     })
 
     BombBox:AddInput("BombKeywords", {
         Default = "bomb,бомба,tnt,dynamite,explosive",
         Text = T("bombKeywords"),
+        Tooltip = "Tool names to detect, separated by commas",
         Finished = false,
         Callback = function(v) CFG.BombKeywords = v end,
     })
+
+    BombBox:AddDivider()
+
+    BombBox:AddDropdown("BombExclude", {
+        Values = GetPlayerNames(),
+        Default = nil,
+        Multi = true,
+        Text = T("bombExclude"),
+        Tooltip = "These players will NOT receive the bomb",
+        Callback = function(v) CFG.BombExcluded = v end,
+    })
+
+    -- Refresh player list button
+    BombBox:AddButton({
+        Text = "🔄 Refresh Player List",
+        Func = function()
+            Options.BombExclude:SetValues(GetPlayerNames())
+            Library:Notify({ Title = "Bomb Pass", Description = "Player list refreshed!", Time = 2 })
+        end,
+    })
+
+    -- Auto refresh player list
+    Players.PlayerAdded:Connect(function()
+        task.wait(1)
+        pcall(function() Options.BombExclude:SetValues(GetPlayerNames()) end)
+    end)
+    Players.PlayerRemoving:Connect(function()
+        task.wait(1)
+        pcall(function() Options.BombExclude:SetValues(GetPlayerNames()) end)
+    end)
 
     -- Info
     local InfoBox = Tabs.Combat:AddRightGroupbox("Info")
@@ -497,17 +522,9 @@ do
                 end
             end
             if closest then
-                Library:Notify({
-                    Title = T("nearestPlayer"),
-                    Description = closest.DisplayName .. " — " .. math.floor(dist) .. " studs",
-                    Time = 4,
-                })
+                Library:Notify({ Title = T("nearestPlayer"), Description = closest.DisplayName .. " — " .. math.floor(dist) .. " studs", Time = 4 })
             else
-                Library:Notify({
-                    Title = "Error",
-                    Description = T("noPlayersNear"),
-                    Time = 3,
-                })
+                Library:Notify({ Title = "Error", Description = T("noPlayersNear"), Time = 3 })
             end
         end,
     })
@@ -521,10 +538,8 @@ do
     local PlayerTPBox = Tabs.Teleport:AddLeftGroupbox("Player Transport")
 
     PlayerTPBox:AddInput("TpTarget", {
-        Default = "",
-        Text = T("targetName"),
-        Placeholder = "Player name...",
-        Finished = false,
+        Default = "", Text = T("targetName"),
+        Placeholder = "Player name...", Finished = false,
         Callback = function(v) CFG.TpTarget = v end,
     })
 
@@ -548,14 +563,9 @@ do
         Func = function()
             local pool = {}
             for _, p in ipairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    table.insert(pool, p)
-                end
+                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then table.insert(pool, p) end
             end
-            if #pool == 0 then
-                Library:Notify({ Title = "Error", Description = T("noPlayers"), Time = 3 })
-                return
-            end
+            if #pool == 0 then Library:Notify({ Title = "Error", Description = T("noPlayers"), Time = 3 }); return end
             local t = pool[math.random(#pool)]
             HRP.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 4)
             Library:Notify({ Title = T("randomPlayer"), Description = T("movedTo") .. " " .. t.DisplayName, Time = 3 })
@@ -567,17 +577,14 @@ do
         Func = function()
             pcall(function()
                 local sp = Workspace:FindFirstChildOfClass("SpawnLocation")
-                if sp then HRP.CFrame = sp.CFrame + Vector3.new(0, 5, 0)
-                else HRP.CFrame = CFrame.new(0, 50, 0) end
+                if sp then HRP.CFrame = sp.CFrame + Vector3.new(0, 5, 0) else HRP.CFrame = CFrame.new(0, 50, 0) end
             end)
         end,
     })
 
     PlayerTPBox:AddButton({
         Text = T("tpForward"),
-        Func = function()
-            pcall(function() HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * 100 end)
-        end,
+        Func = function() pcall(function() HRP.CFrame = HRP.CFrame + HRP.CFrame.LookVector * 100 end) end,
     })
 
     -- Waypoints
@@ -594,18 +601,13 @@ do
     WaypointBox:AddButton({
         Text = T("loadPos"),
         Func = function()
-            if CFG.SavedCF then
-                HRP.CFrame = CFG.SavedCF
-                Library:Notify({ Title = T("loaded"), Description = T("posRestored"), Time = 2 })
-            else
-                Library:Notify({ Title = "Error", Description = T("nothingSaved"), Time = 2 })
-            end
+            if CFG.SavedCF then HRP.CFrame = CFG.SavedCF; Library:Notify({ Title = T("loaded"), Description = T("posRestored"), Time = 2 })
+            else Library:Notify({ Title = "Error", Description = T("nothingSaved"), Time = 2 }) end
         end,
     })
 
     WaypointBox:AddToggle("ClickTP", {
-        Text = T("clickTp"),
-        Default = false,
+        Text = T("clickTp"), Default = false,
         Callback = function(v) CFG.ClickTP = v end,
     })
 end
@@ -617,74 +619,32 @@ end
 do
     local RenderBox = Tabs.ESP:AddLeftGroupbox("Rendering")
 
-    RenderBox:AddToggle("ESP", {
-        Text = T("enableEsp"),
-        Default = false,
-        Callback = function(v) CFG.ESP = v end,
-    })
-
-    RenderBox:AddToggle("BoxESP", {
-        Text = T("boundBox"),
-        Default = false,
-        Callback = function(v) CFG.BoxESP = v end,
-    })
-
-    RenderBox:AddToggle("NameESP", {
-        Text = T("nameTags"),
-        Default = false,
-        Callback = function(v) CFG.NameESP = v end,
-    })
-
-    RenderBox:AddToggle("HealthESP", {
-        Text = T("healthBars"),
-        Default = false,
-        Callback = function(v) CFG.HealthESP = v end,
-    })
-
-    RenderBox:AddToggle("DistESP", {
-        Text = T("distTags"),
-        Default = false,
-        Callback = function(v) CFG.DistESP = v end,
-    })
-
-    RenderBox:AddToggle("TracerESP", {
-        Text = T("tracers"),
-        Default = false,
-        Callback = function(v) CFG.TracerESP = v end,
-    })
+    RenderBox:AddToggle("ESP", { Text = T("enableEsp"), Default = false, Callback = function(v) CFG.ESP = v end })
+    RenderBox:AddToggle("BoxESP", { Text = T("boundBox"), Default = false, Callback = function(v) CFG.BoxESP = v end })
+    RenderBox:AddToggle("NameESP", { Text = T("nameTags"), Default = false, Callback = function(v) CFG.NameESP = v end })
+    RenderBox:AddToggle("HealthESP", { Text = T("healthBars"), Default = false, Callback = function(v) CFG.HealthESP = v end })
+    RenderBox:AddToggle("DistESP", { Text = T("distTags"), Default = false, Callback = function(v) CFG.DistESP = v end })
+    RenderBox:AddToggle("TracerESP", { Text = T("tracers"), Default = false, Callback = function(v) CFG.TracerESP = v end })
 
     RenderBox:AddToggle("ChamsESP", {
-        Text = T("chams"),
-        Default = false,
+        Text = T("chams"), Default = false,
         Callback = function(v)
             CFG.ChamsESP = v
             for _, p in ipairs(Players:GetPlayers()) do
                 if p ~= LocalPlayer and p.Character then
                     local ex = p.Character:FindFirstChild("_Highlight")
                     if v and not ex then
-                        local h = Instance.new("Highlight")
-                        h.Name = "_Highlight"
-                        h.FillColor = Color3.fromRGB(130, 80, 220)
-                        h.FillTransparency = 0.4
-                        h.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                        h.Parent = p.Character
-                    elseif not v and ex then
-                        ex:Destroy()
-                    end
+                        local h = Instance.new("Highlight"); h.Name = "_Highlight"; h.FillColor = Color3.fromRGB(130, 80, 220)
+                        h.FillTransparency = 0.4; h.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop; h.Parent = p.Character
+                    elseif not v and ex then ex:Destroy() end
                 end
             end
         end,
     })
 
-    -- Filters
     local FilterBox = Tabs.ESP:AddRightGroupbox("Filters")
-
-    FilterBox:AddToggle("TeamCheck", {
-        Text = T("teamFilter"),
-        Default = false,
-        Callback = function(v) CFG.TeamCheck = v end,
-    })
+    FilterBox:AddToggle("TeamCheck", { Text = T("teamFilter"), Default = false, Callback = function(v) CFG.TeamCheck = v end })
 end
 
 --// ═══════════════════════════════════════════
@@ -695,110 +655,62 @@ do
     local LightBox = Tabs.Environment:AddLeftGroupbox("Lighting")
 
     LightBox:AddToggle("Fullbright", {
-        Text = T("fullbright"),
-        Default = false,
+        Text = T("fullbright"), Default = false,
         Callback = function(v)
             CFG.Fullbright = v
             if v then
                 Lighting.Brightness = 2; Lighting.GlobalShadows = false
-                Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
-                Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+                Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200); Lighting.Ambient = Color3.fromRGB(200, 200, 200)
             else
                 Lighting.Brightness = 1; Lighting.GlobalShadows = true
-                Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-                Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+                Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128); Lighting.Ambient = Color3.fromRGB(0, 0, 0)
             end
         end,
     })
 
-    LightBox:AddToggle("NoFog", {
-        Text = T("noFog"),
-        Default = false,
-        Callback = function(v)
-            CFG.NoFog = v
-            Lighting.FogEnd = v and 9999999 or 100000
-        end,
-    })
-
-    LightBox:AddToggle("TimeLock", {
-        Text = T("timeLock"),
-        Default = false,
-        Callback = function(v) CFG.CustomTime = v end,
-    })
+    LightBox:AddToggle("NoFog", { Text = T("noFog"), Default = false, Callback = function(v) CFG.NoFog = v; Lighting.FogEnd = v and 9999999 or 100000 end })
+    LightBox:AddToggle("TimeLock", { Text = T("timeLock"), Default = false, Callback = function(v) CFG.CustomTime = v end })
 
     LightBox:AddSlider("ClockTime", {
-        Text = T("clockTime"),
-        Default = 14,
-        Min = 0,
-        Max = 24,
-        Rounding = 1,
-        Callback = function(v)
-            CFG.TimeVal = v
-            if CFG.CustomTime then Lighting.ClockTime = v end
-        end,
+        Text = T("clockTime"), Default = 14, Min = 0, Max = 24, Rounding = 1,
+        Callback = function(v) CFG.TimeVal = v; if CFG.CustomTime then Lighting.ClockTime = v end end,
     })
 
-    -- Cleanup
     local CleanBox = Tabs.Environment:AddRightGroupbox("Cleanup")
 
-    CleanBox:AddButton({
-        Text = T("removeEffects"),
-        Func = function()
-            local n = 0
-            for _, e in ipairs(Lighting:GetChildren()) do
-                if e:IsA("Atmosphere") or e:IsA("BloomEffect") or e:IsA("BlurEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("DepthOfFieldEffect") or e:IsA("SunRaysEffect") then
-                    e:Destroy(); n += 1
-                end
-            end
-            Library:Notify({ Title = "Cleanup", Description = n .. " " .. T("effectsRemoved"), Time = 2 })
-        end,
-    })
+    CleanBox:AddButton({ Text = T("removeEffects"), Func = function()
+        local n = 0
+        for _, e in ipairs(Lighting:GetChildren()) do
+            if e:IsA("Atmosphere") or e:IsA("BloomEffect") or e:IsA("BlurEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("DepthOfFieldEffect") or e:IsA("SunRaysEffect") then e:Destroy(); n += 1 end
+        end
+        Library:Notify({ Title = "Cleanup", Description = n .. " " .. T("effectsRemoved"), Time = 2 })
+    end })
 
-    CleanBox:AddButton({
-        Text = T("removeParticles"),
-        Func = function()
-            local n = 0
-            for _, o in ipairs(Workspace:GetDescendants()) do
-                if o:IsA("ParticleEmitter") or o:IsA("Fire") or o:IsA("Smoke") or o:IsA("Sparkles") then
-                    o:Destroy(); n += 1
-                end
-            end
-            Library:Notify({ Title = "Cleanup", Description = n .. " " .. T("particlesRemoved"), Time = 2 })
-        end,
-    })
+    CleanBox:AddButton({ Text = T("removeParticles"), Func = function()
+        local n = 0
+        for _, o in ipairs(Workspace:GetDescendants()) do
+            if o:IsA("ParticleEmitter") or o:IsA("Fire") or o:IsA("Smoke") or o:IsA("Sparkles") then o:Destroy(); n += 1 end
+        end
+        Library:Notify({ Title = "Cleanup", Description = n .. " " .. T("particlesRemoved"), Time = 2 })
+    end })
 
-    CleanBox:AddButton({
-        Text = T("removeDecals"),
-        Func = function()
-            local n = 0
-            for _, o in ipairs(Workspace:GetDescendants()) do
-                if o:IsA("Decal") or o:IsA("Texture") then o:Destroy(); n += 1 end
-            end
-            Library:Notify({ Title = "Cleanup", Description = n .. " removed", Time = 2 })
-        end,
-    })
+    CleanBox:AddButton({ Text = T("removeDecals"), Func = function()
+        local n = 0
+        for _, o in ipairs(Workspace:GetDescendants()) do if o:IsA("Decal") or o:IsA("Texture") then o:Destroy(); n += 1 end end
+        Library:Notify({ Title = "Cleanup", Description = n .. " removed", Time = 2 })
+    end })
 
-    CleanBox:AddButton({
-        Text = T("removeSounds"),
-        Func = function()
-            local n = 0
-            for _, o in ipairs(Workspace:GetDescendants()) do
-                if o:IsA("Sound") then o:Stop(); o:Destroy(); n += 1 end
-            end
-            Library:Notify({ Title = "Cleanup", Description = n .. " removed", Time = 2 })
-        end,
-    })
+    CleanBox:AddButton({ Text = T("removeSounds"), Func = function()
+        local n = 0
+        for _, o in ipairs(Workspace:GetDescendants()) do if o:IsA("Sound") then o:Stop(); o:Destroy(); n += 1 end end
+        Library:Notify({ Title = "Cleanup", Description = n .. " removed", Time = 2 })
+    end })
 
-    CleanBox:AddButton({
-        Text = T("removeBlur"),
-        Func = function()
-            local n = 0
-            for _, obj in ipairs(Lighting:GetChildren()) do
-                if obj:IsA("BlurEffect") then obj:Destroy(); n += 1 end
-            end
-            Library:Notify({ Title = "Blur", Description = n .. " removed", Time = 2 })
-        end,
-    })
+    CleanBox:AddButton({ Text = T("removeBlur"), Func = function()
+        local n = 0
+        for _, obj in ipairs(Lighting:GetChildren()) do if obj:IsA("BlurEffect") then obj:Destroy(); n += 1 end end
+        Library:Notify({ Title = "Blur", Description = n .. " removed", Time = 2 })
+    end })
 end
 
 --// ═══════════════════════════════════════════
@@ -807,201 +719,82 @@ end
 
 do
     local ProtectBox = Tabs.Utilities:AddLeftGroupbox("Protection")
+    ProtectBox:AddToggle("AntiAFK", { Text = T("antiAfk"), Default = false, Callback = function(v) CFG.AntiAFK = v end })
+    ProtectBox:AddToggle("AntiKick", { Text = T("antiKick"), Default = false, Callback = function(v) CFG.AntiKick = v end })
+    ProtectBox:AddToggle("AntiBlur", { Text = T("blurEnabled"), Default = false, Callback = function(v)
+        CFG.AntiBlur = v
+        if v then for _, obj in ipairs(Lighting:GetChildren()) do if obj:IsA("BlurEffect") then obj:Destroy() end end end
+    end })
 
-    ProtectBox:AddToggle("AntiAFK", {
-        Text = T("antiAfk"),
-        Default = false,
-        Callback = function(v) CFG.AntiAFK = v end,
-    })
-
-    ProtectBox:AddToggle("AntiKick", {
-        Text = T("antiKick"),
-        Default = false,
-        Callback = function(v) CFG.AntiKick = v end,
-    })
-
-    ProtectBox:AddToggle("AntiBlur", {
-        Text = T("blurEnabled"),
-        Default = false,
-        Callback = function(v)
-            CFG.AntiBlur = v
-            if v then
-                for _, obj in ipairs(Lighting:GetChildren()) do
-                    if obj:IsA("BlurEffect") then obj:Destroy() end
-                end
-            end
-        end,
-    })
-
-    -- Actions
     local ActionBox = Tabs.Utilities:AddLeftGroupbox("Actions")
-
-    ActionBox:AddToggle("Spin", {
-        Text = T("spin"),
-        Default = false,
-        Callback = function(v) CFG.Spin = v end,
-    })
-
-    ActionBox:AddSlider("SpinSpeed", {
-        Text = T("spinSpeed"),
-        Default = 10,
-        Min = 1,
-        Max = 50,
-        Rounding = 0,
-        Callback = function(v) CFG.SpinSpeed = v end,
-    })
-
+    ActionBox:AddToggle("Spin", { Text = T("spin"), Default = false, Callback = function(v) CFG.Spin = v end })
+    ActionBox:AddSlider("SpinSpeed", { Text = T("spinSpeed"), Default = 10, Min = 1, Max = 50, Rounding = 0, Callback = function(v) CFG.SpinSpeed = v end })
     ActionBox:AddDivider()
 
-    ActionBox:AddButton({
-        Text = T("spawnPlatform"),
-        Func = function()
-            local p = Instance.new("Part")
-            p.Size = Vector3.new(20, 1, 20)
-            p.CFrame = HRP.CFrame * CFrame.new(0, -4, 0)
-            p.Anchored = true
-            p.BrickColor = BrickColor.new("Bright violet")
-            p.Material = Enum.Material.Neon
-            p.Transparency = 0.3
-            p.Parent = Workspace
-        end,
-    })
+    ActionBox:AddButton({ Text = T("spawnPlatform"), Func = function()
+        local p = Instance.new("Part"); p.Size = Vector3.new(20, 1, 20); p.CFrame = HRP.CFrame * CFrame.new(0, -4, 0)
+        p.Anchored = true; p.BrickColor = BrickColor.new("Bright violet"); p.Material = Enum.Material.Neon; p.Transparency = 0.3; p.Parent = Workspace
+    end })
 
-    ActionBox:AddButton({
-        Text = T("forceSit"),
-        Func = function() pcall(function() Humanoid.Sit = true end) end,
-    })
+    ActionBox:AddButton({ Text = T("forceSit"), Func = function() pcall(function() Humanoid.Sit = true end) end })
+    ActionBox:AddButton({ Text = T("forceJump"), Func = function() pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end) end })
 
-    ActionBox:AddButton({
-        Text = T("forceJump"),
-        Func = function() pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end) end,
-    })
+    ActionBox:AddButton({ Text = T("copyPos"), Func = function()
+        local pos = HRP.Position; local txt = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
+        pcall(function() setclipboard(txt) end); Library:Notify({ Title = T("copied"), Description = txt, Time = 3 })
+    end })
 
-    ActionBox:AddButton({
-        Text = T("copyPos"),
-        Func = function()
-            local pos = HRP.Position
-            local txt = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
-            pcall(function() setclipboard(txt) end)
-            Library:Notify({ Title = T("copied"), Description = txt, Time = 3 })
-        end,
-    })
+    ActionBox:AddButton({ Text = T("copyLink"), Func = function()
+        local link = "https://www.roblox.com/games/" .. game.PlaceId
+        pcall(function() setclipboard(link) end); Library:Notify({ Title = T("copied"), Description = link, Time = 3 })
+    end })
 
-    ActionBox:AddButton({
-        Text = T("copyLink"),
-        Func = function()
-            local link = "https://www.roblox.com/games/" .. game.PlaceId
-            pcall(function() setclipboard(link) end)
-            Library:Notify({ Title = T("copied"), Description = link, Time = 3 })
-        end,
-    })
-
-    -- Chat
     local ChatBox = Tabs.Utilities:AddRightGroupbox("Chat")
 
-    ChatBox:AddInput("SpamMsg", {
-        Default = "",
-        Text = T("spamMsg"),
-        Placeholder = "Message...",
-        Finished = false,
-        Callback = function(v) CFG.SpamMsg = v end,
-    })
+    ChatBox:AddInput("SpamMsg", { Default = "", Text = T("spamMsg"), Placeholder = "Message...", Finished = false, Callback = function(v) CFG.SpamMsg = v end })
+    ChatBox:AddSlider("SpamDelay", { Text = T("spamInterval"), Default = 2, Min = 1, Max = 10, Rounding = 1, Suffix = "s", Callback = function(v) CFG.SpamDelay = v end })
+    ChatBox:AddToggle("ChatSpam", { Text = T("chatSpam"), Default = false, Risky = true, Callback = function(v) CFG.ChatSpam = v end })
 
-    ChatBox:AddSlider("SpamDelay", {
-        Text = T("spamInterval"),
-        Default = 2,
-        Min = 1,
-        Max = 10,
-        Rounding = 1,
-        Suffix = "s",
-        Callback = function(v) CFG.SpamDelay = v end,
-    })
-
-    ChatBox:AddToggle("ChatSpam", {
-        Text = T("chatSpam"),
-        Default = false,
-        Risky = true,
-        Callback = function(v) CFG.ChatSpam = v end,
-    })
-
-    -- Server
     local ServerBox = Tabs.Utilities:AddRightGroupbox("Server")
 
-    ServerBox:AddButton({
-        Text = T("rejoin"),
-        Func = function()
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
-        end,
-    })
+    ServerBox:AddButton({ Text = T("rejoin"), Func = function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end })
 
-    ServerBox:AddButton({
-        Text = T("serverHop"),
-        Func = function()
-            task.spawn(function()
-                local ok, data = pcall(function()
-                    return HttpService:JSONDecode(game:HttpGet(("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"):format(game.PlaceId)))
-                end)
-                if not ok then Library:Notify({ Title = "Error", Description = "Failed", Time = 3 }); return end
-                for _, sv in ipairs(data.data) do
-                    if sv.id ~= game.JobId and sv.playing < sv.maxPlayers then
-                        TeleportService:TeleportToPlaceInstance(game.PlaceId, sv.id, LocalPlayer)
-                        return
-                    end
-                end
-                Library:Notify({ Title = "Error", Description = "No servers", Time = 3 })
-            end)
-        end,
-    })
+    ServerBox:AddButton({ Text = T("serverHop"), Func = function()
+        task.spawn(function()
+            local ok, data = pcall(function() return HttpService:JSONDecode(game:HttpGet(("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"):format(game.PlaceId))) end)
+            if not ok then Library:Notify({ Title = "Error", Description = "Failed", Time = 3 }); return end
+            for _, sv in ipairs(data.data) do
+                if sv.id ~= game.JobId and sv.playing < sv.maxPlayers then TeleportService:TeleportToPlaceInstance(game.PlaceId, sv.id, LocalPlayer); return end
+            end
+            Library:Notify({ Title = "Error", Description = "No servers", Time = 3 })
+        end)
+    end })
 
-    ServerBox:AddButton({
-        Text = T("serverInfo"),
-        Func = function()
-            Library:Notify({
-                Title = T("serverInfo"),
-                Description = string.format("Players: %d/%d\nPlace: %d\nPing: ~%dms",
-                    #Players:GetPlayers(), Players.MaxPlayers, game.PlaceId,
-                    math.floor(LocalPlayer:GetNetworkPing() * 1000)),
-                Time = 6,
-            })
-        end,
-    })
+    ServerBox:AddButton({ Text = T("serverInfo"), Func = function()
+        Library:Notify({ Title = T("serverInfo"), Description = string.format("Players: %d/%d\nPlace: %d\nPing: ~%dms",
+            #Players:GetPlayers(), Players.MaxPlayers, game.PlaceId, math.floor(LocalPlayer:GetNetworkPing() * 1000)), Time = 6 })
+    end })
 
-    ServerBox:AddButton({
-        Text = T("copyId") .. " (" .. LocalPlayer.UserId .. ")",
-        Func = function()
-            pcall(function() setclipboard(tostring(LocalPlayer.UserId)) end)
-            Library:Notify({ Title = T("copied"), Description = tostring(LocalPlayer.UserId), Time = 2 })
-        end,
-    })
+    ServerBox:AddButton({ Text = T("copyId") .. " (" .. LocalPlayer.UserId .. ")", Func = function()
+        pcall(function() setclipboard(tostring(LocalPlayer.UserId)) end)
+        Library:Notify({ Title = T("copied"), Description = tostring(LocalPlayer.UserId), Time = 2 })
+    end })
 
-    -- Graphics
     local GfxBox = Tabs.Utilities:AddRightGroupbox("Graphics")
 
-    GfxBox:AddButton({
-        Text = T("removeAllPost"),
-        Func = function()
-            local n = 0
-            for _, e in ipairs(Lighting:GetChildren()) do
-                if e:IsA("PostEffect") or e:IsA("Atmosphere") then e:Destroy(); n += 1 end
-            end
-            Library:Notify({ Title = "Cleanup", Description = n .. " removed", Time = 2 })
-        end,
-    })
+    GfxBox:AddButton({ Text = T("removeAllPost"), Func = function()
+        local n = 0
+        for _, e in ipairs(Lighting:GetChildren()) do if e:IsA("PostEffect") or e:IsA("Atmosphere") then e:Destroy(); n += 1 end end
+        Library:Notify({ Title = "Cleanup", Description = n .. " removed", Time = 2 })
+    end })
 
-    GfxBox:AddButton({
-        Text = T("lowGraphics"),
-        Func = function()
-            pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
-            Lighting.GlobalShadows = false
-            for _, e in ipairs(Lighting:GetChildren()) do
-                if e:IsA("PostEffect") or e:IsA("Atmosphere") then e.Enabled = false end
-            end
-            for _, o in ipairs(Workspace:GetDescendants()) do
-                if o:IsA("ParticleEmitter") or o:IsA("Trail") then o.Enabled = false end
-            end
-            Library:Notify({ Title = "Graphics", Description = "Low mode ON", Time = 2 })
-        end,
-    })
+    GfxBox:AddButton({ Text = T("lowGraphics"), Func = function()
+        pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
+        Lighting.GlobalShadows = false
+        for _, e in ipairs(Lighting:GetChildren()) do if e:IsA("PostEffect") or e:IsA("Atmosphere") then e.Enabled = false end end
+        for _, o in ipairs(Workspace:GetDescendants()) do if o:IsA("ParticleEmitter") or o:IsA("Trail") then o.Enabled = false end end
+        Library:Notify({ Title = "Graphics", Description = "Low mode ON", Time = 2 })
+    end })
 end
 
 --// ═══════════════════════════════════════════
@@ -1012,101 +805,65 @@ do
     local MenuBox = Tabs.Settings:AddLeftGroupbox("Menu")
 
     MenuBox:AddToggle("KeybindMenuOpen", {
-        Default = false,
-        Text = "Open Keybind Menu",
-        Callback = function(v)
-            Library.KeybindFrame.Visible = v
-        end,
+        Default = false, Text = "Open Keybind Menu",
+        Callback = function(v) Library.KeybindFrame.Visible = v end,
     })
 
     MenuBox:AddToggle("ShowCustomCursor", {
-        Text = "Custom Cursor",
-        Default = true,
-        Callback = function(v)
-            Library.ShowCustomCursor = v
-        end,
+        Text = "Custom Cursor", Default = true,
+        Callback = function(v) Library.ShowCustomCursor = v end,
     })
 
     MenuBox:AddDropdown("NotificationSide", {
-        Values = { "Left", "Right" },
-        Default = "Right",
-        Text = "Notification Side",
-        Callback = function(v)
-            Library:SetNotifySide(v)
-        end,
+        Values = { "Left", "Right" }, Default = "Right", Text = "Notification Side",
+        Callback = function(v) Library:SetNotifySide(v) end,
     })
 
     MenuBox:AddDivider()
-
-    MenuBox:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", {
-        Default = "RightControl",
-        NoUI = true,
-        Text = "Menu keybind",
-    })
+    MenuBox:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", { Default = "RightControl", NoUI = true, Text = "Menu keybind" })
 
     -- Language
     local LangBox = Tabs.Settings:AddLeftGroupbox("Language")
 
-    LangBox:AddButton({
-        Text = "🇬🇧 English",
-        Func = function()
-            Lang = "EN"
-            Library:Notify({ Title = "Language", Description = "English selected. Rejoin to apply.", Time = 4 })
-        end,
-    })
+    LangBox:AddButton({ Text = "🇬🇧 English", Func = function()
+        Lang = "EN"; Library:Notify({ Title = "Language", Description = "English selected. Rejoin to apply.", Time = 4 })
+    end })
 
-    LangBox:AddButton({
-        Text = "🇷🇺 Русский",
-        Func = function()
-            Lang = "RU"
-            Library:Notify({ Title = "Язык", Description = "Русский выбран. Перезайдите.", Time = 4 })
-        end,
-    })
+    LangBox:AddButton({ Text = "🇷🇺 Русский", Func = function()
+        Lang = "RU"; Library:Notify({ Title = "Язык", Description = "Русский выбран. Перезайдите.", Time = 4 })
+    end })
 
     -- Info
     local InfoBox = Tabs.Settings:AddLeftGroupbox("Player Info")
-
     InfoBox:AddLabel("Name: " .. LocalPlayer.Name)
     InfoBox:AddLabel("Display: " .. LocalPlayer.DisplayName)
     InfoBox:AddLabel("ID: " .. LocalPlayer.UserId)
 
-    -- About
     local AboutBox = Tabs.Settings:AddLeftGroupbox("About")
-
     AboutBox:AddLabel("Eplisma v3.0")
     AboutBox:AddLabel("Developer: Frost")
     AboutBox:AddLabel("Telegram: @Jokerfros")
     AboutBox:AddLabel("Obsidian UI Edition")
 
-    -- Danger
     local DangerBox = Tabs.Settings:AddLeftGroupbox("Danger Zone")
-
     DangerBox:AddButton({
-        Text = T("destroy"),
-        DoubleClick = true,
+        Text = T("destroy"), DoubleClick = true,
         Func = function()
             pcall(function() _G._CleanESP() end)
             pcall(function() _G._FOV:Remove() end)
-            pcall(function()
-                if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
-                if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
-            end)
-            CFG.Fly = false; CFG.Noclip = false; CFG.ESP = false
-            CFG.Aimbot = false; CFG.AutoBomb = false
+            pcall(function() if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end; if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end end)
+            CFG.Fly = false; CFG.Noclip = false; CFG.ESP = false; CFG.Aimbot = false; CFG.AutoBomb = false
             Library:Unload()
         end,
     })
 
-    -- Addons
     Library.ToggleKeybind = Options.MenuKeybind
-
     ThemeManager:SetLibrary(Library)
     SaveManager:SetLibrary(Library)
     SaveManager:IgnoreThemeSettings()
     SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
     ThemeManager:SetFolder("Eplisma")
     SaveManager:SetFolder("Eplisma/config")
-
     SaveManager:BuildConfigSection(Tabs.Settings)
     ThemeManager:ApplyToTab(Tabs.Settings)
     SaveManager:LoadAutoloadConfig()
@@ -1117,14 +874,9 @@ end
 --// ═══════════════════════════════════════════
 
 local FOVCircle = Drawing.new("Circle")
-FOVCircle.Thickness = 1.5
-FOVCircle.NumSides = 64
-FOVCircle.Radius = CFG.AimFOV
-FOVCircle.Filled = false
-FOVCircle.Visible = false
-FOVCircle.ZIndex = 999
-FOVCircle.Transparency = 0.75
-FOVCircle.Color = Color3.fromRGB(130, 80, 220)
+FOVCircle.Thickness = 1.5; FOVCircle.NumSides = 64; FOVCircle.Radius = CFG.AimFOV
+FOVCircle.Filled = false; FOVCircle.Visible = false; FOVCircle.ZIndex = 999
+FOVCircle.Transparency = 0.75; FOVCircle.Color = Color3.fromRGB(130, 80, 220)
 _G._FOV = FOVCircle
 
 --// ═══════════════════════════════════════════
@@ -1134,9 +886,7 @@ _G._FOV = FOVCircle
 local ESPCache = {}
 
 local function MkDraw(cls, props)
-    local d = Drawing.new(cls)
-    for k, v in pairs(props) do d[k] = v end
-    return d
+    local d = Drawing.new(cls); for k, v in pairs(props) do d[k] = v end; return d
 end
 
 local function AddESP(plr)
@@ -1152,10 +902,7 @@ local function AddESP(plr)
 end
 
 local function DelESP(plr)
-    if ESPCache[plr] then
-        for _, d in pairs(ESPCache[plr]) do pcall(d.Remove, d) end
-        ESPCache[plr] = nil
-    end
+    if ESPCache[plr] then for _, d in pairs(ESPCache[plr]) do pcall(d.Remove, d) end; ESPCache[plr] = nil end
 end
 
 local function HideAll(esp) for _, d in pairs(esp) do d.Visible = false end end
@@ -1183,7 +930,7 @@ local function FindTarget()
         if p == LocalPlayer or IsAlly(p) then continue end
         local c = p.Character; if not c then continue end
         local hum = c:FindFirstChildOfClass("Humanoid")
-        local part = c:FindFirstChild(CFG.AimBone) or c:FindFirstChild("HumanoidRootPart")
+        local part = c:FindFirstChild(CFG.AimBone) or c:FindFirstChild("Head") or c:FindFirstChild("HumanoidRootPart")
         if not (hum and hum.Health > 0 and part) then continue end
         local sp, vis = Camera:WorldToScreenPoint(part.Position)
         if not vis then continue end
@@ -1191,6 +938,29 @@ local function FindTarget()
         if d < bestD then bestD = d; best = p end
     end
     return best
+end
+
+local function FindNearestPlayerForBomb()
+    local closest, dist = nil, math.huge
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            -- Check if player is excluded from bomb
+            local excluded = false
+            if CFG.BombExcluded then
+                if type(CFG.BombExcluded) == "table" then
+                    if CFG.BombExcluded[p.Name] then
+                        excluded = true
+                    end
+                end
+            end
+
+            if not excluded then
+                local d = (HRP.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                if d < dist then dist = d; closest = p end
+            end
+        end
+    end
+    return closest
 end
 
 local function FindNearestPlayer()
@@ -1215,35 +985,52 @@ local function IsBombTool(tool)
 end
 
 --// ═══════════════════════════════════════════
---//  RENDER LOOP
+--//  RENDER LOOP (FIXED AIMBOT)
 --// ═══════════════════════════════════════════
 
 RunService.RenderStepped:Connect(function()
     local mp = UserInputService:GetMouseLocation()
-    FOVCircle.Visible = CFG.ShowFOV
-    FOVCircle.Radius = CFG.AimFOV
-    FOVCircle.Position = mp
+    FOVCircle.Visible = CFG.ShowFOV; FOVCircle.Radius = CFG.AimFOV; FOVCircle.Position = mp
 
-    if CFG.Aimbot and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
-        local t = FindTarget()
-        if t and t.Character then
-            local part = t.Character:FindFirstChild(CFG.AimBone) or t.Character:FindFirstChild("HumanoidRootPart")
-            if part then
-                local s = 1 / math.max(CFG.AimSmooth, 0.01)
-                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, part.Position), s)
+    -- FIXED AIMBOT: works with RMB on PC or AutoAim for mobile
+    if CFG.Aimbot then
+        local shouldAim = false
+
+        -- PC: hold RMB
+        if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+            shouldAim = true
+        end
+
+        -- Mobile: auto aim mode (no RMB needed)
+        if CFG.AutoAim then
+            shouldAim = true
+        end
+
+        if shouldAim then
+            local t = FindTarget()
+            if t and t.Character then
+                local boneName = CFG.AimBone or "Head"
+                local part = t.Character:FindFirstChild(boneName)
+                if not part then part = t.Character:FindFirstChild("Head") end
+                if not part then part = t.Character:FindFirstChild("HumanoidRootPart") end
+
+                if part then
+                    local smoothFactor = 1 / math.max(CFG.AimSmooth, 0.1)
+                    local targetCF = CFrame.new(Camera.CFrame.Position, part.Position)
+                    Camera.CFrame = Camera.CFrame:Lerp(targetCF, smoothFactor)
+                end
             end
         end
     end
 
+    -- ESP
     local vp = Camera.ViewportSize
     for plr, esp in pairs(ESPCache) do
         local c = plr.Character
         local hum = c and c:FindFirstChildOfClass("Humanoid")
         local hrp = c and c:FindFirstChild("HumanoidRootPart")
         local head = c and c:FindFirstChild("Head")
-        if not (c and hum and hum.Health > 0 and hrp and head and CFG.ESP) or IsAlly(plr) then
-            HideAll(esp); continue
-        end
+        if not (c and hum and hum.Health > 0 and hrp and head and CFG.ESP) or IsAlly(plr) then HideAll(esp); continue end
         local wp, vis = Camera:WorldToViewportPoint(hrp.Position)
         local hp = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, .5, 0))
         local fp = Camera:WorldToViewportPoint(hrp.Position - Vector3.new(0, 3, 0))
@@ -1252,16 +1039,15 @@ RunService.RenderStepped:Connect(function()
 
         esp.Box.Visible = CFG.BoxESP; esp.Box.Size = Vector2.new(bW, bH); esp.Box.Position = Vector2.new(cx - bW * .5, hp.Y)
         esp.Name.Visible = CFG.NameESP; esp.Name.Text = plr.DisplayName; esp.Name.Position = Vector2.new(cx, hp.Y - 16)
-
         local pct = hum.Health / hum.MaxHealth
         esp.HpBG.Visible = CFG.HealthESP; esp.HpBG.From = Vector2.new(cx - bW * .5 - 5, fp.Y); esp.HpBG.To = Vector2.new(cx - bW * .5 - 5, hp.Y)
         esp.Hp.Visible = CFG.HealthESP; esp.Hp.From = Vector2.new(cx - bW * .5 - 5, fp.Y); esp.Hp.To = Vector2.new(cx - bW * .5 - 5, fp.Y - bH * pct); esp.Hp.Color = Color3.new(1 - pct, pct, 0)
-
         local dist = (HRP.Position - hrp.Position).Magnitude
         esp.Dist.Visible = CFG.DistESP; esp.Dist.Text = math.floor(dist) .. "m"; esp.Dist.Position = Vector2.new(cx, fp.Y + 3)
         esp.Tracer.Visible = CFG.TracerESP; esp.Tracer.From = Vector2.new(vp.X * .5, vp.Y); esp.Tracer.To = Vector2.new(cx, fp.Y)
     end
 
+    -- Fly
     if CFG.Fly and HRP then
         local bv = HRP:FindFirstChild("_BV"); local bg = HRP:FindFirstChild("_BG")
         if not bv then bv = Instance.new("BodyVelocity"); bv.Name = "_BV"; bv.MaxForce = Vector3.new(9e9, 9e9, 9e9); bv.Parent = HRP end
@@ -1291,21 +1077,13 @@ end)
 RunService.Heartbeat:Connect(function()
     if CFG.GodMode and Humanoid then pcall(function() Humanoid.Health = Humanoid.MaxHealth end) end
     if CFG.Noclip and Character then
-        for _, p in ipairs(Character:GetDescendants()) do
-            if p:IsA("BasePart") then p.CanCollide = false end
-        end
+        for _, p in ipairs(Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end
     end
     if CFG.BunnyHop and Humanoid then
-        pcall(function()
-            if Humanoid.FloorMaterial ~= Enum.Material.Air then
-                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-            end
-        end)
+        pcall(function() if Humanoid.FloorMaterial ~= Enum.Material.Air then Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
     end
     if CFG.AntiBlur then
-        for _, obj in ipairs(Lighting:GetChildren()) do
-            if obj:IsA("BlurEffect") then obj:Destroy() end
-        end
+        for _, obj in ipairs(Lighting:GetChildren()) do if obj:IsA("BlurEffect") then obj:Destroy() end end
     end
 end)
 
@@ -1314,15 +1092,11 @@ end)
 --// ═══════════════════════════════════════════
 
 UserInputService.JumpRequest:Connect(function()
-    if CFG.InfJump and Humanoid then
-        pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
-    end
+    if CFG.InfJump and Humanoid then pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end) end
 end)
 
 Mouse.Button1Down:Connect(function()
-    if CFG.ClickTP and Mouse.Hit then
-        pcall(function() HRP.CFrame = CFrame.new(Mouse.Hit.Position + Vector3.new(0, 3, 0)) end)
-    end
+    if CFG.ClickTP and Mouse.Hit then pcall(function() HRP.CFrame = CFrame.new(Mouse.Hit.Position + Vector3.new(0, 3, 0)) end) end
 end)
 
 --// ═══════════════════════════════════════════
@@ -1330,37 +1104,67 @@ end)
 --// ═══════════════════════════════════════════
 
 LocalPlayer.Idled:Connect(function()
-    if CFG.AntiAFK then
-        pcall(function()
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new())
-        end)
-    end
+    if CFG.AntiAFK then pcall(function() VirtualUser:CaptureController(); VirtualUser:ClickButton2(Vector2.new()) end) end
 end)
 
+-- Chat Spam
 task.spawn(function()
     while true do
         if CFG.ChatSpam and CFG.SpamMsg ~= "" then
-            pcall(function()
-                ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents", true):FindFirstChild("SayMessageRequest"):FireServer(CFG.SpamMsg, "All")
-            end)
+            pcall(function() ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents", true):FindFirstChild("SayMessageRequest"):FireServer(CFG.SpamMsg, "All") end)
         end
         task.wait(math.max(CFG.SpamDelay, 0.5))
     end
 end)
 
+--// ═══════════════════════════════════════════
+--//  KILL AURA (FIXED)
+--// ═══════════════════════════════════════════
+
 task.spawn(function()
-    while task.wait(0.15) do
-        if not CFG.KillAura or not HRP then continue end
+    while true do
+        task.wait(CFG.AuraDelay or 0.15)
+
+        if not CFG.KillAura or not Character or not HRP then continue end
+
+        -- Find tool in character
+        local tool = Character:FindFirstChildOfClass("Tool")
+        if not tool then continue end
+
+        local handle = tool:FindFirstChild("Handle")
+        if not handle then continue end
+
         for _, p in ipairs(Players:GetPlayers()) do
             if p == LocalPlayer or IsAlly(p) then continue end
-            local c = p.Character; local hrp2 = c and c:FindFirstChild("HumanoidRootPart"); local hum2 = c and c:FindFirstChildOfClass("Humanoid")
-            if hrp2 and hum2 and hum2.Health > 0 and (HRP.Position - hrp2.Position).Magnitude <= CFG.AuraRange then
+
+            local c = p.Character
+            if not c then continue end
+
+            local hrp2 = c:FindFirstChild("HumanoidRootPart")
+            local hum2 = c:FindFirstChildOfClass("Humanoid")
+
+            if not hrp2 or not hum2 or hum2.Health <= 0 then continue end
+
+            local distance = (HRP.Position - hrp2.Position).Magnitude
+
+            if distance <= CFG.AuraRange then
+                -- Method 1: firetouchinterest
                 pcall(function()
-                    local tool = Character:FindFirstChildOfClass("Tool")
-                    if tool then
-                        local h = tool:FindFirstChild("Handle")
-                        if h then firetouchinterest(h, hrp2, 0); task.wait(); firetouchinterest(h, hrp2, 1) end
+                    firetouchinterest(handle, hrp2, 0)
+                    task.wait()
+                    firetouchinterest(handle, hrp2, 1)
+                end)
+
+                -- Method 2: Click simulation
+                pcall(function()
+                    tool:Activate()
+                end)
+
+                -- Method 3: Remote events (some games use these)
+                pcall(function()
+                    local click = tool:FindFirstChild("MouseClick") or tool:FindFirstChild("Click")
+                    if click and click:IsA("ClickDetector") then
+                        fireclickdetector(click)
                     end
                 end)
             end
@@ -1369,30 +1173,59 @@ task.spawn(function()
 end)
 
 --// ═══════════════════════════════════════════
---//  AUTO BOMB PASS
+--//  AUTO BOMB PASS (WITH EXCLUDE)
 --// ═══════════════════════════════════════════
 
 task.spawn(function()
     while task.wait(0.1) do
         if not CFG.AutoBomb or not Character then continue end
+
         for _, tool in ipairs(Character:GetChildren()) do
             if IsBombTool(tool) then
-                local nearest = FindNearestPlayer()
+                -- Use FindNearestPlayerForBomb which respects exclusion list
+                local nearest = FindNearestPlayerForBomb()
+
                 if nearest and nearest.Character and nearest.Character:FindFirstChild("HumanoidRootPart") then
                     local targetHRP = nearest.Character.HumanoidRootPart
-                    pcall(function() HRP.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 2) end)
+
+                    -- Teleport to player
+                    pcall(function()
+                        HRP.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 2)
+                    end)
+
                     task.wait(0.05)
+
+                    -- Touch attempt 1
                     pcall(function()
                         local handle = tool:FindFirstChild("Handle")
-                        if handle then firetouchinterest(handle, targetHRP, 0); task.wait(0.05); firetouchinterest(handle, targetHRP, 1) end
+                        if handle then
+                            firetouchinterest(handle, targetHRP, 0)
+                            task.wait(0.05)
+                            firetouchinterest(handle, targetHRP, 1)
+                        end
                     end)
+
+                    -- Activate tool
+                    pcall(function()
+                        tool:Activate()
+                    end)
+
                     task.wait(0.1)
+
+                    -- Touch attempt 2 if bomb still in hand
                     if tool.Parent == Character then
                         pcall(function()
                             local handle = tool:FindFirstChild("Handle")
-                            if handle then firetouchinterest(handle, targetHRP, 0); task.wait(0.1); firetouchinterest(handle, targetHRP, 1) end
+                            if handle then
+                                firetouchinterest(handle, targetHRP, 0)
+                                task.wait(0.1)
+                                firetouchinterest(handle, targetHRP, 1)
+                            end
                         end)
                     end
+                else
+                    -- No valid target (all excluded or no players)
+                    -- Do nothing - keep bomb
                 end
                 break
             end
@@ -1400,29 +1233,27 @@ task.spawn(function()
     end
 end)
 
+-- Hitbox + Chams for new players
 Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Connect(function(char)
         if CFG.HitboxExp then
-            task.wait(1)
-            local h = char:FindFirstChild("HumanoidRootPart")
+            task.wait(1); local h = char:FindFirstChild("HumanoidRootPart")
             if h then h.Size = Vector3.new(CFG.HitboxSize, CFG.HitboxSize, CFG.HitboxSize); h.Transparency = 0.5 end
         end
         if CFG.ChamsESP then
             task.wait(1)
             if not char:FindFirstChild("_Highlight") then
                 local hl = Instance.new("Highlight"); hl.Name = "_Highlight"; hl.FillColor = Color3.fromRGB(130, 80, 220)
-                hl.FillTransparency = 0.4; hl.OutlineColor = Color3.fromRGB(255, 255, 255); hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop; hl.Parent = char
+                hl.FillTransparency = 0.4; hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop; hl.Parent = char
             end
         end
     end)
 end)
 
+-- Final blur cleanup
 task.delay(2, function()
-    pcall(function()
-        for _, obj in ipairs(Lighting:GetChildren()) do
-            if obj:IsA("BlurEffect") then obj:Destroy() end
-        end
-    end)
+    pcall(function() for _, obj in ipairs(Lighting:GetChildren()) do if obj:IsA("BlurEffect") then obj:Destroy() end end end)
 end)
 
 --// ═══════════════════════════════════════════
@@ -1432,12 +1263,8 @@ end)
 Library:OnUnload(function()
     pcall(function() _G._CleanESP() end)
     pcall(function() _G._FOV:Remove() end)
-    pcall(function()
-        if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end
-        if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end
-    end)
-    CFG.Fly = false; CFG.Noclip = false; CFG.ESP = false
-    CFG.Aimbot = false; CFG.AutoBomb = false
+    pcall(function() if HRP:FindFirstChild("_BV") then HRP._BV:Destroy() end; if HRP:FindFirstChild("_BG") then HRP._BG:Destroy() end end)
+    CFG.Fly = false; CFG.Noclip = false; CFG.ESP = false; CFG.Aimbot = false; CFG.AutoBomb = false; CFG.KillAura = false
     print("Eplisma unloaded!")
 end)
 
